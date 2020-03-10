@@ -34,7 +34,7 @@ check.rpath.params(CalCur_unbal)
 # Running Ecopath in R: balanced an unbalanced Ecopath object
 ```{r}
 #Balance the scenario using rpath function 
-Cal_bal   <- rpath(CalCur_unbal) 
+Cal_bal <- rpath(CalCur_unbal) 
 Cal_bal
 
 #Combine two data frames into a single data frame 
@@ -88,6 +88,8 @@ identical(scene0, scene1)
 
 ```
 
+#MODEL 1: IGNORING BYCATCH 
+
 # Manipulating fishing rates: different scenarios 
 ```{r}
 #Scene1= Rsim.scenario, parameter here = frate (can modify one of three parameters: effort, frate, adn catch), sardine= group, sim.year= yearlist so saying year of simulation that should be modified (or range), sim.month= month of year that should be modified and if set to 0 then all months are modified 
@@ -128,9 +130,10 @@ scene3 <- copy(base_sim_scene)
 run3 <- rsim.run(scene3, method = 'AB', years=2000)
 for (yr in 2001:2020){
   # stock assessment based on current biomass * error
-  #assessment <- end_biomass(run3)[target_sp] * (runif(4) + 0.5)   
-assessment <- end_biomass(run4)[target_sp] * (runif(length(target_sp)) + 0.5)
+  #for 2 species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)  
+assessment <- end_biomass(run3)[target_sp] * (runif(length(target_sp)) + 0.5)
 assessment
+
   # convert target F * assessment to a total catch 
   catches <- target_F * assessment
   
@@ -159,28 +162,27 @@ rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
   rel.bio
 } 
 
-names_spp<- run1$params$spname[2:94]
+names_spp<- run0$params$spname[2:94]
 
 #Need to make z into data frame, before was matrix, names is for data frame not matrix
 #Ways to do this in tidy verse but this is quick fix
-z<-rsim.plot.fun(run3)
-z<-as.data.frame(z)
-names(z) <- names_spp
-z$month <- 1:252
+z_3 <-rsim.plot.fun(run3)
+z_3 <-as.data.frame(z_3)
+names(z_3) <- names_spp
+z_3$month <- 1:252
 
 library(viridis)
 library("RColorBrewer")
 #This vectors adds in the month
-data <- gather(z, key = spp, value = biomass, -month)
+data_3 <- gather(z_3, key = spp, value = biomass, -month)
 
 #Graphs 
-plot3 <- data %>% filter(spp == c("Market squid", "Sardine", "Anchovy", "Herring", "Pacific Mackerel", "Sand lance", "Whitebait smelt", "Other smelt", "Saury")) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Biomass") + 
+plot3 <- data_3 %>% filter(spp == c("Market squid", "Sardine", "Anchovy", "Herring", "Pacific Mackerel", "Sand lance", "Whitebait smelt", "Other smelt", "Saury")) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Biomass") + 
 scale_colour_brewer(palette = "Paired") +
 theme_bw() + 
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Forage fish")
 plot3
-
 
 
 ```
@@ -202,7 +204,7 @@ run4 <- rsim.run(scene4, method = 'AB', years=2000)
 for (yr in 2001:2020){
   # stock assessment based on current biomass * error
   # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
-assessment <- end_biomass(run3)[target_sp] * (runif(length(target_sp)) + 0.5)
+assessment <- end_biomass(run4)[target_sp] * (runif(length(target_sp)) + 0.5)
 assessment
   # convert target F * assessment to a total catch 
   catches <- target_F * assessment
@@ -232,20 +234,20 @@ rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
   rel.bio
 } 
 
-names_spp<- run1$params$spname[2:94]
+names_spp<- run0$params$spname[2:94]
 
 #Need to make z into data frame, before was matrix, names is for data frame not matrix
 #Ways to do this in tidy verse but this is quick fix
-z<-rsim.plot.fun(run4)
-z<-as.data.frame(z)
-names(z) <- names_spp
-z$month <- 1:252
+z_4<-rsim.plot.fun(run4)
+z_4<-as.data.frame(z_4)
+names(z_4) <- names_spp
+z_4$month <- 1:252
 
 
 #This vectors adds in the month
-data <- gather(z, key = spp, value = biomass, -month )
+data_4 <- gather(z_4, key = spp, value = biomass, -month )
 
-plot <- data %>% filter(spp == c("mesopelagics", "Market squid", "Sardine", "Anchovy", "Herring", "Pacific Mackerel", "Sand lance", "Whitebait smelt", "Other smelt", "Saury")) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Biomass") + 
+plot <- data_4 %>% filter(spp == c("Market squid", "Sardine", "Anchovy", "Herring", "Pacific Mackerel", "Sand lance", "Whitebait smelt", "Other smelt", "Saury")) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Biomass") + 
 scale_colour_brewer(palette = "Paired") +
 theme_bw() + 
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
@@ -296,32 +298,26 @@ rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
   rel.bio
 } 
 
-names_spp<- run1$params$spname[2:94]
+names_spp<- run0$params$spname[2:94]
 
 #Need to make z into data frame, before was matrix, names is for data frame not matrix
 #Ways to do this in tidy verse but this is quick fix
-z<-rsim.plot.fun(run5)
-z<-as.data.frame(z)
-names(z) <- names_spp
-z$month <- 1:252
+z_5<-rsim.plot.fun(run5)
+z_5<-as.data.frame(z_5)
+names(z_5) <- names_spp
+z_5$month <- 1:252
 
 
 #This vectors adds in the month
-data <- gather(z, key = spp, value = biomass, -month )
+data_5 <- gather(z_5, key = spp, value = biomass, -month )
 
-plot1 <- data %>% filter(spp == c("Market squid", "Sardine", "Anchovy", "Herring", "Pacific Mackerel", "Sand lance", "Whitebait smelt", "Other smelt", "Saury")) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Biomass") + 
+plot1 <- data_5 %>% filter(spp == c("Market squid", "Sardine", "Anchovy", "Herring", "Pacific Mackerel", "Sand lance", "Whitebait smelt", "Other smelt", "Saury")) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Biomass") + 
 scale_colour_brewer(palette = "Paired") +
 theme_bw() + 
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Forage fish")
 plot1
 
-plot1 <- data %>% filter(spp == c("mesopelagics", "Sharks")) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Biomass") + 
-scale_colour_brewer(palette = "Paired") +
-theme_bw() + 
-theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Forage fish")
-plot1
 
 ```
 
@@ -367,19 +363,19 @@ rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
   rel.bio
 } 
 
-names_spp<- run1$params$spname[2:94]
+names_spp<- run0$params$spname[2:94]
 
 #Need to make z into data frame, before was matrix, names is for data frame not matrix
 #Ways to do this in tidy verse but this is quick fix
-z<-rsim.plot.fun(run6)
-z<-as.data.frame(z)
-names(z) <- names_spp
-z$month <- 1:252
+z_6<-rsim.plot.fun(run6)
+z_6<-as.data.frame(z_6)
+names(z_6) <- names_spp
+z_6$month <- 1:252
 
 
 #This vectors adds in the month
-data <- gather(z, key = spp, value = biomass, -month )
-plot3 <- data %>% filter(spp == c("Market squid", "Sardine", "Anchovy", "Herring", "Pacific Mackerel", "Sand lance", "Whitebait smelt", "Other smelt", "Saury")) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Biomass") + 
+data_6 <- gather(z_6, key = spp, value = biomass, -month )
+plot3 <- data_6 %>% filter(spp == c("Market squid", "Sardine", "Anchovy", "Herring", "Pacific Mackerel", "Sand lance", "Whitebait smelt", "Other smelt", "Saury")) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Biomass") + 
 theme_bw() + 
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Forage fish")
@@ -406,22 +402,6 @@ library(viridis)
 # legend("topright",legend = seabirds, lty = 1, col = color,
 #        inset=c(-0.35,0),  xpd = TRUE, cex = 0.5)
 
-change_overtime_plot <- function(species) {
-  x = seq(0,1, length.out = length(species))
-  color = viridis(n = length(species), option= "B")
-  par(mar = c(6,12,2,4))
-  specieyear3 = run3$annual_BB[1, species]
-  specieyearlast = run3$annual_BB[length(yearlist), species]
-  plot(rev(specieyearlast/specieyear3),x, ylab = "", bg = rev(color), col = "Black",
-       xlab = "Biomass proportion", ylim = c(0,1), pch = 21,
-       xlim = c(0,1.6), axes = F, frame = F)
-  
-  axis(2, at =x, labels = rev(species), las = 2, pos = 0, cex.axis = 1.5)
-  axis(1, at=c(0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8), cex.axis=1, tck=0.01, pos = -0.05)
-  abline(v = 1, lty =3)
-
-}
-
 change_overtime_df <- function(species) {
   x = seq(0,1, length.out = length(species))
   color = viridis(n = length(species), option= "B")
@@ -432,9 +412,6 @@ change_overtime_df <- function(species) {
   cbind(species, value)
 }
 
-test<- change_overtime_df(seabirds)
-test
-
 change_overtime_plot(mammals)
 change_overtime_plot(pred_fish)
 change_overtime_plot(predators_mesopelagic)
@@ -444,6 +421,15 @@ change_overtime_plot(forage)
 change_overtime_plot(diet_over_0.05)
 change_overtime_plot(diet_under_0.05)
 
+
+change_3_df<- change_overtime_df(diet_over_0.05)
+change_3_df <- as.data.frame(change_3_df)
+
+
+#test <- ggplot(change_3_df, aes(x=value, y=species, label=species)) + 
+  #geom_bar(stat='identity', aes(fill=species), width=.5)  +
+  #scale_fill_manual(name="Mileage", labels = c("Above Average", "Below Average"), values = c("above"="#00ba38", "below"="#f8766d")) + 
+  #coord_flip()
 ```
 
 # Fish down and recovery scenario, fish for 25 years and stop and look at how popualtion recovers
@@ -457,7 +443,121 @@ scene2 <- adjust.fishing(scene2, "FRATE", "Sardine", 2020:2050, value=1.0)
 run2   <- rsim.run(scene2, method='AB', years=yearlist)
 rsim.plot(run2,all_species) 
 
-end_biomass(run3)['mesopelagics']
+end_biomass(run2)['mesopelagics']
+```
+
+
+#MODEL #2: INCORPORATING BYCATCH 
+
+#100% fishing, bycatch 20%
+```{r}
+target_sp <- c("mesopelagics", "euphausiids", "small jellies", "large jellies", "carniv-zoops")
+target_F <- c(1.0, 0.2, 0.2, 0.2, 0.2)
+names(target_F) <- target_sp 
+
+library(data.table)
+scene3.2 <- copy(base_sim_scene)
+run3.2 <- rsim.run(scene3.2, method = 'AB', years=2000)
+for (yr in 2001:2020){
+  # stock assessment based on current biomass * error
+  # use this if including two species: 
+  assessment <- end_biomass(run3.2)[target_sp] * (runif(5) + 0.5)   
+#assessment <- end_biomass(run5)[target_sp] * (runif(length(target_sp)) + 0.5)
+assessment
+  # convert target F * assessment to a total catch 
+  catches <- target_F * assessment
+  
+  # apply each catch to each species
+  for (sp in target_sp){
+    scene3.2 <- adjust.fishing(scene3.2, "CATCH", sp, yr, value=catches[sp])
+  }
+  # run 1 year
+  run3.2 <- rsim.step(scene3.2, run3.2, method='AB', year.end=yr) 
+}  
+rsim.plot(run3.2,all_species) 
 
 ```
+
+#Change overtime 
+
+```{r}
+change_overtime_df <- function(species) {
+  x = seq(0,1, length.out = length(species))
+  color = viridis(n = length(species), option= "B")
+  par(mar = c(6,12,2,4))
+  specieyear3.2 = run3.2$annual_BB[1, species]
+  specieyearlast = run3.2$annual_BB[length(yearlist), species]
+  value <- (specieyearlast/specieyear3.2)
+  cbind(species, value)
+}
+
+change_overtime_plot(mammals)
+change_overtime_plot(pred_fish)
+change_overtime_plot(predators_mesopelagic)
+change_overtime_plot(commercial_predators)
+change_overtime_plot(noncommerical_predators)
+change_overtime_plot(forage)
+change_overtime_plot(diet_over_0.05)
+change_overtime_plot(diet_under_0.05)
+
+
+```
+
+
+
+#20% fishing, bycatch 4%
+```{r}
+target_sp <- c("mesopelagics", "euphausiids", "small jellies", "large jellies", "carniv-zoops")
+target_F <- c(1.0, 0.04, 0.04, 0.04, 0.04)
+names(target_F) <- target_sp 
+
+library(data.table)
+scene6.2 <- copy(base_sim_scene)
+run6.2 <- rsim.run(scene6.2, method = 'AB', years=2000)
+for (yr in 2001:2020){
+  # stock assessment based on current biomass * error
+  # use this if including two species: 
+  assessment <- end_biomass(run6.2)[target_sp] * (runif(5) + 0.5)   
+#assessment <- end_biomass(run5)[target_sp] * (runif(length(target_sp)) + 0.5)
+assessment
+  # convert target F * assessment to a total catch 
+  catches <- target_F * assessment
+  
+  # apply each catch to each species
+  for (sp in target_sp){
+    scene6.2 <- adjust.fishing(scene6.2, "CATCH", sp, yr, value=catches[sp])
+  }
+  # run 1 year
+  run6.2 <- rsim.step(scene6.2, run6.2, method='AB', year.end=yr) 
+}  
+rsim.plot(run6.2,all_species) 
+
+```
+
+#Change overtime 
+
+```{r}
+change_overtime_df <- function(species) {
+  x = seq(0,1, length.out = length(species))
+  color = viridis(n = length(species), option= "B")
+  par(mar = c(6,12,2,4))
+  specieyear3.2 = run3.2$annual_BB[1, species]
+  specieyearlast = run3.2$annual_BB[length(yearlist), species]
+  value <- (specieyearlast/specieyear3.2)
+  cbind(species, value)
+}
+
+change_overtime_plot(mammals)
+change_overtime_plot(pred_fish)
+change_overtime_plot(predators_mesopelagic)
+change_overtime_plot(commercial_predators)
+change_overtime_plot(noncommerical_predators)
+change_overtime_plot(forage)
+change_overtime_plot(diet_over_0.05)
+change_overtime_plot(diet_under_0.05)
+
+
+```
+
+
 

@@ -17,8 +17,8 @@ library(data.table)
 #Rpath uses a parameter object created by create.rpath.params to conduct the mass balance of the system
 library(Rpath)
 
-Cbase <- "Groupinfo_CalCur-USE.csv"  # Base biomass, production, fishing, etc.
-Cdiet <- "Diet_CalCur_USE.csv"  # Diet matrix
+Cbase <- "../Data/Groupinfo_CalCur-USE.csv"  # Base biomass, production, fishing, etc.
+Cdiet <- "../Data/Diet_CalCur_USE.csv"  # Diet matrix
 
 ```
 
@@ -89,7 +89,7 @@ identical(scene0, scene1)
 
 scene2 <- adjust.fishing(scene1, "FRATE", "mesopelagics", yearlist, value= 0.25)
 run2 <- rsim.run(scene2, method='AB', years=yearlist)
-rsim.plot(run1,all_species) 
+rsim.plot(run2,all_species) 
 run2
 
 
@@ -109,12 +109,12 @@ rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
   rel.bio
 } 
 
-names_spp<- run1$params$spname[2:94]
+names_spp<- run2$params$spname[2:94]
 
 
 #Need to make z into data frame, before was matrix, names is for data frame not matrix
 #Ways to do this in tidy verse but this is quick fix
-z<-rsim.plot.fun(run1)
+z<-rsim.plot.fun(run2)
 z<-as.data.frame(z)
 names(z) <- names_spp
 z$month <- 1:612
@@ -146,9 +146,9 @@ change_overtime_plot <- function(species) {
   x = seq(0,1, length.out = length(species))
   color = viridis(n = length(species))
   par(mar = c(6,12,2,4))
-  specieyear1 = run1$annual_BB[1, species]
-  specieyearlast = run1$annual_BB[length(yearlist), species]
-  plot(rev(specieyearlast/specieyear1),x, ylab = "", bg = rev(color), col = "Black",
+  specieyear2 = run2$annual_BB[1, species]
+  specieyearlast = run2$annual_BB[length(yearlist), species]
+  plot(rev(specieyearlast/specieyear2),x, ylab = "", bg = rev(color), col = "Black",
        xlab = "Biomass proportion", ylim = c(0,1), pch = 21,
        xlim = c(0,1.6), axes = F, frame = F)
   
@@ -181,7 +181,7 @@ scene2 <- adjust.fishing(scene2, "FRATE", "Sardine", 2020:2050, value=1.0)
 run2   <- rsim.run(scene2, method='AB', years=yearlist)
 rsim.plot(run2,all_species) 
 
-end_biomass(run3)['mesopelagics']
+end_biomass(run2)['mesopelagics']
 
 
 ```
