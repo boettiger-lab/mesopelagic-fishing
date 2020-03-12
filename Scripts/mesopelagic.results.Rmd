@@ -12,6 +12,7 @@ library(tidyverse)
 library(data.table)
 ```
 
+
 #Start of Koehn's code
 ```{r}
 #Rpath uses a parameter object created by create.rpath.params to conduct the mass balance of the system
@@ -19,7 +20,6 @@ library(Rpath)
 
 Cbase <- "../Data/Groupinfo_CalCur-USE.csv"  # Base biomass, production, fishing, etc.
 Cdiet <- "../Data/Diet_CalCur_USE.csv"  # Diet matrix
-
 ```
 
 
@@ -28,7 +28,6 @@ Cdiet <- "../Data/Diet_CalCur_USE.csv"  # Diet matrix
 #Created parameter files outside of R and read in using read.rpath.params function. This merges several different flat files into an R object of the list type. The function create.rpath.params will generate an Rpath.param. This ensures that all of the correct columns are present in the parameter file. 
 CalCur_unbal <- read.rpath.params(Cbase, Cdiet)
 check.rpath.params(CalCur_unbal)
-
 ```
 
 # Running Ecopath in R: balanced an unbalanced Ecopath object
@@ -118,6 +117,20 @@ run_1.0
 
 ```
 
+# Fish down and recovery scenario, fish for 25 years and stop and look at how popualtion recovers
+```{r}
+# helper function to look up the ending biomass of a scenario
+end_biomass <- function(rsim){return(rsim$out_BB[dim(rsim$out_BB)[1], 2:(dim(rsim$out_BB)[2])])}
+end_biomass
+scene2 <- base_sim_scene
+scene2 <- adjust.fishing(scene2, "FRATE", "Anchovy", 2000:2020, value=2.0)
+scene2 <- adjust.fishing(scene2, "FRATE", "Sardine", 2020:2050, value=1.0)
+run2   <- rsim.run(scene2, method='AB', years=yearlist)
+rsim.plot(run2,all_species) 
+
+end_biomass(run2)['mesopelagics']
+```
+
 #100% DEPLETION LEVEL
 # After the year 2000, run each year separately, setting each year's target
 ```{r}
@@ -162,7 +175,7 @@ rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
   rel.bio
 } 
 
-names_spp<- run0$params$spname[2:94]
+names_spp<- run3$params$spname[2:94]
 
 #Need to make z into data frame, before was matrix, names is for data frame not matrix
 #Ways to do this in tidy verse but this is quick fix
@@ -171,20 +184,65 @@ z_3 <-as.data.frame(z_3)
 names(z_3) <- names_spp
 z_3$month <- 1:252
 
-library(viridis)
-library("RColorBrewer")
 #This vectors adds in the month
 data_3 <- gather(z_3, key = spp, value = biomass, -month)
 
 #Graphs 
-plot3 <- data_3 %>% filter(spp == c("Market squid", "Sardine", "Anchovy", "Herring", "Pacific Mackerel", "Sand lance", "Whitebait smelt", "Other smelt", "Saury")) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Biomass") + 
-scale_colour_brewer(palette = "Paired") +
+library(viridis)
+plot3_1 <- data_3 %>% filter(spp == commercial_predators) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Biomass") + 
 theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno") +
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+plot3_1
+
+plot3_2 <- data_3 %>% filter(spp == noncommerical_predators) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Forage fish")
-plot3
+plot3_2
 
+plot3_3 <- data_3 %>% filter(spp == predators_mesopelagic) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Forage fish")
+plot3_3
+```
 
+#Change overtime plot for 100% depletion
+```{r}
+change_3_overtime_df <- function(species) {
+  x = seq(0,1, length.out = length(species))
+  color = viridis(n = length(species), option= "B")
+  par(mar = c(6,12,2,4))
+  specieyear3 = run3$annual_BB[1, species]
+  specieyearlast = run3$annual_BB[length(yearlist), species]
+  value <- (specieyearlast/specieyear3)
+  cbind(species, value)
+}
+change_overtime_plot(mammals)
+change_overtime_plot(pred_fish)
+change_overtime_plot(predators_mesopelagic)
+change_overtime_plot(commercial_predators)
+change_overtime_plot(noncommerical_predators)
+change_overtime_plot(diet_over_0.05)
+change_overtime_plot(diet_under_0.05)
+
+change_3_df<- change_3_overtime_df(diet_over_0.05)
+change_3_df <- as.data.frame(change_3_df)
+change_3_final <- change_3_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+
+nb.cols <- 12
+
+try <- change_3_final %>% ggplot(aes(x= value, y=species)) + geom_point(aes(col= species)) + xlim(0.2, 1.6) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + scale_color_viridis(discrete = TRUE, option = "D")+
+xlab("Proportion of original biomass") + ylab("Species") + theme_bw() + theme(panel.border = element_blank()) +
+theme(axis.line = element_line(colour = "black")) +
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+theme(plot.title= element_text(hjust=.5)) + 
+theme(legend.position= "none")  
+try
 ```
 
 #80% DEPLETION LEVEL!! 
@@ -417,35 +475,17 @@ change_overtime_plot(pred_fish)
 change_overtime_plot(predators_mesopelagic)
 change_overtime_plot(commercial_predators)
 change_overtime_plot(noncommerical_predators)
-change_overtime_plot(forage)
 change_overtime_plot(diet_over_0.05)
 change_overtime_plot(diet_under_0.05)
 
-
 change_3_df<- change_overtime_df(diet_over_0.05)
 change_3_df <- as.data.frame(change_3_df)
+change_3_final <- change_3_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
 
+try <- change_3_final %>% ggplot(aes(x= value, y=species)) + geom_point(aes(col= species)) + xlim(0.8,1.2) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 1.2)
+try
 
-#test <- ggplot(change_3_df, aes(x=value, y=species, label=species)) + 
-  #geom_bar(stat='identity', aes(fill=species), width=.5)  +
-  #scale_fill_manual(name="Mileage", labels = c("Above Average", "Below Average"), values = c("above"="#00ba38", "below"="#f8766d")) + 
-  #coord_flip()
 ```
-
-# Fish down and recovery scenario, fish for 25 years and stop and look at how popualtion recovers
-```{r}
-# helper function to look up the ending biomass of a scenario
-end_biomass <- function(rsim){return(rsim$out_BB[dim(rsim$out_BB)[1], 2:(dim(rsim$out_BB)[2])])}
-end_biomass
-scene2 <- base_sim_scene
-scene2 <- adjust.fishing(scene2, "FRATE", "Anchovy", 2000:2020, value=2.0)
-scene2 <- adjust.fishing(scene2, "FRATE", "Sardine", 2020:2050, value=1.0)
-run2   <- rsim.run(scene2, method='AB', years=yearlist)
-rsim.plot(run2,all_species) 
-
-end_biomass(run2)['mesopelagics']
-```
-
 
 #MODEL #2: INCORPORATING BYCATCH 
 
@@ -508,7 +548,7 @@ change_overtime_plot(diet_under_0.05)
 #20% fishing, bycatch 4%
 ```{r}
 target_sp <- c("mesopelagics", "euphausiids", "small jellies", "large jellies", "carniv-zoops")
-target_F <- c(1.0, 0.04, 0.04, 0.04, 0.04)
+target_F <- c(.20, 0.04, 0.04, 0.04, 0.04)
 names(target_F) <- target_sp 
 
 library(data.table)
