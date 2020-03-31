@@ -72,11 +72,14 @@ diet_under_0.05
 #Diet proportion of mesopelagic fish equal to or greater than 0.05
 diet_over_0.05 <- c(Cal_bal$Group[29], Cal_bal$Group[33], Cal_bal$Group[38], Cal_bal$Group[42], Cal_bal$Group[48], Cal_bal$Group[51], Cal_bal$Group[54], Cal_bal$Group[56], Cal_bal$Group[63], Cal_bal$Group[70], Cal_bal$Group[76], Cal_bal$Group[85])
 diet_over_0.05
+
+high.price <- c(Cal_bal$Group[47], Cal_bal$Group[45], Cal_bal$Group[38], Cal_bal$Group[55], Cal_bal$Group[46], Cal_bal$Group[43])
+high.price
 ```
 
 #Base scenario 
 ```{r}
-yearlist = 2000:2020
+yearlist = 2001:2020
 
 base_sim_scene <- rsim.scenario(Cal_bal, CalCur_unbal, years = yearlist)
 scene0 <- base_sim_scene
@@ -98,26 +101,28 @@ temp
 #Scene1= Rsim.scenario, parameter here = frate (can modify one of three parameters: effort, frate, adn catch), sardine= group, sim.year= yearlist so saying year of simulation that should be modified (or range), sim.month= month of year that should be modified and if set to 0 then all months are modified 
 #VALUE: Returns an Rpath.sim object with the new fishing parameter
 #Fishing them down by constantly applying fishing rate to their original biomass 
+scene_1.0 <- adjust.fishing(scene1, "FRATE", "mesopelagics", yearlist, value= 1)
+run_1.0 <- rsim.run(scene_1.0, method='AB', years=yearlist)
+rsim.plot(run_1.0,all_species) 
+run_1.0
+
 
 scene_0.8 <- adjust.fishing(scene1, "FRATE", "mesopelagics", yearlist, value= 0.80)
 run_0.8 <- rsim.run(scene_0.8, method='AB', years=yearlist)
 rsim.plot(run_0.8,all_species) 
 run_0.8
 
+
 scene_0.5 <- adjust.fishing(scene1, "FRATE", "mesopelagics", yearlist, value= 0.50)
 run_0.5 <- rsim.run(scene_0.5, method='AB', years=yearlist)
 rsim.plot(run_0.5,all_species) 
 run_0.5
 
+
 scene_0.25 <- adjust.fishing(scene1, "FRATE", "mesopelagics", yearlist, value= 0.25)
 run_0.25 <- rsim.run(scene_0.25, method='AB', years=yearlist)
 rsim.plot(run_0.25,all_species) 
 run_0.25
-
-scene_1.0 <- adjust.fishing(scene1, "FRATE", "mesopelagics", yearlist, value= 1)
-run_1.0 <- rsim.run(scene_1.0, method='AB', years=yearlist)
-rsim.plot(run_1.0,all_species) 
-run_1.0
 
 ```
 
@@ -144,8 +149,8 @@ names(target_F) <- target_sp
 
 library(data.table)
 scene3 <- copy(base_sim_scene)
-run3 <- rsim.run(scene3, method = 'AB', years=2000)
-for (yr in 2001:2020){
+run3 <- rsim.run(scene3, method = 'AB', years=2001)
+for (yr in 2002:2020){
   # stock assessment based on current biomass * error
   #for 2 species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)  
 assessment <- end_biomass(run3)[target_sp] * (runif(length(target_sp)) + 0.5)
@@ -186,7 +191,7 @@ names_spp<- run3$params$spname[2:94]
 z_3 <-rsim.plot.fun(run3)
 z_3 <-as.data.frame(z_3)
 names(z_3) <- names_spp
-z_3$month <- 1:252
+z_3$month <- 1:240
 
 #This vectors adds in the month
 data_3 <- gather(z_3, key = spp, value = biomass, -month)
@@ -324,8 +329,8 @@ names(target_F) <- target_sp
 
 library(data.table)
 scene4 <- copy(base_sim_scene)
-run4 <- rsim.run(scene4, method = 'AB', years=2000)
-for (yr in 2001:2020){
+run4 <- rsim.run(scene4, method = 'AB', years=2001)
+for (yr in 2002:2020){
   # stock assessment based on current biomass * error
   # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
 assessment <- end_biomass(run4)[target_sp] * (runif(length(target_sp)) + 0.5)
@@ -365,7 +370,7 @@ names_spp<- run4$params$spname[2:94]
 z_4<-rsim.plot.fun(run4)
 z_4<-as.data.frame(z_4)
 names(z_4) <- names_spp
-z_4$month <- 1:252
+z_4$month <- 1:240
 
 
 #This vectors adds in the month
@@ -500,8 +505,8 @@ names(target_F) <- target_sp
 
 library(data.table)
 scene5 <- copy(base_sim_scene)
-run5 <- rsim.run(scene5, method = 'AB', years=2000)
-for (yr in 2001:2020){
+run5 <- rsim.run(scene5, method = 'AB', years=2001)
+for (yr in 2002:2020){
   # stock assessment based on current biomass * error
   # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
 assessment <- end_biomass(run5)[target_sp] * (runif(length(target_sp)) + 0.5)
@@ -541,7 +546,7 @@ names_spp<- run5$params$spname[2:94]
 z_5<-rsim.plot.fun(run5)
 z_5<-as.data.frame(z_5)
 names(z_5) <- names_spp
-z_5$month <- 1:252
+z_5$month <- 1:240
 
 
 #This vectors adds in the month
@@ -582,6 +587,22 @@ scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion under 0.05") + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.dietunder.50.jpeg")
 plot5_5
+
+plot5_6 <- data_5 %>% filter(spp %in% high.price) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with highest economic value") + ylim(0.95, 1.15) + 
+ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.highprice.50.jpeg")
+plot5_6
+
+plot5_7 <- data_5 %>% filter(spp %in% mammals) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Protected predators of mesopelagic fish") + ylim(0.9, 1.15) + 
+ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.mammals.50.jpeg")
+plot5_7
 
 ```
 
@@ -680,8 +701,8 @@ names(target_F) <- target_sp
 
 library(data.table)
 scene6 <- copy(base_sim_scene)
-run6 <- rsim.run(scene6, method = 'AB', years=2000)
-for (yr in 2001:2020){
+run6 <- rsim.run(scene6, method = 'AB', years=2001)
+for (yr in 2002:2020){
   # stock assessment based on current biomass * error
   # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
 assessment <- end_biomass(run6)[target_sp] * (runif(length(target_sp)) + 0.5)
@@ -721,7 +742,7 @@ names_spp<- run6$params$spname[2:94]
 z_6<-rsim.plot.fun(run6)
 z_6<-as.data.frame(z_6)
 names(z_6) <- names_spp
-z_6$month <- 1:252
+z_6$month <- 1:240
 
 data_6 <- gather(z_6, key = spp, value = biomass, -month )
 
@@ -758,7 +779,7 @@ plot6_5 <- data_6 %>% filter(spp %in% diet_under_0.05) %>% ggplot(aes(x= month, 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion under 0.05") + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion under 0.05") +
   ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.dietunder.25.jpeg")
 plot6_5
 
@@ -828,9 +849,9 @@ change_6_4_plot <- change_6_4 %>% ggplot(aes(x= value, y=species)) + geom_point(
 xlab("Proportion of original biomass") + ylab("Predators with diet proportion over 0.05") + theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-theme(plot.title= element_text(hjust=.5)) + 
+theme(plot.title= element_text(hjust=.5)) +
 theme(legend.position= "none")+ ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/dietover.25.jpeg")
-change_6_4_plot
+change_6_4_plot 
 
 #3.5: Diet under 0.05 
 
@@ -847,14 +868,5 @@ theme(plot.title= element_text(hjust=.5)) +
 theme(legend.position= "none")  + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/dietunder.25.jpeg")
 change_6_5_plot
 ```
-
-#DEPLETION LEVEL OF 0% 
-```{r}
-base_sim_scene <- rsim.scenario(Cal_bal, CalCur_unbal, years = yearlist)
-scene0 <- base_sim_scene
-run0 <- rsim.run(scene0, method='AB', years=yearlist) 
-rsim.plot(run0,all_species)
-```
-
 
 
