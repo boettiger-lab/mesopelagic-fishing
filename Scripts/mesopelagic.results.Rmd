@@ -11,6 +11,7 @@ output: github_document
 library(tidyverse)
 library(data.table)
 library(viridisLite)
+library(dplyr)
 ```
 
 
@@ -54,18 +55,24 @@ mammals <- Cal_bal$Group[71:85]
 seabirds <- c(Cal_bal$Group[60:70], Cal_bal$Group[86:92])
 pred_fish  <- Cal_bal$Group[33:59] 
 
-#My defined functional groups 
+#My customized defined functional groups 
+
+#Forage fish 
 forage <- Cal_bal$Group[19:27]
 
+#All predators of mesopelagic fish 
 predators_mesopelagic <- c(Cal_bal$Group[15], Cal_bal$Group[18], Cal_bal$Group[28:29], Cal_bal$Group[33], Cal_bal$Group[37:38], Cal_bal$Group[42:48], Cal_bal$Group[50:56], Cal_bal$Group[58:60], Cal_bal$Group[63], Cal_bal$Group[65:67], Cal_bal$Group[69:70], Cal_bal$Group[72:73], Cal_bal$Group[76:80], Cal_bal$Group[82], Cal_bal$Group[85:88])
 predators_mesopelagic
 
+#Commercially valuable predators of mesopelagic fish
 commercial_predators <- c(Cal_bal$Group[18], Cal_bal$Group[33], Cal_bal$Group[37:38], Cal_bal$Group[42:48], Cal_bal$Group[50:56], Cal_bal$Group[58:59])
 commercial_predators
 
+#Noncommercially valuable predators of mesopelagic fish
 noncommerical_predators <- c(Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[33], Cal_bal$Group[37:38], Cal_bal$Group[43:47], Cal_bal$Group[50:56], Cal_bal$Group[58:60], Cal_bal$Group[63], Cal_bal$Group[65:67], Cal_bal$Group[69:70], Cal_bal$Group[72:73], Cal_bal$Group[76:80], Cal_bal$Group[82], Cal_bal$Group[85:88])
 noncommerical_predators
 
+#Diet proportion of mesopelagic fish less than 0.05
 diet_under_0.05 <- c(Cal_bal$Group[15], Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[37], Cal_bal$Group[43:47], Cal_bal$Group[50], Cal_bal$Group[52:53], Cal_bal$Group[55], Cal_bal$Group[58:59], Cal_bal$Group[60], Cal_bal$Group[65:67], Cal_bal$Group[69],Cal_bal$Group[72:73], Cal_bal$Group[77:80], Cal_bal$Group[82], Cal_bal$Group[86:88])
 diet_under_0.05
 
@@ -73,6 +80,7 @@ diet_under_0.05
 diet_over_0.05 <- c(Cal_bal$Group[29], Cal_bal$Group[33], Cal_bal$Group[38], Cal_bal$Group[42], Cal_bal$Group[48], Cal_bal$Group[51], Cal_bal$Group[54], Cal_bal$Group[56], Cal_bal$Group[63], Cal_bal$Group[70], Cal_bal$Group[76], Cal_bal$Group[85])
 diet_over_0.05
 
+#Predators of mesopelagic fish with high economic value in $/lb
 high.price <- c(Cal_bal$Group[47], Cal_bal$Group[45], Cal_bal$Group[38], Cal_bal$Group[55], Cal_bal$Group[46], Cal_bal$Group[43])
 high.price
 ```
@@ -93,8 +101,6 @@ identical(scene0, scene1)
 temp= frate.table(scene0)
 temp
 ```
-
-#MODEL 1: IGNORING BYCATCH 
 
 # Manipulating fishing rates: different scenarios 
 ```{r}
@@ -155,6 +161,7 @@ for (yr in 2002:2020){
   #for 2 species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)  
 assessment <- end_biomass(run3)[target_sp] * (runif(length(target_sp)) + 0.5)
 assessment
+
 
   # convert target F * assessment to a total catch 
   catches <- target_F * assessment
@@ -548,7 +555,6 @@ z_5<-as.data.frame(z_5)
 names(z_5) <- names_spp
 z_5$month <- 1:240
 
-
 #This vectors adds in the month
 library(tidyr)
 data_5 <- gather(z_5, key = spp, value = biomass, -month )
@@ -787,6 +793,7 @@ plot6_5
 
 #Change overtime plot for 25% depletion
 ```{r}
+library(viridis)
 change_6_overtime_df <- function(species) {
   x = seq(0,1, length.out = length(species))
   color = viridis(n = length(species), option= "B")
@@ -796,6 +803,9 @@ change_6_overtime_df <- function(species) {
   value <- (specieyearlast/specieyear6)
   cbind(species, value)
 }
+
+change_6_total <- change_6_overtime_df(all_species)
+change_6_total <- as.data.frame(change_6_total)
 
 #3.1: Commercial
 
@@ -867,6 +877,32 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(plot.title= element_text(hjust=.5)) + 
 theme(legend.position= "none")  + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/dietunder.25.jpeg")
 change_6_5_plot
+```
+
+#Running simple stats on depletion level of 50%
+```{r}
+#Does the biomass of organisms increase or decrease during the simulation (as measured by the last month)
+library(dplyr)
+biomass_increase_50 <- data_5 %>% filter(month==240, biomass >1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
+biomass_increase_50
+
+biomass_decrease_50 <- data_5 %>% filter(month==240, biomass <1) %>% mutate(ratio= (1-biomass), ratio2 = (1-biomass)*100)
+biomass_decrease_50
+
+biomass_increase_25 <- data_6 %>% filter(month==240, biomass >1) %>% mutate(ratio = abs(1-biomass), ratio_2 = abs(1-biomass)*100)
+biomass_increase_25
+
+biomass_decrease_25 <- data_6 %>% filter(month==240, biomass < 1) %>% mutate(ratio= (1-biomass), ratio2 = (1-biomass)*100)
+biomass_decrease_25
+
+```
+
+
+#Changing data to group functional groups
+```{r}
+test1 <- data_6 %>% filter(spp %in% noncommerical_predators, month==1) %>% summarize(avg= mean(biomass))
+test1
+
 ```
 
 
