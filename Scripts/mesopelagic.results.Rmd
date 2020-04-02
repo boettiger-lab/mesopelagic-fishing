@@ -883,6 +883,18 @@ change_6_5_plot
 ```{r}
 #Does the biomass of organisms increase or decrease during the simulation (as measured by the last month)
 library(dplyr)
+biomass_increase_100 <- data_3 %>% filter(month==240, biomass >1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
+biomass_increase_100
+
+biomass_decrease_100 <- data_3 %>% filter(month==240, biomass <1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
+biomass_decrease_100
+
+biomass_increase_80 <- data_4 %>% filter(month==240, biomass >1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
+biomass_increase_80
+
+biomass_decrease_80 <- data_4 %>% filter(month==240, biomass <1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
+biomass_decrease_80
+
 biomass_increase_50 <- data_5 %>% filter(month==240, biomass >1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
 biomass_increase_50
 
