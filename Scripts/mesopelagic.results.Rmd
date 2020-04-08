@@ -55,6 +55,7 @@ mammals <- Cal_bal$Group[71:85]
 seabirds <- c(Cal_bal$Group[60:70], Cal_bal$Group[86:92])
 pred_fish  <- Cal_bal$Group[33:59] 
 
+
 #My customized defined functional groups 
 
 #Forage fish 
@@ -87,7 +88,7 @@ high.price
 
 #Base scenario 
 ```{r}
-yearlist = 2001:2020
+yearlist = 2001:2050
 
 base_sim_scene <- rsim.scenario(Cal_bal, CalCur_unbal, years = yearlist)
 scene0 <- base_sim_scene
@@ -156,12 +157,11 @@ names(target_F) <- target_sp
 library(data.table)
 scene3 <- copy(base_sim_scene)
 run3 <- rsim.run(scene3, method = 'AB', years=2001)
-for (yr in 2002:2020){
+for (yr in 2002:2050){
   # stock assessment based on current biomass * error
   #for 2 species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)  
 assessment <- end_biomass(run3)[target_sp] * (runif(length(target_sp)) + 0.5)
 assessment
-
 
   # convert target F * assessment to a total catch 
   catches <- target_F * assessment
@@ -198,7 +198,7 @@ names_spp<- run3$params$spname[2:94]
 z_3 <-rsim.plot.fun(run3)
 z_3 <-as.data.frame(z_3)
 names(z_3) <- names_spp
-z_3$month <- 1:240
+z_3$month <- 1:600
 
 #This vectors adds in the month
 data_3 <- gather(z_3, key = spp, value = biomass, -month)
@@ -288,7 +288,7 @@ change_3_3_df <- as.data.frame(change_3_3_df)
 change_3_3 <- change_3_3_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
 
 #If use have to add in 0 for mesopelagics 
-change_3_3_plot <- change_3_3 %>% ggplot(aes(x= value, y=species)) + geom_point(aes(col= species)) + xlim(0.2, 1.6) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + scale_color_viridis(discrete = TRUE, option = "D")+
+change_3_3_plot <- change_3_3 %>% ggplot(aes(x= value, y=species)) + geom_point(aes(col= species)) + xlim(0, 1.6) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + scale_color_viridis(discrete = TRUE, option = "D")+
 xlab("Proportion of original biomass") + ylab("Predators of mesopelagic fish") + theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
@@ -337,7 +337,7 @@ names(target_F) <- target_sp
 library(data.table)
 scene4 <- copy(base_sim_scene)
 run4 <- rsim.run(scene4, method = 'AB', years=2001)
-for (yr in 2002:2020){
+for (yr in 2002:2050){
   # stock assessment based on current biomass * error
   # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
 assessment <- end_biomass(run4)[target_sp] * (runif(length(target_sp)) + 0.5)
@@ -377,7 +377,7 @@ names_spp<- run4$params$spname[2:94]
 z_4<-rsim.plot.fun(run4)
 z_4<-as.data.frame(z_4)
 names(z_4) <- names_spp
-z_4$month <- 1:240
+z_4$month <- 1:600
 
 
 #This vectors adds in the month
@@ -495,7 +495,7 @@ change_4_5_df <- as.data.frame(change_4_5_df)
 change_4_5 <- change_4_5_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
 
 #If use you need to add a value at 0 for mesopelagics! 
-change_4_5_plot <- change_4_5 %>% ggplot(aes(x= value, y=species)) + geom_point(aes(col= species)) + xlim(0.2, 1.6) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + scale_color_viridis(discrete = TRUE, option = "D") +
+change_4_5_plot <- change_4_5 %>% ggplot(aes(x= value, y=species)) + geom_point(aes(col= species)) + xlim(0, 1.6) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + scale_color_viridis(discrete = TRUE, option = "D") +
 xlab("Proportion of original biomass") + ylab("Predators with diet proportion under 0.05") + theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
@@ -513,7 +513,7 @@ names(target_F) <- target_sp
 library(data.table)
 scene5 <- copy(base_sim_scene)
 run5 <- rsim.run(scene5, method = 'AB', years=2001)
-for (yr in 2002:2020){
+for (yr in 2002:2050){
   # stock assessment based on current biomass * error
   # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
 assessment <- end_biomass(run5)[target_sp] * (runif(length(target_sp)) + 0.5)
@@ -553,7 +553,7 @@ names_spp<- run5$params$spname[2:94]
 z_5<-rsim.plot.fun(run5)
 z_5<-as.data.frame(z_5)
 names(z_5) <- names_spp
-z_5$month <- 1:240
+z_5$month <- 1:600
 
 #This vectors adds in the month
 library(tidyr)
@@ -708,7 +708,7 @@ names(target_F) <- target_sp
 library(data.table)
 scene6 <- copy(base_sim_scene)
 run6 <- rsim.run(scene6, method = 'AB', years=2001)
-for (yr in 2002:2020){
+for (yr in 2002:2050){
   # stock assessment based on current biomass * error
   # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
 assessment <- end_biomass(run6)[target_sp] * (runif(length(target_sp)) + 0.5)
@@ -748,7 +748,7 @@ names_spp<- run6$params$spname[2:94]
 z_6<-rsim.plot.fun(run6)
 z_6<-as.data.frame(z_6)
 names(z_6) <- names_spp
-z_6$month <- 1:240
+z_6$month <- 1:600
 
 data_6 <- gather(z_6, key = spp, value = biomass, -month )
 
@@ -869,6 +869,9 @@ change_6_5_df<- change_6_overtime_df(diet_under_0.05)
 change_6_5_df <- as.data.frame(change_6_5_df)
 change_6_5 <- change_6_5_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
 
+library(dplyr)
+library(ggplot2)
+library(viridis)
 #If use you need to add a value at 0 for mesopelagics! 
 change_6_5_plot <- change_6_5 %>% ggplot(aes(x= value, y=species)) + geom_point(aes(col= species)) + xlim(0, 1.6) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + scale_color_viridis(discrete = TRUE, option = "D") +
 xlab("Proportion of original biomass") + ylab("Predators with diet proportion under 0.05") + theme_bw() + theme(panel.border = element_blank()) +
@@ -883,28 +886,28 @@ change_6_5_plot
 ```{r}
 #Does the biomass of organisms increase or decrease during the simulation (as measured by the last month)
 library(dplyr)
-biomass_increase_100 <- data_3 %>% filter(month==240, biomass >1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
+biomass_increase_100 <- data_3 %>% filter(month==600, biomass >1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
 biomass_increase_100
 
-biomass_decrease_100 <- data_3 %>% filter(month==240, biomass <1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
+biomass_decrease_100 <- data_3 %>% filter(month==600, biomass <1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
 biomass_decrease_100
 
-biomass_increase_80 <- data_4 %>% filter(month==240, biomass >1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
+biomass_increase_80 <- data_4 %>% filter(month==600, biomass >1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
 biomass_increase_80
 
-biomass_decrease_80 <- data_4 %>% filter(month==240, biomass <1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
+biomass_decrease_80 <- data_4 %>% filter(month==600, biomass <1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
 biomass_decrease_80
 
-biomass_increase_50 <- data_5 %>% filter(month==240, biomass >1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
+biomass_increase_50 <- data_5 %>% filter(month==600, biomass >1) %>% mutate(ratio= abs(1-biomass), ratio2 = abs(1-biomass)*100)
 biomass_increase_50
 
-biomass_decrease_50 <- data_5 %>% filter(month==240, biomass <1) %>% mutate(ratio= (1-biomass), ratio2 = (1-biomass)*100)
+biomass_decrease_50 <- data_5 %>% filter(month==600, biomass <1) %>% mutate(ratio= (1-biomass), ratio2 = (1-biomass)*100)
 biomass_decrease_50
 
-biomass_increase_25 <- data_6 %>% filter(month==240, biomass >1) %>% mutate(ratio = abs(1-biomass), ratio_2 = abs(1-biomass)*100)
+biomass_increase_25 <- data_6 %>% filter(month==600, biomass >1) %>% mutate(ratio = abs(1-biomass), ratio_2 = abs(1-biomass)*100)
 biomass_increase_25
 
-biomass_decrease_25 <- data_6 %>% filter(month==240, biomass < 1) %>% mutate(ratio= (1-biomass), ratio2 = (1-biomass)*100)
+biomass_decrease_25 <- data_6 %>% filter(month==600, biomass < 1) %>% mutate(ratio= (1-biomass), ratio2 = (1-biomass)*100)
 biomass_decrease_25
 
 ```
@@ -915,6 +918,82 @@ biomass_decrease_25
 test1 <- data_6 %>% filter(spp %in% noncommerical_predators, month==1) %>% summarize(avg= mean(biomass))
 test1
 
+data_5 %>% left_join(FG))
+data_5 %>% group_by(FG) %>% summarize(biomass = mean(biomass))
+
 ```
 
+#STATISTICS
+#New data sets and Shapiro-wilk test
+```{r}
+#Creating new data sets
+change_5_6_df<- change_5_overtime_df(mammals)
+change_5_6_df <- as.data.frame(change_5_6_df)
+change_5_6 <- change_5_6_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+
+change_5_7_df <-change_5_overtime_df(seabirds)
+change_5_7_df <- as.data.frame(change_5_7_df)
+change_5_7 <- change_5_7_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+
+change_5_8_df <- change_5_overtime_df(pred_fish)
+change_5_8_df <- as.data.frame(change_5_8_df)
+change_5_8 <- change_5_8_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+
+change_5_9_df <- change_5_overtime_df(forage)
+change_5_9_df <- as.data.frame(change_5_9_df)
+change_5_9 <- change_5_9_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+
+change_6_6_df<- change_6_overtime_df(mammals)
+change_6_6_df <- as.data.frame(change_6_6_df)
+change_6_6 <- change_6_6_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+
+change_6_7_df <-change_6_overtime_df(seabirds)
+change_6_7_df <- as.data.frame(change_6_7_df)
+change_6_7 <- change_6_7_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+
+change_6_8_df <- change_6_overtime_df(pred_fish)
+change_6_8_df <- as.data.frame(change_6_8_df)
+change_6_8 <- change_6_8_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+
+change_6_9_df <- change_6_overtime_df(forage)
+change_6_9_df <- as.data.frame(change_6_9_df)
+change_6_9 <- change_6_9_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+
+#Shapiro-wilk test to determine if the data is normally distributed
+#Non normally distributed data:
+shapiro.test(change_5_1$value)
+shapiro.test(change_5_2$value)
+shapiro.test(change_5_3$value)
+shapiro.test(change_5_4$value)
+shapiro.test(change_5_5$value)
+shapiro.test(change_5_7$value)
+shapiro.test(change_5_8$value)
+
+shapiro.test(change_6_1$value)
+shapiro.test(change_6_2$value)
+shapiro.test(change_6_3$value)
+shapiro.test(change_6_4$value)
+shapiro.test(change_6_5$value)
+shapiro.test(change_6_6$value)
+shapiro.test(change_6_7$value)
+
+#Normally distributed data: p > 0.05
+
+shapiro.test(change_5_6$value)
+shapiro.test(change_5_9$value)
+
+shapiro.test(change_6_8$value)
+shapiro.test(change_6_9$value)
+
+```
+
+#T-test for normally distributed data
+#If p>0.05 you fail to reject null hypothesis (means are not significantly different), HA: true difference in means isn't equal to 0
+```{r}
+#4: diet over 0.05 
+change_5_9
+eq_5_9 <- data.frame("value"= c(1,1,1,1,1,1,1,1,1), "spp"= c("sl", "anchovy", "os", "sardine", "ws", "herring", "saury", "pm", "ms"))
+t.test(change_5_9$value, eq_5_9$value, paired= TRUE, alternative= "two.sided")
+
+```
 
