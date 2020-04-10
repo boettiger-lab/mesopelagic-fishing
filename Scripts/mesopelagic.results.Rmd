@@ -959,6 +959,7 @@ change_6_9_df <- change_6_overtime_df(forage)
 change_6_9_df <- as.data.frame(change_6_9_df)
 change_6_9 <- change_6_9_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
 
+#CORRECTION: NEED THE DIFFERENCE B/W DATA TO BE NORMALLY DISTRIBUTED
 #Shapiro-wilk test to determine if the data is normally distributed
 #Non normally distributed data:
 shapiro.test(change_5_1$value)
