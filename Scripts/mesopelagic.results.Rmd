@@ -13,8 +13,8 @@ library(data.table)
 library(viridisLite)
 library(dplyr)
 library(readxl)
+library(ggplot2)
 ```
-
 
 #Start of Koehn's code
 ```{r}
@@ -432,6 +432,18 @@ scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with deiet proportion under 0.05")
 plot4_5
+
+#Grouping various functional groups 
+FG <- read_csv("~/Documents/Thesis/Excel/FG.csv")
+data_4_fnc <- data_4 %>% left_join(FG)
+data_4_grouped <- data_4_fnc %>% group_by(FG, month) %>% summarize(mean_biomass= mean(biomass))
+
+plot_4_grouped <- data_4_grouped %>% ggplot(aes(x= month, y = mean_biomass)) + geom_line(aes(colour= factor(FG))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Ecological groups in the California current")
+plot_4_grouped
 ```
 
 #Change overtime plot for 80% depletion
@@ -608,21 +620,46 @@ theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion under 0.05") + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.dietunder.50.jpeg")
 plot5_5
 
-plot5_6 <- data_5 %>% filter(spp %in% high.price) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+
+plot5_6 <- data_5 %>% filter(spp %in% mammals) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with highest economic value") + ylim(0.95, 1.15) + 
-ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.highprice.50.jpeg")
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Marine mammals") +
+ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.mammals.50.jpeg")
 plot5_6
 
-plot5_7 <- data_5 %>% filter(spp %in% mammals) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+plot5_7 <- data_5 %>% filter(spp %in% seabirds) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Protected predators of mesopelagic fish") + ylim(0.9, 1.15) + 
-ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.mammals.50.jpeg")
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Seabirds") +
+ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.seabirds.50.jpeg")
 plot5_7
+
+plot5_8 <- data_5 %>% filter(spp %in% pred_fish) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predatory fish") +
+ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.predfish.50.jpeg")
+plot5_8
+
+plot5_9 <- data_5 %>% filter(spp %in% forage) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Forage fish") + 
+ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.forage.50.jpeg")
+plot5_9
+
+plot5_10 <- data_5 %>% filter(spp %in% high.price) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with highest economic value") +  
+ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.highprice.50.jpeg")
+plot5_10
 
 #Grouping various functional groups
 FG <- read_csv("~/Documents/Thesis/Excel/FG.csv")
@@ -815,6 +852,46 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
   ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.dietunder.25.jpeg")
 plot6_5
 
+plot6_6 <- data_6 %>% filter(spp %in% mammals) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Marine mammals") +
+ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.mammals.50.jpeg")
+plot6_6
+
+plot6_7 <- data_6 %>% filter(spp %in% seabirds) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Seabirds") +
+ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.seabirds.50.jpeg")
+plot6_7
+
+plot6_8 <- data_6 %>% filter(spp %in% pred_fish) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predatory fish") +
+ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.predfish.50.jpeg")
+plot6_8
+
+plot6_9 <- data_6 %>% filter(spp %in% forage) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Forage fish") + 
+ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.forage.50.jpeg")
+plot6_9
+
+plot6_10 <- data_6 %>% filter(spp %in% high.price) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with highest economic value") +  
+ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.highprice.50.jpeg")
+plot6_10
+
 #Grouping various functional groups
 FG <- read_csv("~/Documents/Thesis/Excel/FG.csv")
 data_6_fnc <- data_6 %>% left_join(FG)
@@ -1003,32 +1080,58 @@ change_6_9_df <- change_6_overtime_df(forage)
 change_6_9_df <- as.data.frame(change_6_9_df)
 change_6_9 <- change_6_9_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
 
+#Mutate data sets to have difference between equilibrium biomass and biomass after depletion
+#Think you need to take away abs value and do 1- value
+#ALSO CONSIDER: Assuming that each individual pair is independent from each other person (in this study it isn't so reconsider) --> doesn't come from SRS 
+change_5_1 <- change_5_1 %>% mutate(diff= (1-value))
+
+change_5_2 <- change_5_2 %>% mutate(diff= abs(value-1))
+change_5_3 <- change_5_3 %>% mutate(diff= abs(value-1))
+change_5_4 <- change_5_4 %>% mutate(diff= abs(value-1))
+change_5_5 <- change_5_5 %>% mutate(diff= abs(value-1))
+change_5_6 <- change_5_6 %>% mutate(diff= abs(value-1))
+change_5_7 <- change_5_7 %>% mutate(diff= abs(value-1))
+change_5_8 <- change_5_8 %>% mutate(diff= abs(value-1))
+change_5_9 <- change_5_9 %>% mutate(diff= abs(value-1))
+
+change_6_1 <- change_6_1 %>% mutate(diff= abs(value-1))
+change_6_2 <- change_6_2 %>% mutate(diff= abs(value-1))
+change_6_3 <- change_6_3 %>% mutate(diff= abs(value-1))
+change_6_4 <- change_6_4 %>% mutate(diff= abs(value-1))
+change_6_5 <- change_6_5 %>% mutate(diff= abs(value-1))
+change_6_6 <- change_6_6 %>% mutate(diff= abs(value-1))
+change_6_7 <- change_6_7 %>% mutate(diff= abs(value-1))
+change_6_8 <- change_6_8 %>% mutate(diff= abs(value-1))
+change_6_9 <- change_6_9 %>% mutate(diff= abs(value-1))
+
+
 #CORRECTION: NEED THE DIFFERENCE B/W DATA TO BE NORMALLY DISTRIBUTED
 #Shapiro-wilk test to determine if the data is normally distributed
 #Non normally distributed data:
-shapiro.test(change_5_1$value)
-shapiro.test(change_5_2$value)
-shapiro.test(change_5_3$value)
-shapiro.test(change_5_4$value)
-shapiro.test(change_5_5$value)
-shapiro.test(change_5_7$value)
-shapiro.test(change_5_8$value)
 
-shapiro.test(change_6_1$value)
-shapiro.test(change_6_2$value)
-shapiro.test(change_6_3$value)
-shapiro.test(change_6_4$value)
-shapiro.test(change_6_5$value)
-shapiro.test(change_6_6$value)
-shapiro.test(change_6_7$value)
+shapiro.test(change_5_1$diff)
+shapiro.test(change_5_2$diff)
+shapiro.test(change_5_3$diff)
+shapiro.test(change_5_4$diff)
+shapiro.test(change_5_5$diff)
+shapiro.test(change_5_8$diff)
+
+shapiro.test(change_6_1$diff)
+shapiro.test(change_6_2$diff)
+shapiro.test(change_6_3$diff)
+shapiro.test(change_6_4$diff)
+shapiro.test(change_6_5$diff)
+shapiro.test(change_6_7$diff)
+shapiro.test(change_6_8$diff)
 
 #Normally distributed data: p > 0.05
+shapiro.test(change_5_6$diff)
+shapiro.test(change_5_7$diff)
+shapiro.test(change_5_9$diff)
 
-shapiro.test(change_5_6$value)
-shapiro.test(change_5_9$value)
+shapiro.test(change_6_6$diff)
+shapiro.test(change_6_9$diff)
 
-shapiro.test(change_6_8$value)
-shapiro.test(change_6_9$value)
 
 ```
 
