@@ -12,6 +12,7 @@ library(tidyverse)
 library(data.table)
 library(viridisLite)
 library(dplyr)
+library(readxl)
 ```
 
 
@@ -158,6 +159,7 @@ library(data.table)
 scene3 <- copy(base_sim_scene)
 run3 <- rsim.run(scene3, method = 'AB', years=2001)
 for (yr in 2002:2050){
+  
   # stock assessment based on current biomass * error
   #for 2 species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)  
 assessment <- end_biomass(run3)[target_sp] * (runif(length(target_sp)) + 0.5)
@@ -239,6 +241,18 @@ scale_color_viridis(discrete = TRUE, option = "inferno") +
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion under 0.05")
 plot3_5
+
+#Grouping various functional groups
+FG <- read_csv("~/Documents/Thesis/Excel/FG.csv")
+data_3_fnc <- data_3 %>% left_join(FG)
+data_3_grouped <- data_3_fnc %>% group_by(FG, month) %>% summarize(mean_biomass= mean(biomass))
+
+plot_3_grouped <- data_3_grouped %>% ggplot(aes(x= month, y = mean_biomass)) + geom_line(aes(colour= factor(FG))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Ecological groups in the California current")
+plot_3_grouped
 ```
 
 #Change overtime plot for 100% depletion
@@ -316,7 +330,7 @@ change_3_5_df <- as.data.frame(change_3_5_df)
 change_3_5 <- change_3_5_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
 
 #If use you need to add a value at 0 for mesopelagics! 
-change_3_5_plot <- change_3_5 %>% ggplot(aes(x= value, y=species)) + geom_point(aes(col= species)) + xlim(0.2, 1.6) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + scale_color_viridis(discrete = TRUE, option = "D") +
+change_3_5_plot <- change_3_5 %>% ggplot(aes(x= value, y=species)) + geom_point(aes(col= species)) + xlim(0, 1.6) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + scale_color_viridis(discrete = TRUE, option = "D") +
 xlab("Proportion of original biomass") + ylab("Predators with diet proportion under 0.05") + theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
@@ -610,6 +624,18 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.mammals.50.jpeg")
 plot5_7
 
+#Grouping various functional groups
+FG <- read_csv("~/Documents/Thesis/Excel/FG.csv")
+data_5_fnc <- data_5 %>% left_join(FG)
+data_5_grouped <- data_5_fnc %>% group_by(FG, month) %>% summarize(mean_biomass= mean(biomass))
+
+plot_5_grouped <- data_5_grouped %>% ggplot(aes(x= month, y = mean_biomass)) + geom_line(aes(colour= factor(FG))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Ecological groups in the California current")
+plot_5_grouped
+
 ```
 
 #Change overtime plot for 50% depletion
@@ -789,6 +815,18 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
   ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.dietunder.25.jpeg")
 plot6_5
 
+#Grouping various functional groups
+FG <- read_csv("~/Documents/Thesis/Excel/FG.csv")
+data_6_fnc <- data_6 %>% left_join(FG)
+data_6_grouped <- data_6_fnc %>% group_by(FG, month) %>% summarize(mean_biomass= mean(biomass))
+
+plot_6_grouped <- data_6_grouped %>% ggplot(aes(x= month, y = mean_biomass)) + geom_line(aes(colour= factor(FG))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Ecological groups in the California current")
+plot_6_grouped
+
 ```
 
 #Change overtime plot for 25% depletion
@@ -913,13 +951,19 @@ biomass_decrease_25
 ```
 
 
-#Changing data to group functional groups
+#Model data for grouping functional groups 
 ```{r}
-test1 <- data_6 %>% filter(spp %in% noncommerical_predators, month==1) %>% summarize(avg= mean(biomass))
-test1
+FG <- read_csv("~/Documents/Thesis/Excel/FG.csv")
+data_5_fnc <- data_5 %>% left_join(FG)
+data_5_test <- data_5_fnc %>% group_by(FG, month) %>% summarize(mean_biomass= mean(biomass))
 
-data_5 %>% left_join(FG))
-data_5 %>% group_by(FG) %>% summarize(biomass = mean(biomass))
+library(viridis)
+plottest <- data_5_test %>% ggplot(aes(x= month, y = mean_biomass)) + geom_line(aes(colour= factor(FG))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with deiet proportion under 0.05")
+plottest
 
 ```
 
