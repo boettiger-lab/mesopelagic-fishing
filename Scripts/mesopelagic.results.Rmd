@@ -250,7 +250,7 @@ plot_3_grouped <- data_3_grouped %>% ggplot(aes(x= month, y = mean_biomass)) + g
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Ecological groups in the California current") + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/100/plot.ecologicalgroups.100.jpeg")
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Ecological groups in the California current") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/100/plot.ecologicalgroups.100.jpeg")
 plot_3_grouped
 ```
 
@@ -306,7 +306,7 @@ xlab("Proportion of original biomass") + ylab("Predators of mesopelagic fish") +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(plot.title= element_text(hjust=.5)) + 
-theme(legend.position= "none") +  ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/100/predators.100.jpeg")
+theme(legend.position= "none") +  theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/100/predators.100.jpeg")
 change_3_3_plot
 
 #3.4: Diet over 0.05
@@ -319,7 +319,7 @@ xlab("Proportion of original biomass") + ylab("Predators with diet proportion ov
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(plot.title= element_text(hjust=.5)) + 
-theme(legend.position= "none") + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/100/dietover.100.jpeg")
+theme(legend.position= "none") + theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/100/dietover.100.jpeg")
 change_3_4_plot
 
 #3.5: Diet under 0.05 
@@ -401,7 +401,7 @@ theme_bw() +
 scale_color_viridis(discrete = TRUE, option = "inferno") +
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
-  labs(colour= "Commercial predators") + 
+  labs(colour= "Commercial predators") + theme(text = element_text(size = 16)) +
   ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/80/plot.commercial.80.jpeg")
 plot4_1
 
@@ -483,7 +483,7 @@ xlab("Proportion of original biomass") + ylab("Noncommercial predators") + theme
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(plot.title= element_text(hjust=.5)) + 
-theme(legend.position= "none") + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/80/noncom.80.jpeg")
+theme(legend.position= "none") + theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/80/noncom.80.jpeg")
 change_4_2_plot
 
 #3.3: Mesopelagic predators
@@ -582,42 +582,42 @@ names(z_5) <- names_spp
 z_5$month <- 1:600
 
 #This vectors adds in the month
-library(tidyr)
+
 data_5 <- gather(z_5, key = spp, value = biomass, -month )
 
-plot5_1 <- data_5 %>% filter(spp %in% commercial_predators) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+plot5_1 <- data_5 %>% filter(spp %in% commercial_predators) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative Biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno") +
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour= "Commercially valuable predators") + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/paper/plot.commercial.50.jpeg")
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour= "Commercially valuable predators") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/paper/plot.commercial.50.jpeg")
 plot5_1
 
 plot5_2 <- data_5 %>% filter(spp %in% noncommerical_predators) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Noncommercially valuable predators") + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/paper/plot.noncommercial.50.jpeg")
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Noncommercially valuable predators") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/paper/plot.noncommercial.50.jpeg")
 plot5_2
 
 plot5_3 <- data_5 %>% filter(spp %in% predators_mesopelagic) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators of mesopelagic fish") + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.predators.50.jpeg")
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators of mesopelagic fish") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.predators.50.jpeg")
 plot5_3
 
 plot5_4 <- data_5 %>% filter(spp %in% diet_over_0.05) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion over 0.05") + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.dietover.50.jpeg")
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion over 0.05") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.dietover.50.jpeg")
 plot5_4
 
 plot5_5 <- data_5 %>% filter(spp %in% diet_under_0.05) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion under 0.05") + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.dietunder.50.jpeg")
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion under 0.05") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.dietunder.50.jpeg")
 plot5_5
 
 
@@ -625,7 +625,7 @@ plot5_6 <- data_5 %>% filter(spp %in% mammals) %>% ggplot(aes(x= month, y = biom
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Marine mammals") +
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Marine mammals") +theme(text = element_text(size = 16)) +
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/paper/plot.mammals.50.jpeg")
 plot5_6
 
@@ -633,7 +633,7 @@ plot5_7 <- data_5 %>% filter(spp %in% seabirds) %>% ggplot(aes(x= month, y = bio
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Seabirds") +
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Seabirds") + theme(text = element_text(size = 16)) +
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.seabirds.50.jpeg")
 plot5_7
 
@@ -641,7 +641,7 @@ plot5_8 <- data_5 %>% filter(spp %in% pred_fish) %>% ggplot(aes(x= month, y = bi
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predatory fish") +
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predatory fish") + theme(text = element_text(size = 16)) +
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.predfish.50.jpeg")
 plot5_8
 
@@ -649,7 +649,7 @@ plot5_9 <- data_5 %>% filter(spp %in% forage) %>% ggplot(aes(x= month, y = bioma
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Forage fish") + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Forage fish") + theme(text = element_text(size = 16)) +
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.forage.50.jpeg")
 plot5_9
 
@@ -657,7 +657,7 @@ plot5_10 <- data_5 %>% filter(spp %in% high.price) %>% ggplot(aes(x= month, y = 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with highest economic value") +  
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with highest economic value") +  theme(text = element_text(size = 16)) +
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/paper/plot.highprice.50.jpeg")
 plot5_10
 
@@ -670,11 +670,10 @@ plot_5_grouped <- data_5_grouped %>% ggplot(aes(x= month, y = mean_biomass)) + g
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Ecological groups in the California current")
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(text = element_text(size = 16)) + labs(colour = "Ecological groups in the California current")
 plot_5_grouped
 
 
-grid.arrange(plot5_1, plot5_10, ncol = 2)
 
 ```
 
@@ -702,7 +701,7 @@ xlab("Proportion of original biomass") + ylab("Commercially valuable predators")
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(plot.title= element_text(hjust=.5)) + 
-theme(legend.position= "none") + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/50/commercial.50.jpeg")
+theme(legend.position= "none") + theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/50/commercial.50.jpeg")
 change_5_1_plot
 
 
@@ -717,7 +716,7 @@ xlab("Proportion of original biomass") + ylab("Noncommercially valuable predator
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(plot.title= element_text(hjust=.5)) + 
-theme(legend.position= "none") + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/50/noncommercial.50.jpeg")
+theme(legend.position= "none") + theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/50/noncommercial.50.jpeg")
 change_5_2_plot
 
 #3.3: Mesopelagic predators
@@ -732,7 +731,7 @@ xlab("Proportion of original biomass") + ylab("Predators of mesopelagic fish") +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(plot.title= element_text(hjust=.5)) + 
-theme(legend.position= "none") + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/50/predators.50.jpeg")
+theme(legend.position= "none") + theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/50/predators.50.jpeg")
 change_5_3_plot
 
 #3.4: Diet over 0.05
@@ -745,7 +744,7 @@ xlab("Proportion of original biomass") + ylab("Predators with diet proportion ov
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(plot.title= element_text(hjust=.5)) + 
-theme(legend.position= "none") + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/50/dietover.50.jpeg")
+theme(legend.position= "none") + theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/50/dietover.50.jpeg")
 change_5_4_plot
 
 #3.5: Diet under 0.05 
@@ -760,7 +759,7 @@ xlab("Proportion of original biomass") + ylab("Predators with diet proportion un
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(plot.title= element_text(hjust=.5)) + 
-theme(legend.position= "none")  + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/50/dietunder.50.jpeg")
+theme(legend.position= "none")  + theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/50/dietunder.50.jpeg")
 change_5_5_plot
 ```
 
@@ -822,28 +821,28 @@ plot6_1 <- data_6 %>% filter(spp %in% commercial_predators) %>% ggplot(aes(x= mo
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno") +
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour= "Commercially valuable predators") + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.commercial.25.jpeg")
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour= "Commercially valuable predators") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.commercial.25.jpeg")
 plot6_1
 
 plot6_2 <- data_6 %>% filter(spp %in% noncommerical_predators) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Noncommercially valuable predators") + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.noncommercial.25.jpeg")
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Noncommercially valuable predators") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.noncommercial.25.jpeg")
 plot6_2
 
 plot6_3 <- data_6 %>% filter(spp %in% predators_mesopelagic) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators of mesopelagic fish") + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.predators.25.jpeg")
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators of mesopelagic fish") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.predators.25.jpeg")
 plot6_3
 
 plot6_4 <- data_6 %>% filter(spp %in% diet_over_0.05) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno") +
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion over 0.05") + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion over 0.05") + theme(text = element_text(size = 16)) +
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.dietover.25.jpeg")
 plot6_4
 
@@ -851,7 +850,7 @@ plot6_5 <- data_6 %>% filter(spp %in% diet_under_0.05) %>% ggplot(aes(x= month, 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion under 0.05") +
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion under 0.05") + theme(text = element_text(size = 16)) +
   ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.dietunder.25.jpeg")
 plot6_5
 
@@ -859,7 +858,7 @@ plot6_6 <- data_6 %>% filter(spp %in% mammals) %>% ggplot(aes(x= month, y = biom
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Marine mammals") +
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Marine mammals") + theme(text = element_text(size = 16)) +
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.mammals.25.jpeg")
 plot6_6
 
@@ -867,7 +866,7 @@ plot6_7 <- data_6 %>% filter(spp %in% seabirds) %>% ggplot(aes(x= month, y = bio
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Seabirds") +
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Seabirds") +theme(text = element_text(size = 16)) +
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.seabirds.25.jpeg")
 plot6_7
 
@@ -875,7 +874,7 @@ plot6_8 <- data_6 %>% filter(spp %in% pred_fish) %>% ggplot(aes(x= month, y = bi
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predatory fish") +
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predatory fish") + theme(text = element_text(size = 16)) +
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.predfish.25.jpeg")
 plot6_8
 
@@ -883,7 +882,7 @@ plot6_9 <- data_6 %>% filter(spp %in% forage) %>% ggplot(aes(x= month, y = bioma
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Forage fish") + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Forage fish") + theme(text = element_text(size = 16)) +
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.forage.25.jpeg")
 plot6_9
 
@@ -891,7 +890,7 @@ plot6_10 <- data_6 %>% filter(spp %in% high.price) %>% ggplot(aes(x= month, y = 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with highest economic value") +  
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with highest economic value") +  theme(text = element_text(size = 16)) +
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.highprice.25.jpeg")
 plot6_10
 
@@ -904,7 +903,7 @@ plot_6_grouped <- data_6_grouped %>% ggplot(aes(x= month, y = mean_biomass)) + g
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Ecological groups in the California current") + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Ecological groups in the California current") + theme(text = element_text(size = 16)) +
   ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/paper/plot.ecologicalgroups.25.jpeg")
 plot_6_grouped
 
@@ -937,7 +936,7 @@ xlab("Proportion of original biomass") + ylab("Commercially valuable predators")
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(plot.title= element_text(hjust=.5)) + 
-theme(legend.position= "none")  + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/commercial.25.jpeg")
+theme(legend.position= "none")  + theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/commercial.25.jpeg")
 change_6_1_plot
 
 #3.2: Noncommercial
@@ -951,7 +950,7 @@ xlab("Proportion of original biomass") + ylab("Noncommercially valuable predator
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(plot.title= element_text(hjust=.5)) + 
-theme(legend.position= "none") + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/noncommercial.25.jpeg")
+theme(legend.position= "none") + theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/noncommercial.25.jpeg")
 change_6_2_plot
 
 #3.3: Mesopelagic predators
@@ -966,7 +965,7 @@ xlab("Proportion of original biomass") + ylab("Predators of mesopelagic fish") +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(plot.title= element_text(hjust=.5)) + 
-theme(legend.position= "none")  + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/predators.25.jpeg")
+theme(legend.position= "none")  + theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/predators.25.jpeg")
 change_6_3_plot
 
 #3.4: Diet over 0.05
@@ -979,7 +978,7 @@ xlab("Proportion of original biomass") + ylab("Predators with diet proportion ov
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(plot.title= element_text(hjust=.5)) +
-theme(legend.position= "none")+ ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/paper/dietover.25.jpeg")
+theme(legend.position= "none")+ theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/paper/dietover.25.jpeg")
 change_6_4_plot 
 
 #3.5: Diet under 0.05 
@@ -997,7 +996,7 @@ xlab("Proportion of original biomass") + ylab("Predators with diet proportion un
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(plot.title= element_text(hjust=.5)) + 
-theme(legend.position= "none")  + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/paper/dietunder.25.jpeg")
+theme(legend.position= "none")  + theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/paper/dietunder.25.jpeg")
 change_6_5_plot
 ```
 
