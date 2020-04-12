@@ -92,7 +92,7 @@ yearlist = 2001:2050
 
 base_sim_scene <- rsim.scenario(Cal_bal, CalCur_unbal, years = yearlist)
 scene0 <- base_sim_scene
-run0   <- rsim.run(scene0, method='AB', years=yearlist) 
+run0 <- rsim.run(scene0, method='AB', years=yearlist) 
 rsim.plot(run0,all_species)
 
 #Scene0 and scene1 are identical, Koehn just redefined it like this so we will too
@@ -672,6 +672,9 @@ scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Ecological groups in the California current")
 plot_5_grouped
+
+
+grid.arrange(plot5_1, plot5_10, ncol = 2)
 
 ```
 
