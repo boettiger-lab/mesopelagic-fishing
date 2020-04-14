@@ -368,6 +368,32 @@ assessment
 rsim.plot(run4,all_species)  
 ```
 
+```{r}
+run4 <- list()
+for(i in 1:100){
+  run4[[i]] <- rsim.run(scene4, method = 'AB', years=2001)
+}
+for(i in 1:100){
+  for (yr in 2002:2050){
+  # stock assessment based on current biomass * error
+  # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
+assessment <- end_biomass(run4[[i]])[target_sp] * (runif(length(target_sp)) + 0.5)
+assessment
+  # convert target F * assessment to a total catch 
+  catches <- target_F * assessment
+  
+  # apply each catch to each species
+  for (sp in target_sp){
+    scene4 <- adjust.fishing(scene4, "CATCH", sp, yr, value=catches[sp])
+  }
+  # run 1 year
+  run4[[i]] <- rsim.step(scene4, run4[[i]], method='AB', year.end=yr) 
+}}  
+rsim.plot(run4[[50]],all_species)
+
+end_biomass(run4[[5]])
+```
+
 #Changing data set so we can change plotting
 ```{r}
 rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
