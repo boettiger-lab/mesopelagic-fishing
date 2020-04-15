@@ -14,6 +14,7 @@ library(viridisLite)
 library(dplyr)
 library(readxl)
 library(ggplot2)
+library(viridis)
 ```
 
 #Start of Koehn's code
@@ -145,6 +146,7 @@ end_biomass
 #rsim.plot(run2,all_species) 
 
 end_biomass(run2)['mesopelagics']
+
 ```
 
 #100% DEPLETION LEVEL
@@ -366,32 +368,6 @@ assessment
   run4 <- rsim.step(scene4, run4, method='AB', year.end=yr) 
 }  
 rsim.plot(run4,all_species)  
-```
-
-```{r}
-run4 <- list()
-for(i in 1:100){
-  run4[[i]] <- rsim.run(scene4, method = 'AB', years=2001)
-}
-for(i in 1:100){
-  for (yr in 2002:2050){
-  # stock assessment based on current biomass * error
-  # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
-assessment <- end_biomass(run4[[i]])[target_sp] * (runif(length(target_sp)) + 0.5)
-assessment
-  # convert target F * assessment to a total catch 
-  catches <- target_F * assessment
-  
-  # apply each catch to each species
-  for (sp in target_sp){
-    scene4 <- adjust.fishing(scene4, "CATCH", sp, yr, value=catches[sp])
-  }
-  # run 1 year
-  run4[[i]] <- rsim.step(scene4, run4[[i]], method='AB', year.end=yr) 
-}}  
-rsim.plot(run4[[50]],all_species)
-
-end_biomass(run4[[5]])
 ```
 
 #Changing data set so we can change plotting
@@ -841,6 +817,7 @@ z_6<-as.data.frame(z_6)
 names(z_6) <- names_spp
 z_6$month <- 1:600
 
+
 data_6 <- gather(z_6, key = spp, value = biomass, -month )
 
 plot6_1 <- data_6 %>% filter(spp %in% commercial_predators) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
@@ -1026,9 +1003,84 @@ theme(legend.position= "none")  + theme(text = element_text(size = 16)) + ggsave
 change_6_5_plot
 ```
 
+#Loop to consider uncertainty!!
+
+```{r}
+
+#Loop! 
+run6 <- list()
+for(i in 1:100){
+  run6[[i]] <- rsim.run(scene6, method = 'AB', years=2001)
+}
+for(i in 1:100){
+  for (yr in 2002:2050){
+  # stock assessment based on current biomass * error
+  # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
+assessment <- end_biomass(run6[[i]])[target_sp] * (runif(length(target_sp)) + 0.5)
+assessment
+  # convert target F * assessment to a total catch 
+  catches <- target_F * assessment
+  
+  # apply each catch to each species
+  for (sp in target_sp){
+    scene6 <- adjust.fishing(scene6, "CATCH", sp, yr, value=catches[sp])
+  }
+  # run 1 year
+  run6[[i]] <- rsim.step(scene6, run6[[i]], method='AB', year.end=yr) 
+}}  
+rsim.plot(run6[[50]],all_species)
+
+end_biomass(run6[[5]])
+
+#Function to convert rsim output to a dataframe
+rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
+  opar <- par(no.readonly = T)
+  if(indplot == F){
+    biomass <- Rsim.output$out_BB[, 2:ncol(Rsim.output$out_BB)]
+    n <- ncol(biomass)
+    start.bio <- biomass[1, ]
+    start.bio[which(start.bio == 0)] <- 1
+    rel.bio <- matrix(NA, dim(biomass)[1], dim(biomass)[2])
+    for(isp in 1:n) rel.bio[, isp] <- biomass[, isp] / start.bio[isp]
+  }
+  rel.bio
+} 
+
+#Convert each element in the list to a dataframe and combine
+df4 <-list()
+for(i in 1:100){
+  names_spp<- run6[[i]]$params$spname[2:94]
+  #Need to make z into data frame, before was matrix, names is for data frame not matrix
+  #Ways to do this in tidy verse but this is quick fix
+  z_6_unc<-rsim.plot.fun(run6[[i]])
+  z_6_unc<-as.data.frame(z_6_unc)
+  names(z_6_unc) <- names_spp
+  z_6_unc$month <- 1:600
+  #This vectors adds in the month
+  df4[[i]] <- gather(z_6_unc, key = spp, value = biomass, -month )
+}
+
+combined_df <- bind_rows(df4, .id = "column_label")
+
+#Plotting
+
+new <- combined_df %>% filter(spp %in% c("Leach's S. Petrel", "Dolphins", "Longspine thorny."), month==600)
+new
+
+#Summarize the mean and standard deviation of biomass at month 600 (end of 2050) for every run (n=100)
+new2 <- combined_df %>% filter(spp %in% diet_over_0.05, month==600) %>%
+  group_by(spp) %>%
+  summarise(mean= mean(biomass), sd= sd(biomass))
+new2
+
+p1 <- ggplot(data= new, aes(x= spp, y= biomass)) + geom_boxplot(aes(fill= spp)) + geom_point() +theme_minimal()
+p1
+```
+
 #Running simple stats on all depletion levels
 ```{r}
 #Analzying if biomass of functional groups increases or decreases (as measured by last month)
+
 
 biomass_increase_100 <- data_3 %>% filter(month==600, biomass >1) %>% mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
 biomass_increase_100
