@@ -59,6 +59,8 @@ pred_fish  <- Cal_bal$Group[33:59]
 
 #My customized defined functional groups 
 
+#Plankton
+Plankton <- c(Cal_bal$Group[1], Cal_bal$Group[5:10])
 #Forage fish 
 forage <- Cal_bal$Group[19:27]
 
@@ -82,6 +84,9 @@ diet_under_0.05
 diet_over_0.05 <- c(Cal_bal$Group[29], Cal_bal$Group[33], Cal_bal$Group[38], Cal_bal$Group[42], Cal_bal$Group[48], Cal_bal$Group[51], Cal_bal$Group[54], Cal_bal$Group[56], Cal_bal$Group[63], Cal_bal$Group[70], Cal_bal$Group[76], Cal_bal$Group[85])
 diet_over_0.05
 
+#Highest diet proportion 
+highest_diet <- c(Cal_bal$Group[70], Cal_bal$Group[56], Cal_bal$Group[12])
+
 #Predators of mesopelagic fish with annual economic value over $1/lb 
 high.price <- c(Cal_bal$Group[47], Cal_bal$Group[45], Cal_bal$Group[38], Cal_bal$Group[55], Cal_bal$Group[46], Cal_bal$Group[43])
 high.price
@@ -102,6 +107,9 @@ identical(scene0, scene1)
 
 temp= frate.table(scene0)
 temp
+
+temp2= frate.table(scene3)
+temp2
 ```
 
 # Manipulating fishing rates: different scenarios, DELETE???!
@@ -254,6 +262,13 @@ scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Ecological groups in the California current") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/100/plot.ecologicalgroups.100.jpeg")
 plot_3_grouped
+
+plot3_test <- data_3 %>% filter(spp %in% Plankton) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno") +
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion under 0.05")
+plot3_test
 ```
 
 #Change overtime plot for 100% depletion
@@ -594,6 +609,21 @@ theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour= "Commercially valuable predators") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/paper/plot.commercial.50.jpeg")
 plot5_1
 
+#Pull out certain commercially valuable predators: explain the relationship 
+compare2 <- c(Cal_bal$Group[15], Cal_bal$Group[1], Cal_bal$Group[21], Cal_bal$Group[7], Cal_bal$Group[42],  Cal_bal$Group[18], Cal_bal$Group[47])
+compare2
+
+plotc <- plotc <- data_5 %>% filter(spp %in% compare4) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative Biomass") + 
+theme_bw() + 
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour= "Fluctuating groups") + theme(text = element_text(size = 16)) 
+plotc
+
+compare4 <- c(Cal_bal$Group[18], Cal_bal$Group[6:10])
+compare4
+
+ttest<- data_5 %>% filter(spp %in% noncommerical_predators, month==200)
+
 plot5_2 <- data_5 %>% filter(spp %in% noncommerical_predators) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
@@ -622,6 +652,15 @@ theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion under 0.05") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.dietunder.50.jpeg")
 plot5_5
 
+compare3 <- c(Cal_bal$Group[18], Cal_bal$Group[19], Cal_bal$Group[80], Cal_bal$Group[81])
+compare3
+
+plot5_20 <- data_5 %>% filter(spp %in% compare3) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +  labs(colour = "Marine mammals") +theme(text = element_text(size = 16)) 
+plot5_20
 
 plot5_6 <- data_5 %>% filter(spp %in% mammals) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
@@ -674,8 +713,6 @@ scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(text = element_text(size = 16)) + labs(colour = "Ecological groups in the California current")
 plot_5_grouped
-
-
 
 ```
 
@@ -841,7 +878,7 @@ theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators of mesopelagic fish") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.predators.25.jpeg")
 plot6_3
 
-plot6_4 <- data_6 %>% filter(spp %in% diet_over_0.05) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+plot6_4 <- data_6 %>% filter(spp %in% diet_over_0.05) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + ylim(0.95, 1.05) + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno") +
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
@@ -881,14 +918,6 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.predfish.25.jpeg")
 plot6_8
 
-plot6_9 <- data_6 %>% filter(spp %in% forage) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
-theme_bw() + 
-scale_color_viridis(discrete = TRUE, option = "inferno")+
-theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Forage fish") + theme(text = element_text(size = 16)) +
-ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.forage.25.jpeg")
-plot6_9
-
 plot6_10 <- data_6 %>% filter(spp %in% high.price) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
@@ -896,6 +925,11 @@ theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with highest economic value") +  theme(text = element_text(size = 16)) +
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.highprice.25.jpeg")
 plot6_10
+
+plot6_high <- data_6 %>% filter(spp %in% highest_diet) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")
+plot6_high
 
 #Grouping various functional groups
 FG <- read_csv("~/Documents/Thesis/Excel/FG.csv")
