@@ -606,29 +606,14 @@ plot5_1 <- data_5 %>% filter(spp %in% commercial_predators) %>% ggplot(aes(x= mo
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno") +
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour= "Commercially valuable predators") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/paper/plot.commercial.50.jpeg")
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour= "Commercially valuable predators", title= "A") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/paper/plot.commercial.50.jpeg")
 plot5_1
-
-#Pull out certain commercially valuable predators: explain the relationship 
-compare2 <- c(Cal_bal$Group[15], Cal_bal$Group[1], Cal_bal$Group[21], Cal_bal$Group[7], Cal_bal$Group[42],  Cal_bal$Group[18], Cal_bal$Group[47])
-compare2
-
-plotc <- plotc <- data_5 %>% filter(spp %in% compare4) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative Biomass") + 
-theme_bw() + 
-theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour= "Fluctuating groups") + theme(text = element_text(size = 16)) 
-plotc
-
-compare4 <- c(Cal_bal$Group[18], Cal_bal$Group[6:10])
-compare4
-
-ttest<- data_5 %>% filter(spp %in% noncommerical_predators, month==200)
 
 plot5_2 <- data_5 %>% filter(spp %in% noncommerical_predators) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Noncommercially valuable predators") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/paper/plot.noncommercial.50.jpeg")
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Noncommercially valuable predators", title="C") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/paper/plot.noncommercial.50.jpeg")
 plot5_2
 
 plot5_3 <- data_5 %>% filter(spp %in% predators_mesopelagic) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
@@ -652,21 +637,11 @@ theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with diet proportion under 0.05") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/plot.dietunder.50.jpeg")
 plot5_5
 
-compare3 <- c(Cal_bal$Group[18], Cal_bal$Group[19], Cal_bal$Group[80], Cal_bal$Group[81])
-compare3
-
-plot5_20 <- data_5 %>% filter(spp %in% compare3) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
-theme_bw() + 
-scale_color_viridis(discrete = TRUE, option = "inferno")+
-theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +  labs(colour = "Marine mammals") +theme(text = element_text(size = 16)) 
-plot5_20
-
 plot5_6 <- data_5 %>% filter(spp %in% mammals) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Marine mammals") +theme(text = element_text(size = 16)) +
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Marine mammals", title= "D") +theme(text = element_text(size = 16)) +
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/paper/plot.mammals.50.jpeg")
 plot5_6
 
@@ -698,7 +673,7 @@ plot5_10 <- data_5 %>% filter(spp %in% high.price) %>% ggplot(aes(x= month, y = 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with highest economic value") +  theme(text = element_text(size = 16)) +
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with highest economic value", title= "B") +  theme(text = element_text(size = 16)) +
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/50/paper/plot.highprice.50.jpeg")
 plot5_10
 
@@ -714,6 +689,15 @@ theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(text = element_text(size = 16)) + labs(colour = "Ecological groups in the California current")
 plot_5_grouped
 
+compare <- c(Cal_bal$Group[1], Cal_bal$Group[7], Cal_bal$Group[18], Cal_bal$Group[21], Cal_bal$Group[42], Cal_bal$Group[42], Cal_bal$Group[15], Cal_bal$Group[47])
+compare
+
+plot5_comp <- data_5 %>% filter(spp %in% compare) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno")+
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Predators with highest economic value", title= "B") +  theme(text = element_text(size = 16))
+plot5_comp
 ```
 
 #Change overtime plot for 50% depletion
