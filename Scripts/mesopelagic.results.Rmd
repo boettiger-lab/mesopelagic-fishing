@@ -995,10 +995,9 @@ change_6_4_df <- as.data.frame(change_6_4_df)
 change_6_4 <- change_6_4_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
 
 change_6_4_plot <- change_6_4 %>% ggplot(aes(x= value, y=species)) + geom_point(aes(col= species)) + xlim(0.5, 1.5) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + scale_color_viridis(discrete = TRUE, option = "D")+
-xlab("Proportion of original biomass") + ylab("Predators with diet proportion over 0.05") + theme_bw() + theme(panel.border = element_blank()) +
+xlab("Proportion of original biomass") + ylab("Predators with diet proportion over 0.05") + labs(title= "A") + theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-theme(plot.title= element_text(hjust=.5)) +
 theme(legend.position= "none")+ theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/paper/dietover.25.jpeg")
 change_6_4_plot 
 
@@ -1008,17 +1007,14 @@ change_6_5_df<- change_6_overtime_df(diet_under_0.05)
 change_6_5_df <- as.data.frame(change_6_5_df)
 change_6_5 <- change_6_5_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
 
-library(dplyr)
-library(ggplot2)
-library(viridis)
 #If use you need to add a value at 0 for mesopelagics! 
 change_6_5_plot <- change_6_5 %>% ggplot(aes(x= value, y=species)) + geom_point(aes(col= species)) + xlim(0, 1.6) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + scale_color_viridis(discrete = TRUE, option = "D") +
-xlab("Proportion of original biomass") + ylab("Predators with diet proportion under 0.05") + theme_bw() + theme(panel.border = element_blank()) +
+xlab("Proportion of original biomass") + ylab("Predators with diet proportion under 0.05") + labs(title= "B") + theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-theme(plot.title= element_text(hjust=.5)) + 
 theme(legend.position= "none")  + theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/paper/dietunder.25.jpeg")
 change_6_5_plot
+
 ```
 
 #Loop to consider uncertainty!!
