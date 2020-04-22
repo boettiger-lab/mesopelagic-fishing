@@ -995,10 +995,10 @@ change_6_4_df <- as.data.frame(change_6_4_df)
 change_6_4 <- change_6_4_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
 
 change_6_4_plot <- change_6_4 %>% ggplot(aes(x= value, y=species)) + geom_point(aes(col= species)) + xlim(0.5, 1.5) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + scale_color_viridis(discrete = TRUE, option = "D")+
-xlab("Proportion of original biomass") + ylab("Predators with diet proportion over 0.05") + labs(title= "A") + theme_bw() + theme(panel.border = element_blank()) +
+xlab("Proportion of original biomass") + ylab("Predators with low diet proportion ") + labs(title= "A") + theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-theme(legend.position= "none")+ theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/paper/dietover.25.jpeg")
+theme(legend.position= "none")+ theme(text = element_text(size = 14)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/paper/dietover.25.jpeg")
 change_6_4_plot 
 
 #3.5: Diet under 0.05 
@@ -1012,7 +1012,7 @@ change_6_5_plot <- change_6_5 %>% ggplot(aes(x= value, y=species)) + geom_point(
 xlab("Proportion of original biomass") + ylab("Predators with diet proportion under 0.05") + labs(title= "B") + theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-theme(legend.position= "none")  + theme(text = element_text(size = 16)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/paper/dietunder.25.jpeg")
+theme(legend.position= "none")  + theme(text = element_text(size = 14)) + ggsave(width = 7, height = 5, "~/Documents/Thesis/Images/25/paper/dietunder.25.jpeg")
 change_6_5_plot
 
 ```
@@ -1095,7 +1095,6 @@ p1
 ```{r}
 #Analzying if biomass of functional groups increases or decreases (as measured by last month)
 
-
 biomass_increase_100 <- data_3 %>% filter(month==600, biomass >1) %>% mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
 biomass_increase_100
 
@@ -1140,103 +1139,56 @@ plottest
 ```
 
 #STATISTICS
-#New data sets and Shapiro-wilk test
+
 ```{r}
-#Creating new data sets
-change_5_6_df<- change_5_overtime_df(mammals)
-change_5_6_df <- as.data.frame(change_5_6_df)
-change_5_6 <- change_5_6_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+cephOTZ <- c(Cal_bal$Group[18], Cal_bal$Group[15])
+cephOTZ
 
-change_5_7_df <-change_5_overtime_df(seabirds)
-change_5_7_df <- as.data.frame(change_5_7_df)
-change_5_7 <- change_5_7_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+data_try <- data_5 %>% filter(spp == "mesopelagics") %>% rename(mesopelagics= biomass) %>% select(month, mesopelagics)
+data_try
 
-change_5_8_df <- change_5_overtime_df(pred_fish)
-change_5_8_df <- as.data.frame(change_5_8_df)
-change_5_8 <- change_5_8_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+data_try2 <- data_5 %>% filter(spp== "Other cephal.") %>% rename(other.cephal= biomass) %>% select(month, other.cephal)
+data_try2
 
-change_5_9_df <- change_5_overtime_df(forage)
-change_5_9_df <- as.data.frame(change_5_9_df)
-change_5_9 <- change_5_9_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+data_try3 <- data_try2 %>% left_join(data_try)
+data_try3
 
-change_6_6_df<- change_6_overtime_df(mammals)
-change_6_6_df <- as.data.frame(change_6_6_df)
-change_6_6 <- change_6_6_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+try <- data_try3 %>% ggplot(aes(x= mesopelagics, y = other.cephal)) + geom_point() + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno") +
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(text = element_text(size = 16)) 
+try
 
-change_6_7_df <-change_6_overtime_df(seabirds)
-change_6_7_df <- as.data.frame(change_6_7_df)
-change_6_7 <- change_6_7_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+#Has to be a linear association 
+cor.coef <- data_try3 %>%
+summarize(newvar = cor(mesopelagics, other.cephal))
+cor.coef
 
-change_6_8_df <- change_6_overtime_df(pred_fish)
-change_6_8_df <- as.data.frame(change_6_8_df)
-change_6_8 <- change_6_8_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+#Can't do linear model as the observations aren't independent 
+cephOTZ <- c(Cal_bal$Group[1], Cal_bal$Group[15])
+cephOTZ
 
-change_6_9_df <- change_6_overtime_df(forage)
-change_6_9_df <- as.data.frame(change_6_9_df)
-change_6_9 <- change_6_9_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+data_try <- data_5 %>% filter(spp == "mesopelagics", month > 400) %>% rename(mesopelagics= biomass) %>% select(month, mesopelagics)
+data_try
 
-#Mutate data sets to have difference between equilibrium biomass and biomass after depletion
-#Think you need to take away abs value and do 1- value
-#ALSO CONSIDER: Assuming that each individual pair is independent from each other person (in this study it isn't so reconsider) --> doesn't come from SRS 
-change_5_1 <- change_5_1 %>% mutate(diff= (1-value))
+data_try2 <- data_5 %>% filter(spp== "phytoplankton", month > 400) %>% rename(phytoplankton= biomass) %>% select(month, phytoplankton)
+data_try2
 
-change_5_2 <- change_5_2 %>% mutate(diff= abs(value-1))
-change_5_3 <- change_5_3 %>% mutate(diff= abs(value-1))
-change_5_4 <- change_5_4 %>% mutate(diff= abs(value-1))
-change_5_5 <- change_5_5 %>% mutate(diff= abs(value-1))
-change_5_6 <- change_5_6 %>% mutate(diff= abs(value-1))
-change_5_7 <- change_5_7 %>% mutate(diff= abs(value-1))
-change_5_8 <- change_5_8 %>% mutate(diff= abs(value-1))
-change_5_9 <- change_5_9 %>% mutate(diff= abs(value-1))
+data_try3 <- data_try2 %>% left_join(data_try)
+data_try3
 
-change_6_1 <- change_6_1 %>% mutate(diff= abs(value-1))
-change_6_2 <- change_6_2 %>% mutate(diff= abs(value-1))
-change_6_3 <- change_6_3 %>% mutate(diff= abs(value-1))
-change_6_4 <- change_6_4 %>% mutate(diff= abs(value-1))
-change_6_5 <- change_6_5 %>% mutate(diff= abs(value-1))
-change_6_6 <- change_6_6 %>% mutate(diff= abs(value-1))
-change_6_7 <- change_6_7 %>% mutate(diff= abs(value-1))
-change_6_8 <- change_6_8 %>% mutate(diff= abs(value-1))
-change_6_9 <- change_6_9 %>% mutate(diff= abs(value-1))
+try <- data_try3 %>% ggplot(aes(x= mesopelagics, y = phytoplankton)) + geom_point() + 
+theme_bw() + 
+scale_color_viridis(discrete = TRUE, option = "inferno") +
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(text = element_text(size = 16)) 
+try
 
-
-#CORRECTION: NEED THE DIFFERENCE B/W DATA TO BE NORMALLY DISTRIBUTED
-#Shapiro-wilk test to determine if the data is normally distributed
-#Non normally distributed data:
-
-shapiro.test(change_5_1$diff)
-shapiro.test(change_5_2$diff)
-shapiro.test(change_5_3$diff)
-shapiro.test(change_5_4$diff)
-shapiro.test(change_5_5$diff)
-shapiro.test(change_5_8$diff)
-
-shapiro.test(change_6_1$diff)
-shapiro.test(change_6_2$diff)
-shapiro.test(change_6_3$diff)
-shapiro.test(change_6_4$diff)
-shapiro.test(change_6_5$diff)
-shapiro.test(change_6_7$diff)
-shapiro.test(change_6_8$diff)
-
-#Normally distributed data: p > 0.05
-shapiro.test(change_5_6$diff)
-shapiro.test(change_5_7$diff)
-shapiro.test(change_5_9$diff)
-
-shapiro.test(change_6_6$diff)
-shapiro.test(change_6_9$diff)
-
-
-```
-
-#T-test for normally distributed data
-#If p>0.05 you fail to reject null hypothesis (means are not significantly different), HA: true difference in means isn't equal to 0
-```{r}
-#4: diet over 0.05 
-change_5_9
-eq_5_9 <- data.frame("value"= c(1,1,1,1,1,1,1,1,1), "spp"= c("sl", "anchovy", "os", "sardine", "ws", "herring", "saury", "pm", "ms"))
-t.test(change_5_9$value, eq_5_9$value, paired= TRUE, alternative= "two.sided")
+#Has to be a linear association 
+cor.coef <- data_try3 %>%
+summarize(newvar = cor(mesopelagics, phytoplankton))
+cor.coef
 
 ```
 
