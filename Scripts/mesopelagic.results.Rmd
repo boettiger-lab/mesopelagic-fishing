@@ -690,7 +690,7 @@ theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(text = element_text(size = 16)) + labs(colour = "Ecological groups in the California current")
 plot_5_grouped
 
-compare <- c(Cal_bal$Group[1], Cal_bal$Group[7], Cal_bal$Group[18], Cal_bal$Group[21], Cal_bal$Group[42], Cal_bal$Group[42], Cal_bal$Group[15], Cal_bal$Group[47])
+compare <- c(Cal_bal$Group[1], Cal_bal$Group[7], Cal_bal$Group[18], Cal_bal$Group[21], Cal_bal$Group[42], Cal_bal$Group[42], Cal_bal$Group[47])
 compare
 
 plot5_comp <- data_5 %>% filter(spp %in% compare) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
@@ -1252,8 +1252,15 @@ ccfvalues = ccf(phyto, hake, ylab= "Cross-correlation")
 ccfvalues
 
 #Phytoplankton and salmon 
-ccfvalues = ccf(phyto, salmon, ylab= "Cross-correlation")
+ccfvalues <- ccf(phyto, salmon, ylab= "Cross-correlation")
 ccfvalues
+
+max.pmc <- max(ccfvalues$acf)
+max.pmc
+# At what lag?
+ccfvalues$lag[which(ccfvalues$acf > max.pmc-0.01 & ccfvalues$acf < max.pmc+0.01)]
+# Produces the output: [1] -3
+
 
 ```
 
