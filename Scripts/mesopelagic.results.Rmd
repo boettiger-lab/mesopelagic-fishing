@@ -1153,42 +1153,29 @@ data_try2
 data_try3 <- data_try2 %>% left_join(data_try)
 data_try3
 
-try <- data_try3 %>% ggplot(aes(x= mesopelagics, y = other.cephal)) + geom_point() + 
-theme_bw() + 
-scale_color_viridis(discrete = TRUE, option = "inferno") +
-theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(text = element_text(size = 16)) 
-try
+mesopelagics_cross <- ts.intersect(data_try2$other.cephal, data_try$mesopelagics)[ , "data_try$mesopelagics"]
 
-#Has to be a linear association 
-cor.coef <- data_try3 %>%
-summarize(newvar = cor(mesopelagics, other.cephal))
-cor.coef
+meso <- as.Date(data_try$month, format = "%Y-%m-%d")
+meso
+test <- as.numeric(data_try$mesopelagics)
+class(test)
+ugh <- xts(test, meso)
+ugh
+cephal <- as.Date(data_try2$month, format = "%Y-%m-%d")
+cephal
+test2 <- as.numeric(data_try2$other.cephal)
+ugh2 <- xts(test, cephal)
+ugh2
 
-#Can't do linear model as the observations aren't independent 
-cephOTZ <- c(Cal_bal$Group[1], Cal_bal$Group[15])
-cephOTZ
+plot(cbind(ugh, ugh2), yax.flip=TRUE)
 
-data_try <- data_5 %>% filter(spp == "mesopelagics", month > 400) %>% rename(mesopelagics= biomass) %>% select(month, mesopelagics)
-data_try
 
-data_try2 <- data_5 %>% filter(spp== "phytoplankton", month > 400) %>% rename(phytoplankton= biomass) %>% select(month, phytoplankton)
-data_try2
+sunspot.year
 
-data_try3 <- data_try2 %>% left_join(data_try)
-data_try3
+ugh
+ugh2
 
-try <- data_try3 %>% ggplot(aes(x= mesopelagics, y = phytoplankton)) + geom_point() + 
-theme_bw() + 
-scale_color_viridis(discrete = TRUE, option = "inferno") +
-theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(text = element_text(size = 16)) 
-try
-
-#Has to be a linear association 
-cor.coef <- data_try3 %>%
-summarize(newvar = cor(mesopelagics, phytoplankton))
-cor.coef
+try <- ts.intersect(ugh2[,1], ugh[,1])[, "sunspot.year"]
 
 ```
 
