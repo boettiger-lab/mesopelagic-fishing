@@ -15,6 +15,7 @@ library(dplyr)
 library(readxl)
 library(ggplot2)
 library(viridis)
+library(zoo)
 ```
 
 #Start of Koehn's code
@@ -1138,44 +1139,130 @@ plottest
 
 ```
 
-#STATISTICS
+#STATISTICS: Time series with behavior trend 1 
 
 ```{r}
-cephOTZ <- c(Cal_bal$Group[18], Cal_bal$Group[15])
-cephOTZ
+#Define data
+data_anchovies <- data_5 %>% filter(spp == "Anchovy") %>% rename(anchovy= biomass) %>% select(month, anchovy)
+data_anchovies
+anchovies <- as.ts(read.zoo(data_anchovies, FUN = as.yearmon))
+anchovies
 
-data_try <- data_5 %>% filter(spp == "mesopelagics") %>% rename(mesopelagics= biomass) %>% select(month, mesopelagics)
-data_try
+data_cephs <- data_5 %>% filter(spp== "Other cephal.") %>% rename(other.cephal= biomass) %>% select(month, other.cephal)
+data_cephs
+cephalopods <- as.ts(read.zoo(data_cephs, FUN = as.yearmon))
+cephalopods
 
-data_try2 <- data_5 %>% filter(spp== "Other cephal.") %>% rename(other.cephal= biomass) %>% select(month, other.cephal)
-data_try2
+data_euphs <- data_5 %>% filter(spp == "euphausiids") %>% rename(euphausiids= biomass) %>% select(month, euphausiids)
+data_euphs
+euphs <- as.ts(read.zoo(data_euphs, FUN = as.yearmon))
+euphs
 
-data_try3 <- data_try2 %>% left_join(data_try)
-data_try3
+data_hake <- data_5 %>% filter(spp == "Hake") %>% rename(hake= biomass) %>% select(month, hake)
+data_hake
+hake <- as.ts(read.zoo(data_hake, FUN = as.yearmon))
+hake
 
-mesopelagics_cross <- ts.intersect(data_try2$other.cephal, data_try$mesopelagics)[ , "data_try$mesopelagics"]
+data_mesos <- data_5 %>% filter(spp == "mesopelagics") %>% rename(mesopelagics= biomass) %>% select(month, mesopelagics)
+data_mesos
+mesos <- as.ts(read.zoo(data_mesos, FUN = as.yearmon))
+mesos
 
-meso <- as.Date(data_try$month, format = "%Y-%m-%d")
-meso
-test <- as.numeric(data_try$mesopelagics)
-class(test)
-ugh <- xts(test, meso)
-ugh
-cephal <- as.Date(data_try2$month, format = "%Y-%m-%d")
-cephal
-test2 <- as.numeric(data_try2$other.cephal)
-ugh2 <- xts(test, cephal)
-ugh2
+data_phyto <- data_5 %>% filter(spp== "phytoplankton") %>% rename(phytoplankton= biomass) %>% select(month, phytoplankton)
+data_phyto
+phyto <- as.ts(read.zoo(data_phyto, FUN = as.yearmon))
+phyto
 
-plot(cbind(ugh, ugh2), yax.flip=TRUE)
+data_salmon <- data_5 %>% filter(spp == "Salmon") %>% rename(salmon= biomass) %>% select(month, salmon)
+data_salmon
+salmon <- as.ts(read.zoo(data_salmon, FUN = as.yearmon))
+salmon
 
+#Test plot
+plot(cbind(mesos, cephalopods))
 
-sunspot.year
+#MESOPELAGICS
 
-ugh
-ugh2
+#Mesopelagics and anchovies
+ccfvalues = ccf(mesos, anchovies,  ylab= "Cross-correlation")
+ccfvalues
 
-try <- ts.intersect(ugh2[,1], ugh[,1])[, "sunspot.year"]
+#Mesopelagics and cephalopods
+ccfvalues = ccf(mesos, cephalopods, ylab= "Cross-correlation")
+ccfvalues
 
+#Mesopelagics and euphausiids
+ccfvalues = ccf(mesos, euphs, ylab= "Cross-correlation")
+ccfvalues
+
+#Mesopelagics and hake 
+ccfvalues = ccf(mesos, hake,  ylab= "Cross-correlation")
+ccfvalues
+
+#Mesopelagics and phytoplankton 
+ccfvalues = ccf(mesos, phyto,  ylab= "Cross-correlation")
+ccfvalues
+
+#Mesopelagics and salmon
+ccfvalues = ccf(mesos, salmon,  ylab= "Cross-correlation")
+ccfvalues
+
+#EUPHAUSIIDS
+
+#Euphausiids and anchovies
+ccfvalues = ccf(euphs, anchovies,  ylab= "Cross-correlation")
+ccfvalues
+
+#Euphausiids and cephalopods
+ccfvalues = ccf(euphs, cephalopods,  ylab= "Cross-correlation")
+ccfvalues
+
+#Euphasiids and hake 
+ccfvalues= ccf(euphs, hake,  ylab= "Cross-correlation")
+ccfvalues
+
+#Euphausiids and mesopelagics
+ccfvalues = ccf(euphs, meso, ylab= "Cross-correlation")
+ccfvalues
+
+#Euphausiids and phytoplankton 
+ccfvalues= ccf(euphs, hake,  ylab= "Cross-correlation")
+ccfvalues
+
+#Euphasiids and salmon 
+ccfvalues= ccf(euphs, salmon,  ylab= "Cross-correlation")
+ccfvalues
+
+#PHYTOPLANKTON
+
+#Phytoplankton and anchovies
+ccfvalues= ccf(phyto, anchovies, ylab= "Cross-correlation")
+ccfvalues
+
+#Phytoplankton and cephalopods 
+ccfvalues = ccf(phyto, cephalopods, ylab= "Cross-correlation")
+ccfvalues
+
+#Phytoplankton and euphausiids
+ccfvalues = ccf(phyto, euphs, ylab= "Cross-correlation")
+ccfvalues
+
+#Phytoplankton and hake
+ccfvalues = ccf(phyto, hake, ylab= "Cross-correlation")
+ccfvalues
+
+#Phytoplankton and salmon 
+ccfvalues = ccf(phyto, salmon, ylab= "Cross-correlation")
+ccfvalues
+
+```
+
+#Interpretation: horizontal blue lines are the approximate CIs
+#Ts.intersect: Binds several time series together into a single multivariate time series whose time domain is the intersection of the time domains of the component series.
+
+#Statistics: Time series with behavior trend 2
+
+```{r}
+diet proportion stuff!!!
 ```
 
