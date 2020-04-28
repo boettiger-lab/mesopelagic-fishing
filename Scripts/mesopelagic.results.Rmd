@@ -1266,7 +1266,7 @@ ccfvalues$lag[which(ccfvalues$acf > max.pmc-0.01 & ccfvalues$acf < max.pmc+0.01)
 acf(mesos)
 acf(hake)
 acf(cephalopods)
-
+ 
 
 ```
 
@@ -1308,10 +1308,50 @@ signswap<-sign(ccfxy[maxlag]$acf) # we can later swap the sign of a series if
 # maxlag has  a negative coefficient; if so the sign function gives -1.  
 print(signswap)
 
-install.packages("arima.sim")
+install.packages("prewhiten")
 
+acf(mesos)
+acf(cephalopods)
 
+AR <- arima(mesos, order = c(1,0,0))
+print(AR)
 
+ts.plot(mesos)
+AR_fit <- mesos - residuals(AR)
+points(AR_fit, type = "l", col = 2, lty = 2)
+
+MA <- arima(mesos, order = c(0,0,1))
+print(MA)
+
+ts.plot(mesos)
+MA_fit <- mesos - resid(MA)
+points(MA_fit, type = "l", col = 2, lty = 2)
+
+cor(AR_fit, MA_fit)
+
+#New 
+
+x = arima.sim(list(order = c(1,1,0), ar = 0.7), n = 600) #Generates random data from ARIMA(1,1,0). This will generate a new data set for each call.
+z = ts.intersect(x, lag(x,-3), lag(x,-4)) #Creates a matrix z with columns, xt, xt-3, and xt-4
+y = 15+0.8*z[,2]+1.5*z[,3] #Creates y from lags 3 and 4 of randomly generated x
+ccf(z[,1],y,na.action = na.omit) #CCF between x and y
+
+acf(x)
+diff1x=diff(x,1)
+acf(diff1x, na.action = na.omit)
+pacf(diff1x, na.action = na.omit)
+ar1model = arima(x, order = c(1,1,0))
+ar1model
+pwx=ar1model$residuals
+newpwy = filter(y, filter = c(1,-1.7445,.7445), sides =1)
+ccf (pwx,newpwy,na.action=na.omit)
+
+?arima.sim
+
+acfvalues = acf(mesos)
+acfvalues
+
+arima(mesos, order=c(1, 0, 1))
 ```
 
 
