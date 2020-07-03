@@ -1138,6 +1138,17 @@ biomass_decrease_25
 
 ```
 
+#Getting dataset for manuscript
+```{r}
+predators_end <- data_6 %>% filter(spp %in% commercial_predators, month== 600)
+predators_end
+predators_end2 <- data_6 %>% filter(spp %in% noncommerical_predators, month== 600)
+predators_end2
+
+write.csv(predators_end, "commercial.end.csv")
+write.csv(predators_end2, "noncommercial.end.csv")
+
+```
 
 #Model data for grouping functional groups 
 ```{r}
@@ -1194,180 +1205,4 @@ data_salmon
 salmon <- as.ts(read.zoo(data_salmon, FUN = as.yearmon))
 salmon
 
-#Test plot
-plot(cbind(mesos, cephalopods))
-
-#MESOPELAGICS
-
-#Mesopelagics and anchovies
-ccfvalues = ccf(mesos, anchovies,  ylab= "Cross-correlation")
-ccfvalues
-
-#Mesopelagics and cephalopods
-ccfvalues = ccf(mesos, cephalopods, ylab= "Cross-correlation")
-ccfvalues
-
-#Mesopelagics and euphausiids
-ccfvalues = ccf(mesos, euphs, ylab= "Cross-correlation")
-ccfvalues
-
-#Mesopelagics and hake 
-ccfvalues = ccf(mesos, hake,  ylab= "Cross-correlation")
-ccfvalues
-
-#Mesopelagics and phytoplankton 
-ccfvalues = ccf(mesos, phyto,  ylab= "Cross-correlation")
-ccfvalues
-
-#Mesopelagics and salmon
-ccfvalues = ccf(mesos, salmon,  ylab= "Cross-correlation")
-ccfvalues
-
-#EUPHAUSIIDS
-
-#Euphausiids and anchovies
-ccfvalues = ccf(euphs, anchovies,  ylab= "Cross-correlation")
-ccfvalues
-
-#Euphausiids and cephalopods
-ccfvalues = ccf(euphs, cephalopods,  ylab= "Cross-correlation")
-ccfvalues
-
-#Euphasiids and hake 
-ccfvalues= ccf(euphs, hake,  ylab= "Cross-correlation")
-ccfvalues
-
-#Euphausiids and mesopelagics
-ccfvalues = ccf(euphs, meso, ylab= "Cross-correlation")
-ccfvalues
-
-#Euphausiids and phytoplankton 
-ccfvalues= ccf(euphs, hake,  ylab= "Cross-correlation")
-ccfvalues
-
-#Euphasiids and salmon 
-ccfvalues= ccf(euphs, salmon,  ylab= "Cross-correlation")
-ccfvalues
-
-#PHYTOPLANKTON
-
-#Phytoplankton and anchovies
-ccfvalues= ccf(phyto, anchovies, ylab= "Cross-correlation")
-ccfvalues
-
-#Phytoplankton and cephalopods 
-ccfvalues = ccf(phyto, cephalopods, ylab= "Cross-correlation")
-ccfvalues
-
-#Phytoplankton and euphausiids
-ccfvalues = ccf(phyto, euphs, ylab= "Cross-correlation")
-ccfvalues
-
-#Phytoplankton and hake
-ccfvalues = ccf(phyto, hake, ylab= "Cross-correlation")
-ccfvalues
-
-#Phytoplankton and salmon 
-ccfvalues <- ccf(phyto, salmon, ylab= "Cross-correlation")
-ccfvalues
-
-max.pmc <- max(ccfvalues$acf)
-max.pmc
-# At what lag?
-ccfvalues$lag[which(ccfvalues$acf > max.pmc-0.01 & ccfvalues$acf < max.pmc+0.01)]
-# Produces the output: [1] -3
-
-
-#Very high autocorrelation
-acf(mesos)
-acf(hake)
-acf(cephalopods)
- 
-
 ```
-
-#Interpretation: horizontal blue lines are the approximate CIs
-#Ts.intersect: Binds several time series together into a single multivariate time series whose time domain is the intersection of the time domains of the component series.
-
-
-```{r}
-library(lmtest) #  this provides the grangertest
-library(TSA) #  This provides the pre-whiten function, and one form of simple 
-# access to the fitted model series.
-library(tseries) #  provides the kpss.test of stationarity 
-
-
-# plot both series without time shift.
-ccfxy=ccf(mesos, cephalopods, plot=F,lag.max=30)
-maxlag<-ccfxy$lag[abs(ccfxy$acf)==max(abs(ccfxy$acf))]
-print(maxlag)
-signswap<-sign(ccfxy[maxlag]$acf) # we can later swap the sign of a series if 
-# maxlag has  a negative coefficient; if so the sign function gives -1.  
-print(signswap)
-
-N<-600
-phi <- 0.90
-x <- arima.sim(n = N, list(ar = c(phi)),sd = 1)
-y <- arima.sim(n = N, list(ar = c(phi)),sd = 1)
-
-pdf("Figure1.pdf")
-par(mfrow=c(2,1))
-xylimit<-max(abs(c(x,y)))
-ts.plot(x,ylim=c(-xylimit,xylimit),ylab="",main="(a) Two independent autoregressions")
-lines(y,col="red")
-abline(h=0)
-
-ccfxy=ccf(x,y, plot=F,lag.max=30)
-maxlag<-ccfxy$lag[abs(ccfxy$acf)==max(abs(ccfxy$acf))]
-print(maxlag)
-signswap<-sign(ccfxy[maxlag]$acf) # we can later swap the sign of a series if 
-# maxlag has  a negative coefficient; if so the sign function gives -1.  
-print(signswap)
-
-install.packages("prewhiten")
-
-acf(mesos)
-acf(cephalopods)
-
-AR <- arima(mesos, order = c(1,0,0))
-print(AR)
-
-ts.plot(mesos)
-AR_fit <- mesos - residuals(AR)
-points(AR_fit, type = "l", col = 2, lty = 2)
-
-MA <- arima(mesos, order = c(0,0,1))
-print(MA)
-
-ts.plot(mesos)
-MA_fit <- mesos - resid(MA)
-points(MA_fit, type = "l", col = 2, lty = 2)
-
-cor(AR_fit, MA_fit)
-
-#New 
-
-x = arima.sim(list(order = c(1,1,0), ar = 0.7), n = 600) #Generates random data from ARIMA(1,1,0). This will generate a new data set for each call.
-z = ts.intersect(x, lag(x,-3), lag(x,-4)) #Creates a matrix z with columns, xt, xt-3, and xt-4
-y = 15+0.8*z[,2]+1.5*z[,3] #Creates y from lags 3 and 4 of randomly generated x
-ccf(z[,1],y,na.action = na.omit) #CCF between x and y
-
-acf(x)
-diff1x=diff(x,1)
-acf(diff1x, na.action = na.omit)
-pacf(diff1x, na.action = na.omit)
-ar1model = arima(x, order = c(1,1,0))
-ar1model
-pwx=ar1model$residuals
-newpwy = filter(y, filter = c(1,-1.7445,.7445), sides =1)
-ccf (pwx,newpwy,na.action=na.omit)
-
-?arima.sim
-
-acfvalues = acf(mesos)
-acfvalues
-
-arima(mesos, order=c(1, 0, 1))
-```
-
-
