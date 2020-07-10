@@ -11,10 +11,10 @@ library(ggplot2)
 library(goft)
 ```
 
-#Import data on price from 2007-2016 for commercially valuable predators 
+#Import data on price from 2007-2016 for commercially valuable predators and WTP values 
 ```{r}
 at_sea_price <- read_excel("../Data/at.sea.price.xlsx")
-
+X37_WTP_values <- read_excel("../Data/37.WTP.values.xlsx")
 ```
 
 #Vectors for commercially valuable predators
@@ -109,7 +109,6 @@ curve(dnorm(x, mean= 0.03323484,sd= 0.003378979), lwd= 2, add=T, col="red")
 #Lognormal Distribution for Non-commercial values 
 ```{r}
 #Check to see if lognormal should be used: often used when values are positively skewed. This is another one to double check 
-X37_WTP_values <- read_excel("~/Documents/WHOI/Excel/37.WTP.values.xlsx")
 WTP.2016.1 <- X37_WTP_values$WTP.2016
 WTP.2016 <- as.data.frame(WTP.2016.1) #Create data frame of WTP values after the discount rate is applied 
 WTP.ln1 <- X37_WTP_values$LN
