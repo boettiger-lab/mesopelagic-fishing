@@ -1,0 +1,173 @@
+---
+title: "Final.code.monte.r"
+output: html_document
+---
+#The normality tests to check over are marked by section #1 and #2
+#Load required packages 
+```{r}
+library(dplyr)
+library(readxl)
+library(ggplot2)
+library(goft)
+```
+
+#Import data on price from 2007-2016 for commercially valuable predators 
+```{r}
+at_sea_price <- read_excel("~/Documents/WHOI/Excel/at.sea.price.xlsx")
+```
+
+#Vectors for commercially valuable predators
+```{r}
+#COMMERCIAL 
+#make a vector for mean, stdev, "a" and "b", share of biomass 
+mean.vec <- at_sea_price$mean
+mean.vec
+stdev.vec <- at_sea_price$stdev
+stdev.vec
+b.vec <- at_sea_price$b
+b.vec
+a.vec <- at_sea_price$a
+a.vec
+biomass.share.vec <- at_sea_price$biomass.share
+biomass.share.vec
+
+```
+
+#1: 
+#Generating 10,000 variations for price for commercially valuable predators 
+```{r}
+#Checking for normality for the price for commercially valuable predators from 2007-2016 (at_sea_price$mean): This is the one we were talking about!!! 
+shapiro.test(mean.vec)
+test <- as.data.frame(mean.vec)
+qqplot <- ggplot(test, aes(sample = mean.vec)) + stat_qq() + stat_qq_line() +
+theme_minimal(base_size = 15)
+histogram <- ggplot(test, aes(x= mean.vec)) + geom_histogram()
+histogram
+
+#Generate vectors with rnorms for all groups, Assuming that price is normally distributed (not biomass)
+ceph <- rnorm(10000, mean = mean.vec[1], sd = stdev.vec[1])
+ceph
+yellowtail <- rnorm(10000, mean = mean.vec[2], sd = stdev.vec[2])
+yellowtail
+greenstriped <- rnorm(10000, mean = mean.vec[3], sd = stdev.vec[3])
+greenstriped
+shelf <- rnorm(10000, mean = mean.vec[4], sd = stdev.vec[4])
+shelf 
+hake <- rnorm(10000, mean = mean.vec[5], sd = stdev.vec[5])
+hake
+lingcod <- rnorm(10000, mean = mean.vec[6], sd = stdev.vec[6])
+lingcod
+arrowtooth <- rnorm(10000, mean = mean.vec[7], sd = stdev.vec[7])
+arrowtooth
+sablefish <- rnorm(10000, mean = mean.vec[8], sd = stdev.vec[8])
+sablefish
+albacore <- rnorm(10000, mean = mean.vec[9], sd = stdev.vec[9])
+albacore
+salmon <- rnorm(10000, mean = mean.vec[10], sd = stdev.vec[10])
+salmon
+grenadiers <- rnorm(10000, mean = mean.vec[11], sd = stdev.vec[11])
+grenadiers
+canary <- rnorm(10000, mean = mean.vec[12], sd = stdev.vec[12])
+canary
+perch <- rnorm(10000, mean = mean.vec[13], sd = stdev.vec[13])
+perch
+widow <- rnorm(10000, mean = mean.vec[14], sd = stdev.vec[14])
+widow
+splitnose <- rnorm(10000, mean = mean.vec[15], sd = stdev.vec[15])
+splitnose
+slope <- rnorm(10000, mean = mean.vec[16], sd = stdev.vec[16])
+slope
+shortspine <- rnorm(10000, mean = mean.vec[17], sd = stdev.vec[17])
+shortspine
+longspine <- rnorm(10000, mean = mean.vec[18], sd = stdev.vec[18])
+longspine
+skates <- rnorm(10000, mean = mean.vec[19], sd = stdev.vec[19])
+skates
+sharks <- rnorm(10000, mean = mean.vec[20], sd = stdev.vec[20])
+sharks 
+```
+
+#Creating vector including all Monte Carlo runs for commercially valuable predators 
+```{r}
+price.add <- (ceph*b.vec[1]*a.vec[1]*biomass.share.vec[1]) + (yellowtail*b.vec[2]*a.vec[2]) + (greenstriped*b.vec[3]*a.vec[3]) + (shelf*b.vec[4]*a.vec[4]) + (hake*b.vec[5]*a.vec[5]) + (lingcod*b.vec[6]*a.vec[6]) + (arrowtooth*b.vec[7]*a.vec[7]) + 
+  (sablefish*b.vec[8]*a.vec[8]) + (albacore*b.vec[9]*a.vec[9]) + (salmon*b.vec[10]*a.vec[10]) + (grenadiers*b.vec[11]*a.vec[11]) + (canary*b.vec[12]*a.vec[12]) + (perch*b.vec[13]*a.vec[13]) + (widow*b.vec[14]*a.vec[14]) + (splitnose*b.vec[15]*a.vec[15]) + (slope*b.vec[16]*a.vec[16]*biomass.share.vec[16]) + 
+  (shortspine*b.vec[17]*a.vec[17]) + (longspine*b.vec[18]*a.vec[18]) + (skates*b.vec[19]*a.vec[19]*biomass.share.vec[19]) + (sharks*b.vec[20]*a.vec[20]*biomass.share.vec[20]) 
+price.add
+```
+
+#Monte Carlo graph for just commercially valuable predators 
+```{r}
+hist(price.add, breaks=15, col= "gray", freq= FALSE, xlab= "Commercial value of predators ($/lb)", main=NULL)
+mean(price.add)
+sd(price.add)
+abline(v=0.67, lwd= 2, col="blue")
+curve(dnorm(x, mean= 0.03323484,sd= 0.003378979), lwd= 2, add=T, col="red")
+```
+
+#2: 
+#Lognormal Distribution for Non-commercial values 
+```{r}
+#Check to see if lognormal should be used: often used when values are positively skewed. This is another one to double check 
+X37_WTP_values <- read_excel("~/Documents/WHOI/Excel/37.WTP.values.xlsx")
+WTP.2016.1 <- X37_WTP_values$WTP.2016
+WTP.2016 <- as.data.frame(WTP.2016.1) #Create data frame of WTP values after the discount rate is applied 
+WTP.ln1 <- X37_WTP_values$LN
+WTP.ln <- as.data.frame(WTP.ln) #Naturally logged values of WTP 
+WTP.log <-  X37_WTP_values$LOG #Log 10 values of WTP 
+
+qqplot <- ggplot(WTP.2016, aes(sample = WTP.2016)) + stat_qq() + stat_qq_line() +
+theme_minimal(base_size = 15)
+
+#Test for normality of 37 logged WTP values 
+shapiro.test(WTP.log)
+shapiro.test(WTP.ln1)
+lnorm_test(WTP.2016.1)
+
+#lognormal
+lognormal <- function(mean, CV) {
+  meanlog <- log(mean)-((CV^2)/2)  # mu = log(E[X]) - (sigma^2)/2
+  return(meanlog)
+}
+lognormal(66.51297297, 0.64481172) #Input the mean and standard deviation from the 37 WTP values
+lognormal
+```
+
+#Noncommercially valuable predators
+```{r}
+noncom <- 0.039582
+
+#Monte carlo for the critical value, v. Discount rate applied to the 37 willingness-to-pay values. Calculated mean and choose standard deviation? 
+nu <- rlnorm(10000, 3.989506, 0.64481172)
+nu
+
+#v * noncommercial value 
+add.nu.real <- nu*noncom
+add.nu.real
+```
+
+#Forage value of mesopelagic fish: add commercial and non-commercial
+```{r}
+forage.value <- price.add + add.nu.real
+hist(forage.value, breaks=15, col= "gray", freq= FALSE, xlab= "Forage value of mesopelagic fish ($/lb)", main=NULL, xlim= c(0,20))
+mean(forage.value)
+sd(forage.value)
+abline(v=0.67, lwd= 2, col="blue")
+curve(dnorm(x, mean= 2.672541,sd= 1.88352), lwd= 2, add=T, col="red")
+legend(x= 8.3, y= 0.22, c("Density curve", "Value of mesopelagic fish ($/lb)"), bty="n", bg= "green",
+       col = c("red", "blue"), lwd= c(2,2), cex=0.9,
+       box.lty=0)
+```
+
+```{r}
+#axis for historgarm
+axis(side=1, at= seq(0.5, 2.5, 0.5))
+# Monte Carlo, generating random variables
+random.normal <- rnorm(100, mean = 1.099794877, sd = 0.179567501)
+random.normal 
+#sampling original populaiton, replicate function: repeats function call n times (1st n)
+#repeate experiemtn n times, new sets of random draws
+random.normal.100.rep <- replicate(n=100, rnorm(100, 1.099794877, 0.179567501))
+random.normal.100.rep
+
+```
+
