@@ -154,6 +154,18 @@ end_biomass
 
 ```
 
+#Rsim mortality function 
+```{r}
+rsim.mort <- function(rout,prey){
+  pmat <-  rout$annual_Qlink[,rout$prey==prey]
+  colnames(pmat) <- rout$pred[rout$prey==prey]
+  return(pmat)
+}  
+
+#Gives mortality of mesopelagics that is caused by all of its predators
+rsim.mort(run3, "mesopelagics")
+```
+
 #100% DEPLETION LEVEL
 # After the year 2000, run each year separately, setting each year's target
 ```{r}
