@@ -109,6 +109,21 @@ identical(scene0, scene1)
 temp= frate.table(scene0)
 temp
 
+#Find initial predation mortality 
+rsim.mort <- function(rout,prey){
+  pmat <-  rout$annual_Qlink[,rout$prey==prey]
+  colnames(pmat) <- rout$pred[rout$prey==prey]
+  return(pmat)
+}  
+
+#Rsim.mort
+total2 <- as.data.frame(rsim.mort(run0, "mesopelagics"))
+total2
+
+diet.2001 <- total2[1 ,]
+diet.2001 %>% summarize(sum= sum(diet.2001))
+diet.2050 <- total2[50, ]
+diet.2050 %>% summarize(sum = sum(diet.2050))
 ```
 
 # Manipulating fishing rates: different scenarios, DELETE???!
@@ -152,18 +167,6 @@ end_biomass
 #run2   <- rsim.run(scene2, method='AB', years=yearlist)
 #rsim.plot(run2,all_species) 
 
-```
-
-#Rsim mortality function 
-```{r}
-rsim.mort <- function(rout,prey){
-  pmat <-  rout$annual_Qlink[,rout$prey==prey]
-  colnames(pmat) <- rout$pred[rout$prey==prey]
-  return(pmat)
-}  
-
-#Gives mortality of mesopelagics that is caused by all of its predators
-rsim.mort(run3, "mesopelagics")
 ```
 
 #100% DEPLETION LEVEL
@@ -831,6 +834,32 @@ assessment
   run6 <- rsim.step(scene6, run6, method='AB', year.end=yr) 
 }  
 rsim.plot(run6,all_species)  
+```
+
+#Rsim mortality function
+```{r}
+#Rsim mort will tell you for mesopelagics what the mortality is caused by all other groups (predation mortality), predation mortality rate
+rsim.mort <- function(rout,prey){
+  pmat <-  rout$annual_Qlink[,rout$prey==prey]
+  colnames(pmat) <- rout$pred[rout$prey==prey]
+  return(pmat)
+}  
+
+#Rsim.mort
+total <- as.data.frame(rsim.mort(run6, "mesopelagics"))
+total
+
+#Sum amount of mesopelagic biomass that each group is eating
+diet.2001 <- total[1 ,]
+diet.2001 %>% summarize(sum= sum(diet.2001))
+diet.2050 <- total[50, ]
+try <- diet.2050 %>% summarize(sum = sum(diet.2050))
+
+3.248127/(42*0.4847366)
+
+#Rsim.diet: gives you predicted diet of a predator 
+rsim.diet(run6, "mesopelagics")
+
 ```
 
 #Changing data set so we can change plotting
