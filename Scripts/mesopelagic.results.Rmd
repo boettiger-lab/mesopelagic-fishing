@@ -153,7 +153,6 @@ scene_0.25 <- adjust.fishing(scene1, "FRATE", "mesopelagics", yearlist, value= 0
 run_0.25 <- rsim.run(scene_0.25, method='AB', years=yearlist)
 rsim.plot(run_0.25,all_species) 
 run_0.25
-
 ```
 
 # Fish down and recovery scenario, fish for 25 years and stop and look at how popualtion recovers
@@ -958,8 +957,6 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
 ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.predfish.25.jpeg")
 plot6_9
 
-
-
 plot6_10 <- data_6 %>% filter(spp %in% high.price) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 theme_bw() + 
 scale_color_viridis(discrete = TRUE, option = "inferno")+
@@ -1181,14 +1178,19 @@ biomass_decrease_25
 
 #Getting dataset for manuscript
 ```{r}
+#Biomass at the end of the simulation 
 predators_end <- data_6 %>% filter(spp %in% commercial_predators, month== 600)
 predators_end
+
 predators_end2 <- data_6 %>% filter(spp %in% noncommerical_predators, month== 600)
 predators_end2
 
-write.csv(predators_end, "commercial.end.csv")
-write.csv(predators_end2, "noncommercial.end.csv")
+predators_end3 <- data_6 %>% filter(spp %in% predators_mesopelagic, month == 600)
+predators_end3
 
+write.csv(predators_end, "/Users/SallyDowd/Documents/commercial.end.csv")
+write.csv(predators_end2, "/Users/SallyDowd/Documents/noncommercial.end.csv")
+write.csv(predators_end3, "/Users/SallyDowd/Documents/predators.end.csv")
 ```
 
 #Model data for grouping functional groups 
