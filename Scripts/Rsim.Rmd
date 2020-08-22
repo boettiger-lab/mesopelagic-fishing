@@ -194,7 +194,8 @@ effort of the trawler fleet after 25 years using the `adjust.fishing` function.
 
 ```{r Change effort}
 REco.sim <- adjust.fishing(REco.sim, 'EFFORT', group = 'Trawlers', sim.year = 25:100, 
-                           value = 2) #In the new version of Rpath (uploaded to NOAA github, it is 'ForcedEffort' instead of just effort)
+                           value = 2) 
+#In the new version of Rpath (uploaded to NOAA github, it is 'ForcedEffort' instead of just effort)
 ```
 
 The final part is to apply the modified Rsim.scenario function to the `rsim.run`
@@ -205,7 +206,10 @@ Older versions of EwE use the Adams-Bashforth method while the latest version (6
 uses Runge-Kutta (The default method for Rpath).
 
 ```{r rsim.run}
-REco.run1 <- rsim.run(REco.sim, method = 'AB', years = 1:100) #Also in new Rpath the method used is 'RK4' instead of 'AB'
+REco.run1 <- rsim.run(REco.sim, method = 'AB', years = 1:100) 
+
+#Also in new Rpath the method used is 'RK4' instead of 'AB', only applying this to rsim.run after adjusting fishing effort though (wouldn't be for a base scenario situation)
+#When ran the base scenario with RK4 the relative biomass was no longer 1 for all of the groups 
 ```
 
 The output from `rsim.run` is another S3 object class called 'Rsim.output'.  Similar
