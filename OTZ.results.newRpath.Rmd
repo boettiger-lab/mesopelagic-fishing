@@ -1,0 +1,189 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+
+```{r}
+library(tidyverse)
+library(data.table)
+library(viridisLite)
+library(dplyr)
+library(readxl)
+library(ggplot2)
+```
+
+#Start of Koehn's code
+```{r}
+#Rpath uses a parameter object created by create.rpath.params to conduct the mass balance of the system
+library(Rpath)
+
+Cbase <- "../Data/Groupinfo_CalCur-USE.csv"  # Base biomass, production, fishing, etc.
+Cdiet <- "../Data/Diet_CalCur_USE.csv"  # Diet matrix
+```
+
+
+```{r}
+# Load unbalanced Ecopath model from csv files 
+#Created parameter files outside of R and read in using read.rpath.params function. This merges several different flat files into an R object of the list type. The function create.rpath.params will generate an Rpath.param. This ensures that all of the correct columns are present in the parameter file. 
+CalCur_unbal <- read.rpath.params(Cbase, Cdiet)
+check.rpath.params(CalCur_unbal)
+```
+
+# Running Ecopath in R: balanced an unbalanced Ecopath object
+```{r}
+#Balance the scenario using rpath function 
+Cal_bal <- rpath(CalCur_unbal) 
+Cal_bal
+
+#Combine two data frames into a single data frame 
+cbind(Cal_bal$Group, Cal_bal$EE)
+cbind(Cal_bal$Group, Cal_bal$TL) 
+
+#webplot: way to make a basic food web plot. Can add many different arguments to change preferences. 
+webplot(Cal_bal, eco.name = "California Current",
+        labels = TRUE)
+```
+
+# List of species for plotting
+```{r}
+#Koehn's defined functional groups 
+all_species <- Cal_bal$Group[1:92] 
+mammals <- Cal_bal$Group[71:85] 
+seabirds <- c(Cal_bal$Group[60:70], Cal_bal$Group[86:92])
+pred_fish  <- Cal_bal$Group[33:59] 
+
+#My customized defined functional groups 
+
+#Plankton
+Plankton <- c(Cal_bal$Group[1], Cal_bal$Group[5:10])
+#Forage fish 
+forage <- Cal_bal$Group[19:27]
+
+#All predators of mesopelagic fish 
+predators_mesopelagic <- c(Cal_bal$Group[15], Cal_bal$Group[18], Cal_bal$Group[28:29], Cal_bal$Group[33], Cal_bal$Group[37:38], Cal_bal$Group[42:48], Cal_bal$Group[50:56], Cal_bal$Group[58:60], Cal_bal$Group[63], Cal_bal$Group[65:67], Cal_bal$Group[69:70], Cal_bal$Group[72:73], Cal_bal$Group[76:80], Cal_bal$Group[82], Cal_bal$Group[85:88])
+predators_mesopelagic
+
+#Commercially valuable predators of mesopelagic fish
+commercial_predators <- c(Cal_bal$Group[18], Cal_bal$Group[33], Cal_bal$Group[37:38], Cal_bal$Group[42:48], Cal_bal$Group[50:56], Cal_bal$Group[58:59])
+commercial_predators
+
+#Noncommercially valuable predators of mesopelagic fish
+noncommerical_predators <- c(Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[33], Cal_bal$Group[37:38], Cal_bal$Group[43:47], Cal_bal$Group[50:56], Cal_bal$Group[58:60], Cal_bal$Group[63], Cal_bal$Group[65:67], Cal_bal$Group[69:70], Cal_bal$Group[72:73], Cal_bal$Group[76:80], Cal_bal$Group[82], Cal_bal$Group[85:88])
+noncommerical_predators
+
+#Diet proportion of mesopelagic fish less than 0.05
+diet_under_0.05 <- c(Cal_bal$Group[15], Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[37], Cal_bal$Group[43:47], Cal_bal$Group[50], Cal_bal$Group[52:53], Cal_bal$Group[55], Cal_bal$Group[58:59], Cal_bal$Group[60], Cal_bal$Group[65:67], Cal_bal$Group[69],Cal_bal$Group[72:73], Cal_bal$Group[77:80], Cal_bal$Group[82], Cal_bal$Group[86:88])
+diet_under_0.05
+
+#Diet proportion of mesopelagic fish equal to or greater than 0.05
+diet_over_0.05 <- c(Cal_bal$Group[29], Cal_bal$Group[33], Cal_bal$Group[38], Cal_bal$Group[42], Cal_bal$Group[48], Cal_bal$Group[51], Cal_bal$Group[54], Cal_bal$Group[56], Cal_bal$Group[63], Cal_bal$Group[70], Cal_bal$Group[76], Cal_bal$Group[85])
+diet_over_0.05
+
+#Highest diet proportion 
+highest_diet <- c(Cal_bal$Group[70], Cal_bal$Group[56], Cal_bal$Group[12])
+
+#Predators of mesopelagic fish with annual economic value over $1/lb 
+high.price <- c(Cal_bal$Group[47], Cal_bal$Group[45], Cal_bal$Group[38], Cal_bal$Group[55], Cal_bal$Group[46], Cal_bal$Group[43])
+high.price
+```
+
+#Base scenario 
+```{r}
+yearlist = 2001:2050
+
+base_sim_scene <- rsim.scenario(Cal_bal, CalCur_unbal, years = yearlist)
+scene0 <- base_sim_scene
+run0 <- rsim.run(scene0, method='AB', years=yearlist) 
+rsim.plot(run0,all_species)
+
+#Scene0 and scene1 are identical, Koehn just redefined it like this so we will too
+scene1 <- base_sim_scene
+identical(scene0, scene1)
+
+temp= frate.table(scene0)
+temp
+```
+
+
+# Fish down and recovery scenario, fish for 25 years and stop and look at how popualtion recovers
+```{r}
+# helper function to look up the ending biomass of a scenario
+end_biomass <- function(rsim){return(rsim$out_Biomass[dim(rsim$out_Biomass)[1], 2:(dim(rsim$out_Biomass)[2])])}
+end_biomass
+```
+
+#DEPLETION LEVEL OF 25%
+```{r}
+target_sp <- "mesopelagics"
+target_F <- 0.25
+names(target_F) <- target_sp 
+
+library(data.table)
+scene6 <- copy(base_sim_scene)
+run6 <- rsim.run(scene6, method = 'AB', years=2001)
+for (yr in 2002:2050){
+  # stock assessment based on current biomass * error
+  # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
+assessment <- end_biomass(run6)[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
+assessment
+  # convert target F * assessment to a total catch 
+  catches <- target_F * assessment
+  # apply each catch to each species
+  for (sp in target_sp){
+    scene6 <- adjust.fishing(scene6, "ForcedCatch", sp, yr, value=catches[sp])
+  }
+  # run 1 year
+  run6 <- rsim.step(scene6, run6, method = 'AB', year.end=yr)  #Says in Rsim document on NOAA github that older versions of Ecosim use AB and new versions use 'RK4', default for Rpath is RK4 but we aren't using it??
+}  
+rsim.plot(run6,all_species)  
+```
+
+#Changing data set so we can change plotting
+```{r}
+rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
+  opar <- par(no.readonly = T)
+  if(indplot == F){
+    biomass <- Rsim.output$out_Biomass[, 2:ncol(Rsim.output$out_Biomass)]
+    n <- ncol(biomass)
+    start.bio <- biomass[1, ]
+    start.bio[which(start.bio == 0)] <- 1
+    rel.bio <- matrix(NA, dim(biomass)[1], dim(biomass)[2])
+    for(isp in 1:n) rel.bio[, isp] <- biomass[, isp] / start.bio[isp]
+  }
+  rel.bio
+} 
+
+names_spp<- run6$params$spname[2:94]
+
+#Need to make z into data frame, before was matrix, names is for data frame not matrix
+#Ways to do this in tidy verse but this is quick fix
+z_6 <-rsim.plot.fun(run6)
+z_6<-as.data.frame(z_6)
+names(z_6) <- names_spp
+z_6$month <- 1:600
+
+
+data_6 <- gather(z_6, key = spp, value = biomass, -month )
+
+plot6_1 <- data_6 %>% filter(spp %in% commercial_predators) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour= "Commercially valuable predators") + theme(text = element_text(size = 16)) + ggsave(width = 9, height = 6, "~/Documents/Thesis/Images/25/plot.commercial.25.jpeg")
+plot6_1
+
+```
+
+
+#Running simple stats on all depletion levels
+```{r}
+#Analzying if biomass of functional groups increases or decreases (as measured by last month)
+
+biomass_increase_25 <- data_6 %>% filter(month==600, biomass >1) %>% mutate(difference = abs(1-biomass), percent = abs(1-biomass)*100)
+biomass_increase_25
+
+biomass_decrease_25 <- data_6 %>% filter(month==600, biomass < 1) %>% mutate(difference= (1-biomass), percent= (1-biomass)*100)
+biomass_decrease_25
+
+```
+
