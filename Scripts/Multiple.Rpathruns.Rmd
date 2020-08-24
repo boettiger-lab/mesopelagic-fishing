@@ -1,0 +1,61 @@
+---
+title: "100 Rsim runs"
+output: html_document
+---
+
+```{r}
+datasets <- "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/500BaseParameters"
+```
+
+
+#Assign sets a number
+```{r}
+datasets <- "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/500BaseParameters"
+
+read_function <- function(x) { #close but need to put in different function that doesn't just read in data
+  import_path <- str_c("/Users/SallyDowd/Documents/OTZ.manuscript/Excel/500BaseParameters", (x), ".csv")
+  read_csv(file = import_path)
+}
+
+df_list <- lapply(datasets, read_csv) #lapply loops through each file in datasets and passes it to specified function
+
+assign_function <- function(x) {
+  dataset_name <- str_c("/Users/SallyDowd/Documents/OTZ.manuscript/Excel/500BaseParameters", (x))
+  assign(datasets, df_list[[(x)]], inherits = TRUE)
+}
+
+lapply(1:500, assign_function)
+
+
+
+```
+
+```{r}
+Files <- list.files(pattern="\\.csv$")
+File.name <- gsub("\\.csv$", "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/500BaseParameters", Files)
+for (i in 1:500:length(Files)){
+  assign(File.name[i], 
+         read.csv(Files[i], 
+                  sep = ";", 
+                  header = T))
+
+length(Files)
+}
+
+
+Files <- list.files(pattern="\\.csv$")
+File.name <- gsub("\\.csv$", "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/500BaseParameters", Files)
+for (i in 1:500:length(Files)){
+  assign(File.name[i], 1:500)
+
+
+}
+
+```
+
+```{r}
+#Select 100 of the sets 
+round(runif(n = 100, min = 1, max = 500))
+```
+
+
