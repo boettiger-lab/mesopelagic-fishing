@@ -14,10 +14,26 @@ diet_list <-list.files(path = "../Data/DietMatrices/",
 Cbase_list <- list()
 Cdiet_list <- list()
 
+groups <- GroupInfo_CalCur_USE %>%
+  select(Group, Type, Unassim, BioAcc, ProdCons, DetInput, DetritusFate, Fleet1_Landings, Fleet_1Discards) %>%
+  mutate(X = 1:94)
+
+groups2 <- Diet_CalCur_USE %>% select(DIETS) %>% mutate(X= 1:94)
+
+group_vector<- groups2$DIETS[1:92]
+group_vector <- c("DIETS", group_vector)
+
 for (i in 1:500) {
-  Cbase_list[[i]] <- read.csv(base_list[i])
-  Cdiet_list[[i]] <- read.csv(diet_list[i])
+  Cbase_list[[i]] <- read.csv(base_list[i]) %>%
+    rename(Biomass = "V1", PB = "V2", QB = "V3", EE = "V4", Yield = "V5") %>%
+    left_join(groups, by = "X")
+    select(-X) %>% relocate(Group)
+
+Cdiet_list[[i]] <- read.csv(diet_list[i]) %>% left_join(groups2, by = "X") %>% select(-X) %>% relocate(DIETS) 
 }
+
+Cbase_list[[1]]
+
 ```
 
 ```{r}
