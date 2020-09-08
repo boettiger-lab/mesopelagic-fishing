@@ -58,7 +58,6 @@ colnames(Cbase_list[[i]])
  #Cbase_list[[1]]
  
 
-
 #Cdiet_list[[i]] <- read.csv(diet_list[i]) %>% left_join(groups2, by = "X") %>% select(-X) %>% relocate(DIETS) 
 #Cbase_list[[1]]
 
