@@ -30,16 +30,14 @@ Fleet1 <- GroupInfo_CalCur_USE[94, ] %>% select(Biomass, EE, PB, QB, Fleet1_Land
 groups2 <- Diet_CalCur_USE %>% select(DIETS) %>% mutate(X= 1:94)
 
 #Rename columns in diet file
-#group_vector <- groups2$DIETS[1:92]
-#group_vector <- c("DIETS", group_vector)
-#group_vector
+group_vector <- groups2$DIETS[1:92]
+group_vector <- as.data.frame(c("DIETS", group_vector))
+group_vector
 
-#test <- read_csv("../Data/DietMatrices/diet100227.csv")
-#colnames(test)
-#test_vector <- as.data.frame(test)
-#test_vector <- test$X1[1:92]
+test <- read_csv("../Data/DietMatrices/diet100227.csv")
+test_vector <- colnames(test)[1:93]
 
-#Loop to add columns rename columns, add columns onto dataset, bind fleet1 to X position 94
+#First loop for group: rename columns, add Fleet 1 row (assigned position X=94), add new parameters (columns) onto dataset, redu column order
 for (i in 1:500) {
  Cbase_list[[i]] <- read.csv(base_list[i]) %>% 
     rename(Biomass = "V1", PB = "V2", QB = "V3", EE = "V4", Fleet1_Landings = "V5")
@@ -48,18 +46,26 @@ col_order <- c("Group", "Biomass", "EE", "PB", "QB", "Type", "Unassim", "BioAcc"
 Cbase_list[[i]] <- Cbase_list[[i]][, col_order]
 }
 
-Cbase_list[[3]]
 
-colnames(Cbase_list[[i]])
-   #for (i in 1:500) {
- #Cbase_list[[i]] <- rbind(fleet1, Cbase_list[[i]]) %>% left_join(groups, by = "X") %>% select(-X) %>% relocate(Group)
+#Diet matrices: #REMOVE IMPORT ROW??? ROW 94 (V93) IN TEST DATA
+for (i in 1:500) {
+Cdiet_list[[i]] <- read.csv(diet_list[i]) %>% select(-V93)
 
- 
- #Cbase_list[[1]]
- 
+}
+Cdiet_list[[3]]
 
-#Cdiet_list[[i]] <- read.csv(diet_list[i]) %>% left_join(groups2, by = "X") %>% select(-X) %>% relocate(DIETS) 
-#Cbase_list[[1]]
+Cdiet_list[[i]] <- bind_cols(group_vector, Cdiet_list[[i]])
+
+
+sapply(test_vector, setNames, nm = "group_vector")
+
+names(Cdiet_list[[i]])[names(Cdiet_list[[i]]) == "test_vector"] <- "group_vector"
+
+%>% left_join(groups2, by = "X") %>% select(-X) %>% relocate(DIETS) 
+names(Cdiet_list[[i]])[names(Cdiet_list[[i]]) == "test_vector"] <- "group_vector"
+
+names(Cdiet_list[[i]])[names(Cdiet_list[[i]])%in% test_vector] <- group_vector
+
 
 ```
 
