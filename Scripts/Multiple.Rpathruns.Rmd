@@ -3,6 +3,13 @@ title: "100 Rsim runs"
 output: html_document
 ---
 
+#
+```{r}
+library(dplyr)
+library(readr)
+library(Rpath)
+```
+
 ```{r}
 GroupInfo_CalCur_USE <- read.csv("../Data/Groupinfo_CalCur-USE.csv")  
 Diet_CalCur_USE <- read.csv("../Data/Diet_CalCur_USE.csv")  
@@ -32,7 +39,7 @@ groups2 <- Diet_CalCur_USE %>% select(DIETS) %>% mutate(X= 1:94)
 #Rename columns in diet file
 group_vector <- groups2$DIETS[1:92]
 group_vector <- as.data.frame(c("DIETS", group_vector))
-group_vector
+group_vector <- groups2[,"DIETS"]
 
 test <- read_csv("../Data/DietMatrices/diet100227.csv")
 test_vector <- colnames(test)[1:93]
@@ -44,42 +51,93 @@ for (i in 1:500) {
  Cbase_list[[i]] <- bind_rows(Fleet1, Cbase_list[[i]]) %>% arrange(X) %>% left_join(groups, by= "X") %>% select(-X) %>% relocate(Group)
 col_order <- c("Group", "Biomass", "EE", "PB", "QB", "Type", "Unassim", "BioAcc", "ProdCons", "DetInput", "DetritusFate", "Fleet1_Landings", "Fleet1_Discards")
 Cbase_list[[i]] <- Cbase_list[[i]][, col_order]
+write.csv(Cbase_list[[i]], base_list[i])
 }
 
+z<- read_csv(base_list[1])
 
+colnamesgroups<- c("DIETS", group_vector[1:93])
 #Diet matrices: #REMOVE IMPORT ROW??? ROW 94 (V93) IN TEST DATA
 for (i in 1:500) {
-Cdiet_list[[i]] <- read.csv(diet_list[i]) %>% select(-V93)
-
+Cdiet_list[[i]] <- read_csv(diet_list[i], col_names = colnamesgroups ) %>% select(-Detritus)
+Cdiet_list[[i]]<- Cdiet_list[[i]][-1,]
+Cdiet_list[[i]] <- Cdiet_list[[i]] %>%
+  mutate(DIETS = c(colnamesgroups[2:94], "Import"))
+write.csv(Cdiet_list[[i]], diet_list[i])
+z <- read_csv(diet_list[1])
 }
-Cdiet_list[[3]]
-
-Cdiet_list[[i]] <- bind_cols(group_vector, Cdiet_list[[i]])
-
-
-sapply(test_vector, setNames, nm = "group_vector")
-
-names(Cdiet_list[[i]])[names(Cdiet_list[[i]]) == "test_vector"] <- "group_vector"
-
-%>% left_join(groups2, by = "X") %>% select(-X) %>% relocate(DIETS) 
-names(Cdiet_list[[i]])[names(Cdiet_list[[i]]) == "test_vector"] <- "group_vector"
-
-names(Cdiet_list[[i]])[names(Cdiet_list[[i]])%in% test_vector] <- group_vector
-
-
 ```
 
 ```{r}
-set.seed(12345)
-run0 <- list()
+read.rpath.params2 <- function(modfile, dietfile, pedfile = NA,
+                              stanzagroupfile = NA, stanzafile = NA){
+  #Need to define variables to eliminate check() note about no visible binding
+  Type <- Group <- V1 <- NULL
+  
+  Rpath.params <- list()
+  
+  Rpath.params$model <- as.data.table(read.csv(modfile,  header = T)) %>%
+    select(-X) 
+  Rpath.params$model[Rpath.params$model == -1] <- NA
+
+  
+  Rpath.params$diet  <- as.data.table(read.csv(dietfile, header = T)) %>%
+    select(-X)
+  
+  
+  if(!is.na(stanzagroupfile)){
+    stanzagroup <- as.data.table(read.csv(stanzagroupfile, header = T))
+    Rpath.params$stanzas$NStanzaGroups <- nrow(stanzagroup)
+    Rpath.params$stanzas$stgroups      <- stanzagroup
+    Rpath.params$stanzas$stindiv       <- as.data.table(read.csv(stanzafile, 
+                                                                 header = T))
+  } else {
+    Rpath.params$stanzas$NStanzaGroups <- 0
+    Rpath.params$stanzas$stgroups      <- data.table(StGroupNum  = NA,
+                                                     StanzaGroup = NA,
+                                                     nstanzas    = NA,
+                                                     VBGF_Ksp    = NA,
+                                                     VBGF_d      = NA,
+                                                     Wmat        = NA,
+                                                     RecPower    = NA,
+                                                     Wmat001     = NA,
+                                                     Wmat50      = NA,
+                                                     Amat001     = NA,
+                                                     Amat50      = NA)
+    Rpath.params$stanzas$stindiv       <- data.table(StGroupNum   = NA,
+                                                     StanzaNum   = NA,
+                                                     GroupNum    = NA,
+                                                     Group       = NA,
+                                                     First       = NA,
+                                                     Last        = NA,
+                                                     Z           = NA,
+                                                     Leading     = NA)
+  }
+  if(!is.na(pedfile)){
+    Rpath.params$pedigree <- as.data.table(read.csv(pedfile, header = T))
+  } else {
+    Rpath.params$pedigree <- data.table(Group = Rpath.params$model$Group,
+                                        B     = 1,
+                                        PB    = 1,
+                                        QB    = 1,
+                                        Diet  = 1)
+    fleets <- as.character(Rpath.params$model[Type == 3, Group])
+    for(i in 1:length(fleets)){
+      Rpath.params$pedigree[, V1 := 1]
+      setnames(Rpath.params$pedigree, 'V1', fleets[i])
+    }
+  }
+  class(Rpath.params) <- 'Rpath.params'
+  return(Rpath.params)
+}
 ```
 
 ```{r}
 for (i in 1:500) {
-  Cbase <-  Cbase_list[[i]] # Base biomass, production, fishing, etc.
-  Cdiet <- Cdiet_list[[i]] # Diet matrix
+  Cbase <-  base_list[[1]] # Base biomass, production, fishing, etc.
+  Cdiet <- diet_list[[1]] # Diet matrix
 
-  CalCur_unbal <- read.rpath.params(Cbase, Cdiet)
+  CalCur_unbal <- read.rpath.params2(Cbase, Cdiet)
   check.rpath.params(CalCur_unbal)
 
 
