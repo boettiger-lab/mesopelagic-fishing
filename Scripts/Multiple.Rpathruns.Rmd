@@ -64,7 +64,7 @@ Cdiet_list[[i]]<- Cdiet_list[[i]][-1,]
 Cdiet_list[[i]] <- Cdiet_list[[i]] %>%
   mutate(DIETS = c(colnamesgroups[2:94], "Import"))
 write.csv(Cdiet_list[[i]], diet_list[i])
-z <- read_csv(diet_list[1])
+z2 <- read_csv(diet_list[1])
 }
 ```
 
@@ -79,6 +79,7 @@ read.rpath.params2 <- function(modfile, dietfile, pedfile = NA,
   Rpath.params$model <- as.data.table(read.csv(modfile,  header = T)) %>%
     select(-X) 
   Rpath.params$model[Rpath.params$model == -1] <- NA
+   Rpath.params$model[Rpath.params$model[93, 5]] <- NA
 
   
   Rpath.params$diet  <- as.data.table(read.csv(dietfile, header = T)) %>%
@@ -132,10 +133,23 @@ read.rpath.params2 <- function(modfile, dietfile, pedfile = NA,
 }
 ```
 
+
+
 ```{r}
-for (i in 1:500) {
   Cbase <-  base_list[[1]] # Base biomass, production, fishing, etc.
   Cdiet <- diet_list[[1]] # Diet matrix
+
+  CalCur_unbal <- read.rpath.params2(Cbase, Cdiet)
+  check.rpath.params(CalCur_unbal)
+```
+
+
+
+
+```{r}
+for (i in 1:500) {
+  Cbase <-  base_list[[i]] # Base biomass, production, fishing, etc.
+  Cdiet <- diet_list[[i]] # Diet matrix
 
   CalCur_unbal <- read.rpath.params2(Cbase, Cdiet)
   check.rpath.params(CalCur_unbal)
