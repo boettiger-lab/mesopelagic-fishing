@@ -11,6 +11,7 @@ library(Rpath)
 library(data.table)
 ```
 
+#Load this each time 
 ```{r}
 GroupInfo_CalCur_USE <- read.csv("../Data/Groupinfo_CalCur-USE.csv")  
 Diet_CalCur_USE <- read.csv("../Data/Diet_CalCur_USE.csv")  
@@ -25,6 +26,10 @@ diet_list <-list.files(path = "../Data/DietMatrices/",
 Cbase_list <- list()
 Cdiet_list <- list()
 
+```
+
+#Don't need to run this again!! 
+```{r}
 #Add columns to base parameters
 groups <- GroupInfo_CalCur_USE %>%
   select(Group, Type, Unassim, BioAcc, ProdCons, DetInput, DetritusFate, Fleet1_Discards) %>%
@@ -68,8 +73,10 @@ write.csv(Cdiet_list[[i]], diet_list[i])
 }
 
 z2 <- read_csv(diet_list[1])
+
 ```
 
+#Currently not running this either 
 ```{r}
 read.rpath.params2 <- function(modfile, dietfile, pedfile = NA,
                               stanzagroupfile = NA, stanzafile = NA){
@@ -135,7 +142,7 @@ read.rpath.params2 <- function(modfile, dietfile, pedfile = NA,
 }
 ```
 
-
+#Test with 1 dataset 
 ```{r}
   Cbase <-  base_list[[1]] # Base biomass, production, fishing, etc.
   Cdiet <- diet_list[[1]] # Diet matrix
@@ -150,6 +157,9 @@ read.rpath.params2 <- function(modfile, dietfile, pedfile = NA,
   check.rpath.params(CalCur_unbal)
 ```
 
+#Loop through 500 data sets!! 
+
+#Reading in data
 ```{r}
 for (i in 1:500) {
   Cbase <-  base_list[[i]] # Base biomass, production, fishing, etc.
@@ -165,27 +175,77 @@ for (i in 1:500) {
     select(-X)
 
   check.rpath.params(CalCur_unbal)
+}
 
-  Cal_bal   <- rpath(CalCur_unbal) 
-
+```
+ 
+#Creating a balanced Ecopath model 
+```{r}
+for (i in 1:500) {
+Cal_bal   <- rpath(CalCur_unbal) 
 
   cbind(Cal_bal$Group, Cal_bal$EE)
   cbind(Cal_bal$Group, Cal_bal$TL) 
-  #Define different functional groups
+}
+```
+
+#Creating base scenario 
+```{r}
+ #Define different functional groups
   all_species <- Cal_bal$Group[1:92] 
   mammals <- Cal_bal$Group[71:85] 
   seabirds <- c(Cal_bal$Group[60:70], Cal_bal$Group[86:92])
   pred_fish  <- Cal_bal$Group[33:59] 
   forage <- Cal_bal$Group[19:27]
 
+  for (i in 1:500) {
   yearlist = 2001:2050
 
-  base_sim_scene <- rsim.scenario(Cal_bal, CalCur_unbal, years = yearlist)
+base_sim_scene <- rsim.scenario(Cal_bal, CalCur_unbal, years = yearlist)
+scene0 <- base_sim_scene
+run0 <- rsim.run(scene0, method='AB', years=yearlist) 
+#rsim.plot(run0,all_species) #This will create 500 plots of base scenario, don't need to run
 
-# Baseline (equilibrium) run, make a copy of the baseline scenario
-  scene0 <- base_sim_scene
-
-  run0[[i]]   <- rsim.run(scene0, method='AB', years=yearlist) 
+#Scene0 and scene1 are identical, Koehn just redefined it like this so we will too
+scene1 <- base_sim_scene
 }
 ```
+
+#End biomass
+```{r}
+end_biomass <- function(rsim){return(rsim$out_Biomass[dim(rsim$out_Biomass)[1], 2:(dim(rsim$out_Biomass)[2])])}
+end_biomass
+```
+
+#25% harvest rate
+
+```{r}
+ for (i in 1:500) {
+target_sp <- "mesopelagics"
+target_F <- 0.25
+names(target_F) <- target_sp 
+
+library(data.table)
+scene6 <- copy(base_sim_scene)
+run6 <- rsim.run(scene6, method = 'AB', years=2001)
+for (yr in 2002:2050){
+  # stock assessment based on current biomass * error
+  # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
+assessment <- end_biomass(run6)[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
+assessment
+  # convert target F * assessment to a total catch 
+  catches <- target_F * assessment
+  # apply each catch to each species
+  for (sp in target_sp){
+    scene6 <- adjust.fishing(scene6, "ForcedCatch", sp, yr, value=catches[sp])
+  }
+  # run 1 year
+  run6 <- rsim.step(scene6, run6, method = 'AB', year.end=yr)  #Says in Rsim document on NOAA github that older versions of Ecosim use AB and new versions use 'RK4', default for Rpath is RK4 but we aren't using it??
+}  
+rsim.plot(run6,all_species)
+}
+```
+
+ 
+  
 
