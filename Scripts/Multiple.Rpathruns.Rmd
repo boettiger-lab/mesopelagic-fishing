@@ -65,8 +65,9 @@ Cdiet_list[[i]]<- Cdiet_list[[i]][-1,]
 Cdiet_list[[i]] <- Cdiet_list[[i]] %>%
   mutate(DIETS = c(colnamesgroups[2:94], "Import"))
 write.csv(Cdiet_list[[i]], diet_list[i])
-z2 <- read_csv(diet_list[1])
 }
+
+z2 <- read_csv(diet_list[1])
 ```
 
 ```{r}
@@ -149,17 +150,21 @@ read.rpath.params2 <- function(modfile, dietfile, pedfile = NA,
   check.rpath.params(CalCur_unbal)
 ```
 
-
-
-
 ```{r}
 for (i in 1:500) {
   Cbase <-  base_list[[i]] # Base biomass, production, fishing, etc.
   Cdiet <- diet_list[[i]] # Diet matrix
 
-  CalCur_unbal <- read.rpath.params2(Cbase, Cdiet)
-  check.rpath.params(CalCur_unbal)
+  #Edit the datasets
+  CalCur_unbal <- read.rpath.params(Cbase, Cdiet)
+  CalCur_unbal[[1]] <- CalCur_unbal[[1]] %>%
+    select(-X)
+  CalCur_unbal[[1]][93, 5] <- NA
+  CalCur_unbal[[1]][CalCur_unbal[[1]] == -1] <- NA
+   CalCur_unbal[[2]] <- CalCur_unbal[[2]] %>%
+    select(-X)
 
+  check.rpath.params(CalCur_unbal)
 
   Cal_bal   <- rpath(CalCur_unbal) 
 
