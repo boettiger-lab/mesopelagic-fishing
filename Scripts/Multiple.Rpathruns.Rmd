@@ -8,6 +8,7 @@ output: html_document
 library(dplyr)
 library(readr)
 library(Rpath)
+library(data.table)
 ```
 
 ```{r}
@@ -51,7 +52,7 @@ for (i in 1:500) {
  Cbase_list[[i]] <- bind_rows(Fleet1, Cbase_list[[i]]) %>% arrange(X) %>% left_join(groups, by= "X") %>% select(-X) %>% relocate(Group)
 col_order <- c("Group", "Biomass", "EE", "PB", "QB", "Type", "Unassim", "BioAcc", "ProdCons", "DetInput", "DetritusFate", "Fleet1_Landings", "Fleet1_Discards")
 Cbase_list[[i]] <- Cbase_list[[i]][, col_order]
-write.csv(Cbase_list[[i]], base_list[i])
+write.csv(Cbase_list[[i]], paste("output", base_list[i]))
 }
 
 z<- read_csv(base_list[1])
@@ -134,12 +135,17 @@ read.rpath.params2 <- function(modfile, dietfile, pedfile = NA,
 ```
 
 
-
 ```{r}
   Cbase <-  base_list[[1]] # Base biomass, production, fishing, etc.
   Cdiet <- diet_list[[1]] # Diet matrix
 
-  CalCur_unbal <- read.rpath.params2(Cbase, Cdiet)
+  CalCur_unbal <- read.rpath.params(Cbase, Cdiet)
+  CalCur_unbal[[1]] <- CalCur_unbal[[1]] %>%
+    select(-X)
+  CalCur_unbal[[1]][93, 5] <- NA
+  CalCur_unbal[[1]][CalCur_unbal[[1]] == -1] <- NA
+   CalCur_unbal[[2]] <- CalCur_unbal[[2]] %>%
+    select(-X)
   check.rpath.params(CalCur_unbal)
 ```
 
