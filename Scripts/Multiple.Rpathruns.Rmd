@@ -51,7 +51,7 @@ test <- read_csv("../Data/DietMatrices/diet100227.csv")
 test_vector <- colnames(test)[1:93]
 
 #First loop for group: rename columns, add Fleet 1 row (assigned position X=94), add new parameters (columns) onto dataset, redu column order
-for (i in 1:500) {
+#for (i in 1:500) {
  Cbase_list[[i]] <- read.csv(base_list[i]) %>% 
     rename(Biomass = "V1", PB = "V2", QB = "V3", EE = "V4", Fleet1_Landings = "V5")
  Cbase_list[[i]] <- bind_rows(Fleet1, Cbase_list[[i]]) %>% arrange(X) %>% left_join(groups, by= "X") %>% select(-X) %>% relocate(Group)
@@ -64,7 +64,7 @@ z<- read_csv(base_list[1])
 
 colnamesgroups<- c("DIETS", group_vector[1:93])
 #Diet matrices: #REMOVE IMPORT ROW??? ROW 94 (V93) IN TEST DATA
-for (i in 1:500) {
+#for (i in 1:500) {
 Cdiet_list[[i]] <- read_csv(diet_list[i], col_names = colnamesgroups ) %>% select(-Detritus)
 Cdiet_list[[i]]<- Cdiet_list[[i]][-1,]
 Cdiet_list[[i]] <- Cdiet_list[[i]] %>%
@@ -161,20 +161,20 @@ read.rpath.params2 <- function(modfile, dietfile, pedfile = NA,
 
 #Reading in data
 ```{r}
-for (i in 1:500) {
+  for (i in 1:500) {
   Cbase <-  base_list[[i]] # Base biomass, production, fishing, etc.
   Cdiet <- diet_list[[i]] # Diet matrix
 
   #Edit the datasets
-  CalCur_unbal <- read.rpath.params(Cbase, Cdiet)
-  CalCur_unbal[[1]] <- CalCur_unbal[[1]] %>%
+  CalCur_unbal[[i]] <- read.rpath.params(Cbase, Cdiet)
+  CalCur_unbal[[i]][[1]] <- CalCur_unbal[[i]][[1]] %>%
     select(-X)
-  CalCur_unbal[[1]][93, 5] <- NA
-  CalCur_unbal[[1]][CalCur_unbal[[1]] == -1] <- NA
-   CalCur_unbal[[2]] <- CalCur_unbal[[2]] %>%
+  CalCur_unbal[[i]][[1]][93, 5] <- NA
+  CalCur_unbal[[i]][[1]][CalCur_unbal[[i]][[1]] == -1] <- NA
+   CalCur_unbal[[i]][[2]] <- CalCur_unbal[[i]][[2]] %>%
     select(-X)
 
-  check.rpath.params(CalCur_unbal)
+  check.rpath.params(CalCur_unbal[[i]])
 }
 
 ```
@@ -182,10 +182,9 @@ for (i in 1:500) {
 #Creating a balanced Ecopath model 
 ```{r}
 for (i in 1:500) {
-Cal_bal   <- rpath(CalCur_unbal) 
-
-  cbind(Cal_bal$Group, Cal_bal$EE)
-  cbind(Cal_bal$Group, Cal_bal$TL) 
+Cal_bal[[i]] <- rpath(CalCur_unbal[[i]]) 
+  cbind(Cal_bal[[i]]$Group, Cal_bal[[i]]$EE)
+  cbind(Cal_bal[[i]]$Group, Cal_bal[[i]]$TL) 
 }
 ```
 
@@ -201,14 +200,13 @@ Cal_bal   <- rpath(CalCur_unbal)
   for (i in 1:500) {
   yearlist = 2001:2050
 
-base_sim_scene <- rsim.scenario(Cal_bal, CalCur_unbal, years = yearlist)
-scene0 <- base_sim_scene
-run0 <- rsim.run(scene0, method='AB', years=yearlist) 
-#rsim.plot(run0,all_species) #This will create 500 plots of base scenario, don't need to run
+base_sim_scene[[i]] <- rsim.scenario(Cal_bal[[i]], CalCur_unbal[[i]], years = yearlist)
+scene0[[i]] <- base_sim_scene[[i]]
+run0[[i]] <- rsim.run(scene0[[i]], method='AB', years=yearlist) 
+#rsim.plot(run0[[i]], all_species) #This isn't working
+  }
 
-#Scene0 and scene1 are identical, Koehn just redefined it like this so we will too
-scene1 <- base_sim_scene
-}
+
 ```
 
 #End biomass
@@ -225,22 +223,21 @@ target_sp <- "mesopelagics"
 target_F <- 0.25
 names(target_F) <- target_sp 
 
-library(data.table)
-scene6 <- copy(base_sim_scene)
-run6 <- rsim.run(scene6, method = 'AB', years=2001)
+scene6[[i]] <- copy(base_sim_scene[[i]])
+run6[[i]] <- rsim.run(scene6[[i]], method = 'AB', years=2001)
 for (yr in 2002:2050){
   # stock assessment based on current biomass * error
   # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
-assessment <- end_biomass(run6)[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
-assessment
+assessment[[i]] <- end_biomass(run6[[i]])[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
+assessment[[i]]
   # convert target F * assessment to a total catch 
-  catches <- target_F * assessment
+  catches[[i]] <- target_F * assessment[[i]]
   # apply each catch to each species
   for (sp in target_sp){
-    scene6 <- adjust.fishing(scene6, "ForcedCatch", sp, yr, value=catches[sp])
+    scene6[[i]] <- adjust.fishing(scene6[[i]], "ForcedCatch", sp, yr, value=catches[[i]][sp])
   }
   # run 1 year
-  run6 <- rsim.step(scene6, run6, method = 'AB', year.end=yr)  #Says in Rsim document on NOAA github that older versions of Ecosim use AB and new versions use 'RK4', default for Rpath is RK4 but we aren't using it??
+  run6[[i]] <- rsim.step(scene6[[i]], run6[[i]], method = 'AB', year.end=yr)  #Says in Rsim document on NOAA github that older versions of Ecosim use AB and new versions use 'RK4', default for Rpath is RK4 but we aren't using it??
 }  
 rsim.plot(run6,all_species)
 }
