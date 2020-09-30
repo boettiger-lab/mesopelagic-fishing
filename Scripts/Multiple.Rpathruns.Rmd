@@ -25,7 +25,6 @@ diet_list <-list.files(path = "../Data/DietMatrices/",
                full.names = T)
 Cbase_list <- list()
 Cdiet_list <- list()
-
 ```
 
 #Don't need to run this again!! 
@@ -76,22 +75,6 @@ z2 <- read_csv(diet_list[1])
 
 ```
 
-#Example of change to CalCur_unbal data 
-```{r}
-  Cbase2 <-  base_list[[1]] # Base biomass, production, fishing, etc.
-  Cdiet2 <- diet_list[[1]] # Diet matrix
-
-  CalCur_unbal2 <- read.rpath.params(Cbase2, Cdiet2)
-  CalCur_unbal2[[1]] <- CalCur_unbal2[[1]] %>%
-    select(-X)
-  CalCur_unbal2[[1]][93, 5] <- NA
-  CalCur_unbal2[[1]][CalCur_unbal2[[1]] == -1] <- NA
-   CalCur_unbal[[2]] <- CalCur_unbal[[2]] %>%
-    select(-X)
-  check.rpath.params(CalCur_unbal)
-  CalCur_unbal
-```
-
 #Loop through 500 data sets!! 
 
 #Reading in data, unbalanced model
@@ -99,31 +82,35 @@ z2 <- read_csv(diet_list[1])
 #HELP: need to check over this b/c when you run CalCur_unbal2 nothing goes, confused why 
 
 #Define list, large list where each seperate model output you can call out of list, need to define CalCur_unbalanced outside of loop, creating a list in R, have to do it b/c you are indexing, filling different parts of object at a time
+
+CalCur_unbal2_list <- list() #Creating an empty list to store vectors so can index 
+
   for (i in 1:500) {
-  Cbase2 <-  base_list[[i]] # Base biomass, production, fishing, etc.
-  Cdiet2 <- diet_list[[i]] # Diet matrix
+  Cbase2 <-  base_list[[i]] 
+  Cdiet2 <- diet_list[[i]]
 
   #Edit the datasets
-  CalCur_unbal2[[i]] <- read.rpath.params(Cbase2, Cdiet2)
-  CalCur_unbal2[[i]][[1]] <- CalCur_unbal2[[i]][[1]] %>%
+  CalCur_unbal2_list[[i]] <- read.rpath.params(Cbase2, Cdiet2)
+  CalCur_unbal2_list[[i]][[1]] <- CalCur_unbal2_list[[i]][[1]] %>%
     select(-X)
-  CalCur_unbal2[[i]][[1]][93, 5] <- NA
-  CalCur_unbal2[[i]][[1]][CalCur_unbal2[[i]][[1]] == -1] <- NA
-   CalCur_unbal2[[i]][[2]] <- CalCur_unbal2[[i]][[2]] %>%
+  CalCur_unbal2_list[[i]][[1]][93, 5] <- NA
+  CalCur_unbal2_list[[i]][[1]][CalCur_unbal2_list[[i]][[1]] == -1] <- NA
+   CalCur_unbal2_list[[i]][[2]] <- CalCur_unbal2_list[[i]][[2]] %>%
     select(-X)
 
-  check.rpath.params(CalCur_unbal2[[i]])
-}
-
+  check.rpath.params(CalCur_unbal2_list[[i]])
+  }
+CalCur_unbal2_list[[50]]
 
 ```
  
 #Creating a balanced Ecopath model 
 ```{r}
+Cal_bal2 <- list()
 for (i in 1:500) {
-Cal_bal[[i]] <- rpath(CalCur_unbal[[i]]) 
-  cbind(Cal_bal[[i]]$Group, Cal_bal[[i]]$EE)
-  cbind(Cal_bal[[i]]$Group, Cal_bal[[i]]$TL) 
+Cal_bal2[[i]] <- rpath(CalCur_unbal2_list[[i]]) 
+  cbind(Cal_bal2[[i]]$Group, Cal_bal2[[i]]$EE)
+  cbind(Cal_bal2[[i]]$Group, Cal_bal2[[i]]$TL) 
 }
 ```
 
