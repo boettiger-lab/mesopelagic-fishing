@@ -79,10 +79,6 @@ z2 <- read_csv(diet_list[1])
 
 #Reading in data, unbalanced model
 ```{r}
-#HELP: need to check over this b/c when you run CalCur_unbal2 nothing goes, confused why 
-
-#Define list, large list where each seperate model output you can call out of list, need to define CalCur_unbalanced outside of loop, creating a list in R, have to do it b/c you are indexing, filling different parts of object at a time
-
 CalCur_unbal2_list <- list() #Creating an empty list to store vectors so can index 
 
   for (i in 1:500) {
@@ -100,7 +96,7 @@ CalCur_unbal2_list <- list() #Creating an empty list to store vectors so can ind
 
   check.rpath.params(CalCur_unbal2_list[[i]])
   }
-CalCur_unbal2_list[[50]]
+CalCur_unbal2_list[[450]]
 
 ```
  
@@ -123,15 +119,20 @@ Cal_bal2[[i]] <- rpath(CalCur_unbal2_list[[i]])
   pred_fish  <- Cal_bal$Group[33:59] 
   forage <- Cal_bal$Group[19:27]
 
+  #Base scenario
+  base_sim_scene2 <- list()
+  scene0.2 <- list()
+  run0.2 <- list()
   for (i in 1:500) {
   yearlist = 2001:2050
 
-base_sim_scene[[i]] <- rsim.scenario(Cal_bal[[i]], CalCur_unbal[[i]], years = yearlist)
-scene0[[i]] <- base_sim_scene[[i]]
-run0[[i]] <- rsim.run(scene0[[i]], method='AB', years=yearlist) 
+base_sim_scene2[[i]] <- rsim.scenario(Cal_bal2[[i]], CalCur_unbal2_list[[i]], years = yearlist)
+scene0.2[[i]] <- base_sim_scene2[[i]]
+run0.2[[i]] <- rsim.run(scene0.2[[i]], method='AB', years=yearlist) 
 #rsim.plot(run0[[i]], all_species) #This isn't working
   }
 
+rsim.plot(run0.2[[500]])
 
 ```
 
@@ -141,32 +142,68 @@ end_biomass <- function(rsim){return(rsim$out_Biomass[dim(rsim$out_Biomass)[1], 
 end_biomass
 ```
 
-#25% harvest rate
-
+#Apply 25% harvest rate 
 ```{r}
- for (i in 1:500) {
+
 target_sp <- "mesopelagics"
 target_F <- 0.25
 names(target_F) <- target_sp 
 
-scene6[[i]] <- copy(base_sim_scene[[i]])
-run6[[i]] <- rsim.run(scene6[[i]], method = 'AB', years=2001)
-for (yr in 2002:2050){
-  # stock assessment based on current biomass * error
-  # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
-assessment[[i]] <- end_biomass(run6[[i]])[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
-assessment[[i]]
+scence6.2 <- list()
+run6.2 <- list()
+
+for (i in 1:500) {
+for(yr in 2002:2050){
+scence6.2[[i]] <- copy(base_sim_scene2[[i]])
+run6.2[[i]] <- rsim.run(scence6.2[[i]], method = 'AB', years=2001)
+assessment <- end_biomass(run6.2[[i]])[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
+assessment
   # convert target F * assessment to a total catch 
-  catches[[i]] <- target_F * assessment[[i]]
+  catches <- target_F * assessment
   # apply each catch to each species
   for (sp in target_sp){
-    scene6[[i]] <- adjust.fishing(scene6[[i]], "ForcedCatch", sp, yr, value=catches[[i]][sp])
+    scene6.2[[i]] <- adjust.fishing(scene6.2[[i]], "ForcedCatch", sp, yr, value=catches[sp])
   }
   # run 1 year
-  run6[[i]] <- rsim.step(scene6[[i]], run6[[i]], method = 'AB', year.end=yr)  #Says in Rsim document on NOAA github that older versions of Ecosim use AB and new versions use 'RK4', default for Rpath is RK4 but we aren't using it??
+  run6.2[[i]] <- rsim.step(scene6.2[[i]], run6.2, method = 'AB', year.end=yr)  
 }  
 }
 ```
+
+#Changing data set so we can change plotting
+
+```{r}
+rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
+  opar <- par(no.readonly = T)
+  if(indplot == F){
+    biomass <- Rsim.output$out_Biomass[, 2:ncol(Rsim.output$out_Biomass)]
+    n <- ncol(biomass)
+    start.bio <- biomass[1, ]
+    start.bio[which(start.bio == 0)] <- 1
+    rel.bio <- matrix(NA, dim(biomass)[1], dim(biomass)[2])
+    for(isp in 1:n) rel.bio[, isp] <- biomass[, isp] / start.bio[isp]
+  }
+  rel.bio
+} 
+
+names_spp<- run6$params$spname[2:94]
+
+#Need to make z into data frame, before was matrix, names is for data frame not matrix
+#Ways to do this in tidy verse but this is quick fix
+z_6 <-rsim.plot.fun(run6)
+z_6<-as.data.frame(z_6)
+names(z_6) <- names_spp
+z_6$month <- 1:600
+
+data_6 <- gather(z_6, key = spp, value = biomass, -month )
+
+```
+
+
+
+
+
+
 
  
   
