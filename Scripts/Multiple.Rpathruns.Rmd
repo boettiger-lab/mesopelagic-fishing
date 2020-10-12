@@ -108,6 +108,7 @@ Cal_bal2[[i]] <- rpath(CalCur_unbal2_list[[i]])
   cbind(Cal_bal2[[i]]$Group, Cal_bal2[[i]]$EE)
   cbind(Cal_bal2[[i]]$Group, Cal_bal2[[i]]$TL) 
 }
+Cal_bal2[[200]]
 ```
 
 #Creating base scenario 
@@ -144,36 +145,36 @@ end_biomass
 
 #Apply 25% harvest rate 
 ```{r}
-
 target_sp <- "mesopelagics"
 target_F <- 0.25
 names(target_F) <- target_sp 
 
+#Creating empty lists, defining year sequence
 scene6.2 <- list()
 run6.2 <- list()
 assessment2 <- list()
 catches2 <- list()
 year <- seq(2002,2050)
 
-
-for (i in 1:500) {
+#Begin nested loop
+for (i in 1:2) {
 for(j in 1:49){
 scene6.2[[i]] <- copy(base_sim_scene2[[i]])
-run6.2[[i]] <- rsim.run(scene6.2[[i]], method = 'AB', years=2001)
-assessment2[[i]] <- end_biomass(run6.2[[i]])[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
+run6.2[[i]] <- rsim.run(scene6.2[[i]], method = 'AB', years=2001) #When running a multistep run your initial run is up to the point of your first break
+#Stock assessment based on end biomass from run6 year 2001, will get 500 different assessments 
+assessment2[[i]] <- end_biomass(run6.2[[i]])[target_sp] * (runif(length(target_sp)) + 0.5) 
 assessment2[[i]]
-  # convert target F * assessment to a total catch 
+#Find total catch in year 2001 based off stock assessment, 500 different catches 
   catches2[[i]] <- target_F * assessment2[[i]]
-  # apply each catch to each species
-  for (sp in target_sp){
-    scene6.2[[i]] <- adjust.fishing(scene6.2[[i]], "ForcedCatch", sp, year[[j]], value=catches2[[i]][sp])
-  } 
-  # run 1 year
-  run6.2[[i]] <- rsim.step(scene6.2[[i]], run6.2[[i]], method = 'AB', year.end= year[[j]])  
+#Apply the catch to the target species, considering catch from first year of the run 
+#ForcedCatch: catch added directly to loss due to fishing, input with annual resolution, overrides dynamics from fleets and doesn't change bycatch 
+scene6.2[[i]] <- adjust.fishing(scene6.2[[i]], "ForcedCatch", target_sp, year[[j]], value= catches2[[i]][target_sp])
+#Rsim.step runs rsim.run at intervals and combines the run to one ouptput, Pause operating model to extract data, these results can be used to adjust parameters of operating model before next iteration
+#Run 1 year
+  run6.2[[i]] <- rsim.step(scene6.2[[i]], run6.2[[i]], method = 'AB', year.end= year[[j]])  #year.end: end year for current interval
 }  
 }
 rsim.plot(run6.2[[1]], all_species)
-run6.2[[1]]
 
 ```
 
@@ -193,16 +194,19 @@ rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
   rel.bio
 } 
 
-names_spp<- run6$params$spname[2:94]
+names_spp.2 <- run6$params$spname[2:94]
+z_6.2 <- list()
+data_6.2 <- list()
+for (i in 1:2) {
+z_6.2[[i]] <- rsim.plot.fun(run6.2[[i]])
+z_6.2[[i]] <- as.data.frame(z_6.2[[i]])
+names(z_6.2[[i]]) <- names_spp.2
+z_6.2[[i]]$month <- 1:600
+data_6.2[[i]] <- gather(z_6.2[[i]], key = spp, value = biomass, -month )
+}
+data_6.2[[2]]
+#In format: month, species, biomass, want 95% CI for each model at month 600 for each commercially and noncommercially valuable species 
 
-#Need to make z into data frame, before was matrix, names is for data frame not matrix
-#Ways to do this in tidy verse but this is quick fix
-z_6 <-rsim.plot.fun(run6)
-z_6<-as.data.frame(z_6)
-names(z_6) <- names_spp
-z_6$month <- 1:600
-
-data_6 <- gather(z_6, key = spp, value = biomass, -month )
 
 ```
 
