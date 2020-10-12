@@ -155,7 +155,6 @@ run6.2 <- list()
 assessment2 <- list()
 catches2 <- list()
 year <- seq(2002,2050)
-
 #Begin nested loop
 for (i in 1:2) {
 for(j in 1:49){
@@ -178,8 +177,39 @@ rsim.plot(run6.2[[1]], all_species)
 
 ```
 
-#Changing data set so we can change plotting
+```{r}
+target_sp <- "mesopelagics"
+target_F <- 0.25
+names(target_F) <- target_sp 
 
+scene6.2 <- list()
+run6.2 <- list()
+assessment2 <- list()
+catches2 <- list()
+for (i in 1:2){
+scene6.2[[i]] <- copy(base_sim_scene2[[i]])
+run6.2[[i]] <- rsim.run(scene6.2[[i]], method = 'AB', years=2001)
+for (yr in 2002:2050){
+  # stock assessment based on current biomass * error
+  # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
+assessment2[[i]] <- end_biomass(run6.2[[i]])[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
+assessment2[[i]]
+  # convert target F * assessment to a total catch 
+  catches2[[i]] <- target_F * assessment2[[i]]
+  # apply each catch to each species
+  for (sp in target_sp){
+    scene6.2[[i]] <- adjust.fishing(scene6.2[[i]], "ForcedCatch", sp, yr, value=catches2[[i]][sp])
+  }
+  # run 1 year
+  run6.2[[i]] <- rsim.step(scene6.2[[i]], run6.2[[i]], method = 'AB', year.end=yr)  #Says in Rsim document on NOAA github that older versions of Ecosim use AB and new versions use 'RK4', default for Rpath is RK4 but we aren't using it??
+}  
+  }
+rsim.plot(run6.2[[1]],all_species) 
+assessment2[[1]]
+assessment2[[2]]
+```
+
+#Changing data set so we can change plotting
 ```{r}
 rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
   opar <- par(no.readonly = T)
@@ -194,6 +224,7 @@ rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
   rel.bio
 } 
 
+#Convert 500 rsim models into a data frame 
 names_spp.2 <- run6$params$spname[2:94]
 z_6.2 <- list()
 data_6.2 <- list()
@@ -206,7 +237,6 @@ data_6.2[[i]] <- gather(z_6.2[[i]], key = spp, value = biomass, -month )
 }
 data_6.2[[2]]
 #In format: month, species, biomass, want 95% CI for each model at month 600 for each commercially and noncommercially valuable species 
-
 
 ```
 
