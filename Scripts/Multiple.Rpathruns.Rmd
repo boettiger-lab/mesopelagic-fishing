@@ -199,23 +199,31 @@ z_6.2[[i]] <- as.data.frame(z_6.2[[i]])
 names(z_6.2[[i]]) <- names_spp.2
 z_6.2[[i]]$month <- 1:600
 data_6.2[[i]] <- gather(z_6.2[[i]], key = spp, value = biomass, -month)
-data_6.2[[i]] <- data_6.2[[i]] %>% filter(month==600) %>% mutate(X= i )
+data_6.2[[i]] <- data_6.2[[i]] %>% filter(month==600) %>% mutate(X= i)
 }
 
 #Want 95% CI for each model at month 600 for each commercially and noncommercially valuable species 
-#1) Combine datasets
-#2) Check to see if 500 end biomass values for each species are normally distributed 
-#1) check if 500 end biomass values for each species are normally distributed
 
-entire_data_6 <- bind_rows(data_6.2) %>% arrange(spp) %>% filter(!X %in% c(67, 126, 237, 343, 396, 430, 472), spp == "Dolphins")
-shapiro.test(entire_data_6$biomass)
+#Combine datasets into one: remove the rsim simulations that are incorrect
+entire_data_6 <- bind_rows(data_6.2) %>% filter(!X %in% c(67, 126, 237, 343, 396, 430, 472)) %>% arrange(spp)
+entire_data_6 <- transform(entire_data_6,ID=as.numeric(factor(spp)))
 
-(!Income_Group %in% c("High income: OECD", "High income: nonOECD"))
-entire_data_6 <- bind_rows(data_6.2) %>% arrange(spp) %>% filter(spp == "mesopelagics")
-shapiro.test(entire_data_6$biomass)
+
+#Statistics
+sum_data_6 <- entire_data_6 %>% group_by(spp) %>% summarise(mean_biomass = mean(biomass), sd_biomass= sd(biomass))
+
+#Check to see if 500 end biomass values for each species are normally distributed
+#Only one is normally distributed-mesopelagics 
+listids <- list()
+for (ids in unique(entire_data_6$ID)){
+    subdf <- subset(x=entire_data_6, subset=ID==ids) #Subset returns subsets of data frame that meet certain condition (keeps original dataset intact and creates another dataframe with specific ID) 
+    listids[[ids]] <- shapiro.test(subdf$biomass) #Doing analysis on subsetting dataframes
+    print(listids[[ids]])
+}
 
 #Off for mesopelagics: row 67 (5.42), 126 (4.86), 237(1.1),343(8.26), 396(4.69), 430 (4.82), 472 (#2.183) 
-#Off for sharks: row 67 (15.58), row 126 (17.95), row 237 (2.30), 343 (27.85), 396(17.568), 430 (9.22), 472(6.74),  
+#Off for sharks: row 67 (15.58), row 126 (17.95), row 237 (2.30), 343 (27.85),  396(17.568), 430 (9.22), 472(6.74),  
+#Off for dolphins: row 67 (15.62), 126 (12.21), 237 (2.73), 343(15.75), 396(18), 430(9.11), 472(4.82),  
 ```
 
 
