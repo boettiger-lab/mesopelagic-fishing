@@ -9,6 +9,7 @@ library(dplyr)
 library(readr)
 library(Rpath)
 library(data.table)
+library(tidyr)
 ```
 
 #Load this each time 
@@ -143,40 +144,6 @@ end_biomass <- function(rsim){return(rsim$out_Biomass[dim(rsim$out_Biomass)[1], 
 end_biomass
 ```
 
-#Apply 25% harvest rate 
-```{r}
-target_sp <- "mesopelagics"
-target_F <- 0.25
-names(target_F) <- target_sp 
-
-#Creating empty lists, defining year sequence
-scene6.2 <- list()
-run6.2 <- list()
-assessment2 <- list()
-catches2 <- list()
-year <- seq(2002,2050)
-#Begin nested loop
-for (i in 1:2) {
-for(j in 1:49){
-scene6.2[[i]] <- copy(base_sim_scene2[[i]])
-run6.2[[i]] <- rsim.run(scene6.2[[i]], method = 'AB', years=2001) #When running a multistep run your initial run is up to the point of your first break
-#Stock assessment based on end biomass from run6 year 2001, will get 500 different assessments 
-assessment2[[i]] <- end_biomass(run6.2[[i]])[target_sp] * (runif(length(target_sp)) + 0.5) 
-assessment2[[i]]
-#Find total catch in year 2001 based off stock assessment, 500 different catches 
-  catches2[[i]] <- target_F * assessment2[[i]]
-#Apply the catch to the target species, considering catch from first year of the run 
-#ForcedCatch: catch added directly to loss due to fishing, input with annual resolution, overrides dynamics from fleets and doesn't change bycatch 
-scene6.2[[i]] <- adjust.fishing(scene6.2[[i]], "ForcedCatch", target_sp, year[[j]], value= catches2[[i]][target_sp])
-#Rsim.step runs rsim.run at intervals and combines the run to one ouptput, Pause operating model to extract data, these results can be used to adjust parameters of operating model before next iteration
-#Run 1 year
-  run6.2[[i]] <- rsim.step(scene6.2[[i]], run6.2[[i]], method = 'AB', year.end= year[[j]])  #year.end: end year for current interval
-}  
-}
-rsim.plot(run6.2[[1]], all_species)
-
-```
-
 ```{r}
 target_sp <- "mesopelagics"
 target_F <- 0.25
@@ -186,7 +153,7 @@ scene6.2 <- list()
 run6.2 <- list()
 assessment2 <- list()
 catches2 <- list()
-for (i in 1:2){
+for (i in 1:500){
 scene6.2[[i]] <- copy(base_sim_scene2[[i]])
 run6.2[[i]] <- rsim.run(scene6.2[[i]], method = 'AB', years=2001)
 for (yr in 2002:2050){
@@ -204,12 +171,10 @@ assessment2[[i]]
   run6.2[[i]] <- rsim.step(scene6.2[[i]], run6.2[[i]], method = 'AB', year.end=yr)  #Says in Rsim document on NOAA github that older versions of Ecosim use AB and new versions use 'RK4', default for Rpath is RK4 but we aren't using it??
 }  
   }
-rsim.plot(run6.2[[1]],all_species) 
-assessment2[[1]]
-assessment2[[2]]
+rsim.plot(run6.2[[500]], all_species)
 ```
 
-#Changing data set so we can change plotting
+#Manipulating output data
 ```{r}
 rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
   opar <- par(no.readonly = T)
@@ -228,16 +193,29 @@ rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
 names_spp.2 <- run6$params$spname[2:94]
 z_6.2 <- list()
 data_6.2 <- list()
-for (i in 1:2) {
+for (i in 1:500) {
 z_6.2[[i]] <- rsim.plot.fun(run6.2[[i]])
 z_6.2[[i]] <- as.data.frame(z_6.2[[i]])
 names(z_6.2[[i]]) <- names_spp.2
 z_6.2[[i]]$month <- 1:600
-data_6.2[[i]] <- gather(z_6.2[[i]], key = spp, value = biomass, -month )
+data_6.2[[i]] <- gather(z_6.2[[i]], key = spp, value = biomass, -month)
+data_6.2[[i]] <- data_6.2[[i]] %>% filter(month==600) %>% mutate(X= i )
 }
-data_6.2[[2]]
-#In format: month, species, biomass, want 95% CI for each model at month 600 for each commercially and noncommercially valuable species 
 
+#Want 95% CI for each model at month 600 for each commercially and noncommercially valuable species 
+#1) Combine datasets
+#2) Check to see if 500 end biomass values for each species are normally distributed 
+#1) check if 500 end biomass values for each species are normally distributed
+
+entire_data_6 <- bind_rows(data_6.2) %>% arrange(spp) %>% filter(!X %in% c(67, 126, 237, 343, 396, 430, 472), spp == "Dolphins")
+shapiro.test(entire_data_6$biomass)
+
+(!Income_Group %in% c("High income: OECD", "High income: nonOECD"))
+entire_data_6 <- bind_rows(data_6.2) %>% arrange(spp) %>% filter(spp == "mesopelagics")
+shapiro.test(entire_data_6$biomass)
+
+#Off for mesopelagics: row 67 (5.42), 126 (4.86), 237(1.1),343(8.26), 396(4.69), 430 (4.82), 472 (#2.183) 
+#Off for sharks: row 67 (15.58), row 126 (17.95), row 237 (2.30), 343 (27.85), 396(17.568), 430 (9.22), 472(6.74),  
 ```
 
 
