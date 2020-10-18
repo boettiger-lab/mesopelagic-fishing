@@ -236,7 +236,6 @@ df2 <- as.data.frame(do.call(rbind, CI_upper)) %>% rename("CI_upper" = V1) %>% m
 df1 <- as.data.frame(do.call(rbind, CI_lower)) %>% rename("CI_lower"= V1) %>% mutate(ID = 1:93) %>% left_join(df2, by = "ID") %>% relocate(ID)
 
 #Statistics
-
 sum_data_6 <- entire_data_6 %>% group_by(spp, ID) %>% summarise(mean_biomass = mean(biomass), sd_biomass= sd(biomass), st_error= ((sd_biomass)/sqrt(n)), min = min(biomass), max= max(biomass)) %>% left_join(df1, by = "ID")
 
 #Check to see if 500 end biomass values for each species are normally distributed
