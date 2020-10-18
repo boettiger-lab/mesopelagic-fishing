@@ -10,6 +10,7 @@ library(readr)
 library(Rpath)
 library(data.table)
 library(tidyr)
+library(ggplot2)
 ```
 
 #Load this each time 
@@ -109,7 +110,7 @@ Cal_bal2[[i]] <- rpath(CalCur_unbal2_list[[i]])
   cbind(Cal_bal2[[i]]$Group, Cal_bal2[[i]]$EE)
   cbind(Cal_bal2[[i]]$Group, Cal_bal2[[i]]$TL) 
 }
-Cal_bal2[[200]]
+Cal_bal2[[430]]
 ```
 
 #Creating base scenario 
@@ -120,6 +121,8 @@ Cal_bal2[[200]]
   seabirds <- c(Cal_bal$Group[60:70], Cal_bal$Group[86:92])
   pred_fish  <- Cal_bal$Group[33:59] 
   forage <- Cal_bal$Group[19:27]
+  diet_over_0.05 <- c(Cal_bal$Group[29], Cal_bal$Group[33], Cal_bal$Group[38], Cal_bal$Group[42], Cal_bal$Group[48], Cal_bal$Group[51], Cal_bal$Group[54], Cal_bal$Group[56], Cal_bal$Group[63], Cal_bal$Group[70], Cal_bal$Group[76], Cal_bal$Group[85])
+diet_over_0.05
 
   #Base scenario
   base_sim_scene2 <- list()
@@ -201,16 +204,35 @@ z_6.2[[i]]$month <- 1:600
 data_6.2[[i]] <- gather(z_6.2[[i]], key = spp, value = biomass, -month)
 data_6.2[[i]] <- data_6.2[[i]] %>% filter(month==600) %>% mutate(X= i)
 }
+```
 
-#Want 95% CI for each model at month 600 for each commercially and noncommercially valuable species 
-
+#Confidence intervals: Want 95% CI for each model at month 600 for each commercially and noncommercially valuable species
+```{r}
 #Combine datasets into one: remove the rsim simulations that are incorrect
 entire_data_6 <- bind_rows(data_6.2) %>% filter(!X %in% c(67, 126, 237, 343, 396, 430, 472)) %>% arrange(spp)
-entire_data_6 <- transform(entire_data_6,ID=as.numeric(factor(spp)))
+entire_data_6 <- transform(entire_data_6,ID=as.numeric(factor(spp))) #Add column for ID that correlates to each different species 
+#Off for mesopelagics: row 67 (5.42), 126 (4.86), 237(1.1),343(8.26), 396(4.69), 430 (4.82), 472 (#2.183) 
+#Off for sharks: row 67 (15.58), row 126 (17.95), row 237 (2.30), 343 (27.85),  396(17.568), 430 (9.22), 472(6.74),  
+#Off for dolphins: row 67 (15.62), 126 (12.21), 237 (2.73), 343(15.75), 396(18), 430(9.11), 472(4.82),  
 
+#Calculate CI:
+n <- 500
+t_star <- 1.960
+sample_mean <- list()
+sd_error <- list()
+CI_lower <- list()
+CI_upper <- list()
+
+for (i in unique(entire_data_6$ID)){
+subdf <- subset(x=entire_data_6, subset=ID==i)
+sample_mean[[i]] <- mean(subdf$biomass)
+sd_error[[i]] <- (sd(subdf$biomass))/(sqrt(n))
+CI_lower[[i]] <- sample_mean[[i]] - (t_star*sd_error[[i]])
+CI_upper[[i]] <- sample_mean[[i]] + (t_star*sd_error[[i]])
+}
 
 #Statistics
-sum_data_6 <- entire_data_6 %>% group_by(spp) %>% summarise(mean_biomass = mean(biomass), sd_biomass= sd(biomass))
+sum_data_6 <- entire_data_6 %>% group_by(spp) %>% summarise(mean_biomass = mean(biomass), sd_biomass= sd(biomass), st_error= ((sd_biomass)/sqrt(n)), min = min(biomass), max= max(biomass))
 
 #Check to see if 500 end biomass values for each species are normally distributed
 #Only one is normally distributed-mesopelagics 
@@ -221,10 +243,9 @@ for (ids in unique(entire_data_6$ID)){
     print(listids[[ids]])
 }
 
-#Off for mesopelagics: row 67 (5.42), 126 (4.86), 237(1.1),343(8.26), 396(4.69), 430 (4.82), 472 (#2.183) 
-#Off for sharks: row 67 (15.58), row 126 (17.95), row 237 (2.30), 343 (27.85),  396(17.568), 430 (9.22), 472(6.74),  
-#Off for dolphins: row 67 (15.62), 126 (12.21), 237 (2.73), 343(15.75), 396(18), 430(9.11), 472(4.82),  
+
 ```
+
 
 
 
