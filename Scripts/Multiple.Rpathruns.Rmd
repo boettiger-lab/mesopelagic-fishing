@@ -229,10 +229,15 @@ sample_mean[[i]] <- mean(subdf$biomass)
 sd_error[[i]] <- (sd(subdf$biomass))/(sqrt(n))
 CI_lower[[i]] <- sample_mean[[i]] - (t_star*sd_error[[i]])
 CI_upper[[i]] <- sample_mean[[i]] + (t_star*sd_error[[i]])
+print(CI_lower[[i]])
 }
 
+df2 <- as.data.frame(do.call(rbind, CI_upper)) %>% rename("CI_upper" = V1) %>% mutate(ID = 1:93)
+df1 <- as.data.frame(do.call(rbind, CI_lower)) %>% rename("CI_lower"= V1) %>% mutate(ID = 1:93) %>% left_join(df2, by = "ID") %>% relocate(ID)
+
 #Statistics
-sum_data_6 <- entire_data_6 %>% group_by(spp) %>% summarise(mean_biomass = mean(biomass), sd_biomass= sd(biomass), st_error= ((sd_biomass)/sqrt(n)), min = min(biomass), max= max(biomass))
+
+sum_data_6 <- entire_data_6 %>% group_by(spp, ID) %>% summarise(mean_biomass = mean(biomass), sd_biomass= sd(biomass), st_error= ((sd_biomass)/sqrt(n)), min = min(biomass), max= max(biomass)) %>% left_join(df1, by = "ID")
 
 #Check to see if 500 end biomass values for each species are normally distributed
 #Only one is normally distributed-mesopelagics 
