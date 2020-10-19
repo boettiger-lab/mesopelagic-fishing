@@ -209,6 +209,7 @@ data_6.2[[i]] <- data_6.2[[i]] %>% filter(month==600) %>% mutate(X= i)
 #Confidence intervals: Want 95% CI for each model at month 600 for each commercially and noncommercially valuable species
 ```{r}
 #Combine datasets into one: remove the rsim simulations that are incorrect
+entire_data_6 <- bind_rows(data_6.2) %>% filter(X == 67)
 entire_data_6 <- bind_rows(data_6.2) %>% filter(!X %in% c(67, 126, 237, 343, 396, 430, 472)) %>% arrange(spp)
 entire_data_6 <- transform(entire_data_6,ID=as.numeric(factor(spp))) #Add column for ID that correlates to each different species 
 #Off for mesopelagics: row 67 (5.42), 126 (4.86), 237(1.1),343(8.26), 396(4.69), 430 (4.82), 472 (#2.183) 
@@ -229,14 +230,27 @@ sample_mean[[i]] <- mean(subdf$biomass)
 sd_error[[i]] <- (sd(subdf$biomass))/(sqrt(n))
 CI_lower[[i]] <- sample_mean[[i]] - (t_star*sd_error[[i]])
 CI_upper[[i]] <- sample_mean[[i]] + (t_star*sd_error[[i]])
-print(CI_lower[[i]])
 }
 
 df2 <- as.data.frame(do.call(rbind, CI_upper)) %>% rename("CI_upper" = V1) %>% mutate(ID = 1:93)
 df1 <- as.data.frame(do.call(rbind, CI_lower)) %>% rename("CI_lower"= V1) %>% mutate(ID = 1:93) %>% left_join(df2, by = "ID") %>% relocate(ID)
 
+#Calculate quantiles
+quantile_0.025 <- list()
+quantile_0.975 <- list()
+
+for (i in unique(entire_data_6$ID)){
+subdf2 <- subset(x=entire_data_6, subset=ID==i)
+quantile_0.025[[i]] <- quantile(subdf2$biomass, 0.025)
+quantile_0.975[[i]] <- quantile(subdf2$biomass, 0.975)
+}
+
+df_quant2 <- as.data.frame(do.call(rbind, quantile_0.975)) %>% mutate(ID = 1:93)
+df_quant1 <- as.data.frame(do.call(rbind, quantile_0.025)) %>% mutate(ID = 1:93) %>% left_join(df_quant2, by = "ID") %>% relocate("ID")
+
 #Statistics
-sum_data_6 <- entire_data_6 %>% group_by(spp, ID) %>% summarise(mean_biomass = mean(biomass), sd_biomass= sd(biomass), st_error= ((sd_biomass)/sqrt(n)), min = min(biomass), max= max(biomass)) %>% left_join(df1, by = "ID")
+sum_data_6 <- entire_data_6 %>% group_by(spp, ID) %>% summarise(mean_biomass = mean(biomass), sd_biomass= sd(biomass)) %>% left_join(df1, by = "ID")
+sum_data_6 <- sum_data_6 %>% left_join(df_quant1, by = "ID")
 
 #Check to see if 500 end biomass values for each species are normally distributed
 #Only one is normally distributed-mesopelagics 
@@ -246,8 +260,6 @@ for (ids in unique(entire_data_6$ID)){
     listids[[ids]] <- shapiro.test(subdf$biomass) #Doing analysis on subsetting dataframes
     print(listids[[ids]])
 }
-
-
 ```
 
 
