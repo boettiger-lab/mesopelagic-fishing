@@ -265,9 +265,18 @@ for (ids in unique(entire_data_6$ID)){
 #Graph
 ```{r}
 #Organize datasets
-comm_value <- sum_data_6 %>% filter(spp %in% commercial_predators) 
-noncomm_value <- sum_data_6 %>% filter(spp %in% noncommerical_predators)
 
+#Species overlap between noncomm and commercially valuable 
+intersect(comm_value$spp, noncomm_value$spp)
+noncommerical_predators
+new_noncomm <- noncommerical_predators[- c(9,7,11,4,6,17,1,12,8,10,19,5,16,18,15,14,13,3)]
+#Highlight albacore (9), arrowtooth (7), canary rockfish (11),greenstriped (4), lingcod (6), longspine thorny (17), other cephal (1), pacific ocean perch (12), sablefish (8), salmon (10), sharks (19), shelf rock (5), shortspine thorny (16), skates (18), slope rockfish (15), splitnose rockfish (14), widow rock (13), and yellowtail rock (3) in commercially valuable and remove from noncommercially valuable 
+
+#Filter datasets
+comm_value <- sum_data_6 %>% filter(spp %in% commercial_predators) 
+noncomm_value <- sum_data_6 %>% filter(spp %in% new_noncomm)
+
+#Make plot
 noncomm_value %>% ggplot() + 
 geom_linerange(noncomm_value, mapping=aes(y=spp, xmin= quant_2.5, xmax= quant_97.5), width=0.2, size=1, color="blue") 
 ```
