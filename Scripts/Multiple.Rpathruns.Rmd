@@ -249,8 +249,8 @@ df_quant2 <- as.data.frame(do.call(rbind, quantile_0.975)) %>% mutate(ID = 1:93)
 df_quant1 <- as.data.frame(do.call(rbind, quantile_0.025)) %>% mutate(ID = 1:93) %>% left_join(df_quant2, by = "ID") %>% relocate("ID")
 
 #Statistics
-sum_data_6 <- entire_data_6 %>% group_by(spp, ID) %>% summarise(mean_biomass = mean(biomass), sd_biomass= sd(biomass)) %>% left_join(df1, by = "ID")
-sum_data_6 <- sum_data_6 %>% left_join(df_quant1, by = "ID")
+sum_data_6 <- entire_data_6 %>% group_by(spp, ID) %>% summarise(mean_biomass = mean(biomass), sd_biomass= sd(biomass), median_biomass = median(biomass)) %>% left_join(df1, by = "ID")
+sum_data_6 <- sum_data_6 %>% left_join(df_quant1, by = "ID") %>% rename(quant_2.5 = "2.5%", quant_97.5 = "97.5%")
 
 #Check to see if 500 end biomass values for each species are normally distributed
 #Only one is normally distributed-mesopelagics 
@@ -262,6 +262,15 @@ for (ids in unique(entire_data_6$ID)){
 }
 ```
 
+#Graph
+```{r}
+#Organize datasets
+comm_value <- sum_data_6 %>% filter(spp %in% commercial_predators) 
+noncomm_value <- sum_data_6 %>% filter(spp %in% noncommerical_predators)
+
+noncomm_value %>% ggplot() + 
+geom_linerange(noncomm_value, mapping=aes(y=spp, xmin= quant_2.5, xmax= quant_97.5), width=0.2, size=1, color="blue") 
+```
 
 
 
