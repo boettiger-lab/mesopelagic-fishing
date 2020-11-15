@@ -286,7 +286,7 @@ comm_value_500 <- comm_value %>% ggplot(aes(fill = median.value)) +
 scale_y_discrete(limits = unique(rev(comm_value$spp)), labels= c("Greenstriped" = expression(bold("Greenstriped rock.")), "P. Ocean Perch"= expression(bold("P. ocean perch")), "Albacore" = expression(bold("Albacore")), "Arrowtooth" = expression(bold("Arrowtooth flounder")), "Canary rock."= expression(bold("Canary rock.")), "Lingcod"= expression(bold("Lingcod")), "Longspine thorny."= expression(bold("Longspine thorny.")), "Other cephal."= expression(bold("Other cephal.")), "Sablefish"= expression(bold("Sablefish")), "Salmon"= expression(bold("Salmon")), "Sharks"= expression(bold("Sharks")), "Shelf rock."= expression(bold("Shelf rock.")), "Shortspine thorny."= expression(bold("Shortspine thorny.")), "Skates"= expression(bold("Skates")), "Slope rock."= expression(bold("Slope rock.")), "Splitnose rock."= expression(bold("Splitnose rock.")), "Widow rock."= expression(bold("Widow rock.")), "Yellowtail rock."= expression(bold("Yellowtail rock.")))) +
 theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + 
 geom_vline(xintercept = 1, size = 0.5) + 
-xlab("Relative biomass") + ylab("Species") + labs(fill = "Median biomass") + 
+xlab("Relative biomass") + ylab("Species") + labs(fill = "Median biomass", title= "A") + 
 theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
@@ -298,12 +298,12 @@ noncomm_value_500 <- noncomm_value %>% ggplot(aes(fill = median.value)) + geom_p
 scale_fill_grey() + 
 scale_y_discrete(limits = unique(rev(noncomm_value$spp)), labels= c("Western Gull" = "Western gull", "Tufted Puffin" = "Tufted puffin", "Sea Lions"= "Sea lions", "Resident Orcas"= "Resident orcas", "Leach's S. Petrel" ="Leach's s. petrel", "Juv. Ele. Seal"="Juv. elephant seal", "Double corm."= "Double cormorant", "Brandt's corm." = "Brandt's cormorant", "Juv. rock." = "Juvenile rock.")) + 
 geom_vline(xintercept = 1, size = 0.5) + 
-xlab("Relative biomass") + ylab("Species") + labs(fill = "Median biomass") + 
+xlab("Relative biomass") + ylab("Species") + labs(fill = "Median biomass", title= "B") + 
 theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
 theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + 
-ggsave(width = 7, height = 5, "~/Documents/OTZ.Manuscript/Images/500.noncommercial.25.jpeg")
+ggsave(width = 6, height = 4, "~/Documents/OTZ.Manuscript/Images/500.noncommercial.25.jpeg")
 noncomm_value_500
 ```
 
