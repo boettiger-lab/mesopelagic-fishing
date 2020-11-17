@@ -210,6 +210,18 @@ assessment
 }  
 rsim.plot(run2,all_species)  
 ```
+#Modify data
+
+```{r}
+names_spp <- run2$params$spname[2:94]
+
+#Need to make z into data frame
+z_2 <-rsim.plot.fun(run2)
+z_2<-as.data.frame(z_2)
+names(z_2) <- names_spp
+z_2$month <- 1:600
+data_2 <- gather(z_2, key = spp, value = biomass, -month )
+```
 
 #Change over time graphs 
 ```{r}
@@ -287,13 +299,22 @@ biomass_decrease_25 <- data_6 %>% filter(month==600, biomass < 1) %>% mutate(dif
 biomass_decrease_25
 
 #Find species specific end biomass for 25% (and 50?) harvest rate 
-predators_end <- data_6 %>% filter(spp %in% commercial_predators, month== 600)
+predators_end2.1 <- data_2 %>% filter(spp %in% commercial_predators, month== 600)
+predators_end2.1
+
+predators_end2.2 <- data_2 %>% filter(spp %in% noncommerical_predators, month== 600)
+predators_end2.2
+
+predators_end2.3 <- data_2 %>% filter(spp %in% predators_mesopelagic, month == 600)
+predators_end2.3
+
+predators_end <- data_1 %>% filter(spp %in% commercial_predators, month== 600)
 predators_end
 
-predators_end2 <- data_6 %>% filter(spp %in% noncommerical_predators, month== 600)
+predators_end2 <- data_1 %>% filter(spp %in% noncommerical_predators, month== 600)
 predators_end2
 
-predators_end3 <- data_6 %>% filter(spp %in% predators_mesopelagic, month == 600)
+predators_end3 <- data_1 %>% filter(spp %in% predators_mesopelagic, month == 600)
 predators_end3
 
 write.csv(predators_end, "/Users/SallyDowd/Documents/commercial.end.csv")
