@@ -254,7 +254,11 @@ sum_data_6 <- sum_data_6 %>% left_join(df_quant1, by = "ID") %>% rename(quant_2.
 sum_data_6 <- sum_data_6 %>% mutate("median.value" = cut(median_biomass, 
                       breaks = c(-Inf, 1, Inf),
                       labels = c("Decreasing", "Increasing"),
-                      right = TRUE))
+                      right = TRUE), "difference"= quant_97.5-quant_2.5)
+
+max(sum_data_6$difference)*100
+min(sum_data_6$difference)*100
+mean(sum_data_6$difference)*100
 
 #Check to see if 500 end biomass values for each species are normally distributed
 #Only one is normally distributed-mesopelagics 
