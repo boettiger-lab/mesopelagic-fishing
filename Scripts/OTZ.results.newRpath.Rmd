@@ -156,7 +156,9 @@ plot1_comm <- data_1 %>% filter(spp %in% commercial_predators) %>% ggplot(aes(x=
 scale_color_discrete(type = "viridis", labels= c("Greenstriped" = expression(bold("Greenstriped rock.")), "P. Ocean Perch"= expression(bold("P. ocean perch")), "Albacore" = expression(bold("Albacore")), "Arrowtooth" = expression(bold("Arrowtooth flounder")), "Canary rock."= expression(bold("Canary rock.")), "Lingcod"= expression(bold("Lingcod")), "Longspine thorny."= expression(bold("Longspine thorny.")), "Other cephal."= expression(bold("Other cephal.")), "Sablefish"= expression(bold("Sablefish")), "Salmon"= expression(bold("Salmon")), "Sharks"= expression(bold("Sharks")), "Shelf rock."= expression(bold("Shelf rock.")), "Shortspine thorny."= expression(bold("Shortspine thorny.")), "Skates"= expression(bold("Skates")), "Slope rock."= expression(bold("Slope rock.")), "Splitnose rock."= expression(bold("Splitnose rock.")), "Widow rock."= expression(bold("Widow rock.")), "Yellowtail rock."= expression(bold("Yellowtail rock.")))) + 
   theme_bw() + theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour= "Commercially valuable predators", title= "A") + theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + ggsave(width = 6, height = 6, "~/Documents/OTZ.manuscript/Images/plot.commercial.50.jpeg")
-plot1_comm      
+plot1_comm    
+
+scale_colour_discrete <- scale_colour_viridis_d
 
 #Graph with noncommercially valuable predators
 new_noncomm <- noncommerical_predators[- c(9,7,11,4,6,17,1,12,8,10,19,5,16,18,15,14,13,3)] #Remove predators that have commercial value as well 
@@ -246,7 +248,7 @@ change_2_1 <- change_2_1_df %>% mutate(value = round(as.numeric(paste(value)), 2
 #Change species labels? change text size 
 change_2_1_plot <- change_2_1 %>% ggplot(aes(x= value, y= reorder(species, desc(species)))) + geom_point(aes(col= species)) + xlim(0.5, 1.5) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
  scale_color_discrete(type= "viridis", labels= c("Tufted Puffin= Tufted puffin", "P. Ocean Perch"= "P. ocean perch", "Leach's S. Petrel"= "Leach's s. petrel")) +  
-xlab("Proportion of original biomass") + ylab("Predators with low diet proportion ") + labs(title= "A") + theme_bw() + theme(panel.border = element_blank()) +
+xlab("Proportion of original biomass") + ylab("Predators with high diet proportion ") + labs(title= "A") + theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(legend.position= "none")+  theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) +
@@ -261,7 +263,7 @@ change_2_2 <- change_2_2_df %>% mutate(value = round(as.numeric(paste(value)), 2
 
 change_2_2_plot <- change_2_2 %>% ggplot(aes(x= value, y=reorder(species, desc(species)))) + geom_point(aes(col= species)) + xlim(0, 1.6) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
  scale_color_discrete(type= "viridis", labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Juv. Ele. Seal"= "Juv. elephant seal", "Greenstriped"= "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm"= "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder")) + 
-xlab("Proportion of original biomass") + ylab("Predators with diet proportion under 0.05") + labs(title= "B") + theme_bw() + theme(panel.border = element_blank()) +
+xlab("Proportion of original biomass") + ylab("Predators with low diet proportion") + labs(title= "B") + theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(legend.position= "none") + theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + 
