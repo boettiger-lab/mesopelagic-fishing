@@ -13,6 +13,8 @@ library(dplyr)
 library(readxl)
 library(ggplot2)
 library(Rpath)
+library(cowplot)
+library(grid)
 ```
 
 #Importing code
@@ -158,7 +160,13 @@ scale_color_discrete(type = "viridis", labels= c("Greenstriped" = expression(bol
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour= "Commercially valuable predators", title= "A") + theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + ggsave(width = 6, height = 6, "~/Documents/OTZ.manuscript/Images/plot.commercial.50.jpeg")
 plot1_comm    
 
-scale_colour_discrete <- scale_colour_viridis_d
+#Removes legend: 
+theme(legend.position= "none"), #put in code above 
+#Seperates legend and saves it as pdf document 
+legend <- get_legend(plot1_comm)
+pdf("/Users/SallyDowd/Documents/legend.pdf")
+grid.draw(legend)
+dev.off()
 
 #Graph with noncommercially valuable predators
 new_noncomm <- noncommerical_predators[- c(9,7,11,4,6,17,1,12,8,10,19,5,16,18,15,14,13,3)] #Remove predators that have commercial value as well 
@@ -243,15 +251,21 @@ change_2_total <- as.data.frame(change_2_total)
 #3.4: Diet over 0.05
 change_2_1_df<- change_2_overtime_df(diet_over_0.05)
 change_2_1_df <- as.data.frame(change_2_1_df)
-change_2_1 <- change_2_1_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+change_2_1 <- change_2_1_df %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, 
+                      breaks = c(-Inf, 0.99, 1.001, Inf),
+                      labels = c("Decreasing", "Neither", "Increasing"),
+                      right = TRUE)) %>% arrange(value)
 
 #Change species labels? change text size 
-change_2_1_plot <- change_2_1 %>% ggplot(aes(x= value, y= reorder(species, desc(species)))) + geom_point(aes(col= species)) + xlim(0.5, 1.5) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
- scale_color_discrete(type= "viridis", labels= c("Tufted Puffin= Tufted puffin", "P. Ocean Perch"= "P. ocean perch", "Leach's S. Petrel"= "Leach's s. petrel")) +  
-xlab("Proportion of original biomass") + ylab("Predators with high diet proportion ") + labs(title= "A") + theme_bw() + theme(panel.border = element_blank()) +
+change_2_1_plot <- change_2_1 %>% ggplot(aes(col = result)) + geom_point(aes(x=value, y=reorder(species, desc(species)))) + 
+scale_colour_grey() +
+scale_y_discrete(labels= c("Tufted Puffin= Tufted puffin", "P. Ocean Perch"= "P. ocean perch", "Leach's S. Petrel"= "Leach's s. petrel")) + 
+  geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
+  xlim(0.5, 1.5) + 
+xlab("Relative biomass") + ylab("Predators with high diet proportion ") + labs(col = "End biomass", title= "A") + theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-theme(legend.position= "none")+  theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) +
+theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) +
   ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/dietover.25.jpeg")
 change_2_1_plot 
 
@@ -259,11 +273,12 @@ change_2_1_plot
 #Change species labels? change text size? 
 change_2_2_df<- change_2_overtime_df(diet_under_0.05)
 change_2_2_df <- as.data.frame(change_2_2_df)
-change_2_2 <- change_2_2_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value)
+change_2_2 <- change_2_2_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value) 
 
-change_2_2_plot <- change_2_2 %>% ggplot(aes(x= value, y=reorder(species, desc(species)))) + geom_point(aes(col= species)) + xlim(0, 1.6) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
- scale_color_discrete(type= "viridis", labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Juv. Ele. Seal"= "Juv. elephant seal", "Greenstriped"= "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm"= "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder")) + 
-xlab("Proportion of original biomass") + ylab("Predators with low diet proportion") + labs(title= "B") + theme_bw() + theme(panel.border = element_blank()) +
+change_2_2_plot <- change_2_2 %>% ggplot(aes(x= value, y=reorder(species, desc(species)))) + geom_point() + xlim(0, 1.6) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
+  scale_colour_grey() + 
+ scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Juv. Ele. Seal"= "Juv. elephant seal", "Greenstriped"= "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm"= "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder")) + 
+xlab("Relative biomass") + ylab("Predators with low diet proportion") + labs(title= "B") + theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 theme(legend.position= "none") + theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + 
