@@ -1,0 +1,27 @@
+---
+title: "Uncertainty ranges"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+Uncertainty_ranges <- read_excel("~/Documents/Uncertainty.ranges.xlsx")
+```
+
+```{r}
+Uncert_range <- Uncertainty_ranges %>% ggplot() +
+geom_linerange(aes(ymin= Min, ymax= Max, x= factor(Parameter, level= c('Mortality', 'Biomass', 'Fishing Costs', 'Price')))) + 
+theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10, family= "Helvetica
+serif"), axis.title=element_text(size=12)) + 
+xlab("Parameter") + ylab("Critical value range") + 
+theme_bw() + theme(panel.border = element_blank()) +
+theme(axis.line = element_line(colour = "black")) +
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
+ggsave(width = 6, height = 4, "~/Documents/OTZ.Manuscript/Images/uncertainty.ranges.jpeg")
+Uncert_range
+```
+
