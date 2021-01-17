@@ -70,7 +70,9 @@ noncommerical_predators
 
 #Diet proportion of mesopelagic fish less than 0.05
 diet_under_0.05 <- c(Cal_bal$Group[15], Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[37], Cal_bal$Group[43:47], Cal_bal$Group[50], Cal_bal$Group[52:53], Cal_bal$Group[55], Cal_bal$Group[58:59], Cal_bal$Group[60], Cal_bal$Group[65:67], Cal_bal$Group[69],Cal_bal$Group[72:73], Cal_bal$Group[77:80], Cal_bal$Group[82], Cal_bal$Group[86:88])
-diet_under_0.05
+
+diet_under_0.05_2 <- c(Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[37], Cal_bal$Group[43:47], Cal_bal$Group[50], Cal_bal$Group[52:53], Cal_bal$Group[55], Cal_bal$Group[58:59], Cal_bal$Group[60], Cal_bal$Group[65:67], Cal_bal$Group[69],Cal_bal$Group[72:73], Cal_bal$Group[77:80], Cal_bal$Group[82], Cal_bal$Group[86:88])
+diet_under_0.05_2
 
 #Diet proportion of mesopelagic fish equal to or greater than 0.05
 diet_over_0.05 <- c(Cal_bal$Group[29], Cal_bal$Group[33], Cal_bal$Group[38], Cal_bal$Group[42], Cal_bal$Group[48], Cal_bal$Group[51], Cal_bal$Group[54], Cal_bal$Group[56], Cal_bal$Group[63], Cal_bal$Group[70], Cal_bal$Group[76], Cal_bal$Group[85])
@@ -258,30 +260,39 @@ change_2_1 <- change_2_1_df %>% mutate(value = round(as.numeric(paste(value)), 2
 
 #Change species labels? change text size 
 change_2_1_plot <- change_2_1 %>% ggplot(aes(col = result)) + geom_point(aes(x=value, y=reorder(species, desc(species)))) + 
-scale_colour_grey() +
+scale_colour_grey() + 
 scale_y_discrete(labels= c("Tufted Puffin= Tufted puffin", "P. Ocean Perch"= "P. ocean perch", "Leach's S. Petrel"= "Leach's s. petrel")) + 
   geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
-  xlim(0.5, 1.5) + 
+  xlim(0.75, 1.25) + 
 xlab("Relative biomass") + ylab("Predators with high diet proportion ") + labs(col = "End biomass", title= "A") + theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) +
-  ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/dietover.25.jpeg")
+theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + 
+ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/dietover.25.jpeg")
 change_2_1_plot 
 
 #3.5: Diet under 0.05 
-#Change species labels? change text size? 
-change_2_2_df<- change_2_overtime_df(diet_under_0.05)
-change_2_2_df <- as.data.frame(change_2_2_df)
-change_2_2 <- change_2_2_df %>% mutate(value = round(as.numeric(paste(value)), 2)) %>% arrange(value) 
 
-change_2_2_plot <- change_2_2 %>% ggplot(aes(x= value, y=reorder(species, desc(species)))) + geom_point() + xlim(0, 1.6) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
-  scale_colour_grey() + 
- scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Juv. Ele. Seal"= "Juv. elephant seal", "Greenstriped"= "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm"= "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder")) + 
-xlab("Relative biomass") + ylab("Predators with low diet proportion") + labs(title= "B") + theme_bw() + theme(panel.border = element_blank()) +
+change_2_2_df<- change_2_overtime_df(diet_under_0.05_2)
+change_2_2_df <- as.data.frame(change_2_2_df)
+change_2_2 <- change_2_2_df %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, 
+                      breaks = c(-Inf, 0.99, 1.001, Inf),
+                      labels = c("Decreasing", "Neither", "Increasing"),
+                      right = TRUE)) %>% arrange(value)
+
+
+change_2_2_plot <- change_2_2 %>% ggplot(aes(col= result)) + geom_point(aes(x= value, y=reorder(species, desc(species)))) + 
+scale_colour_grey() +  
+ scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Juv. Ele.      Seal"= "Juv. elephant seal", "Greenstriped"= "Greenstriped rockfish", "Double corm."= "Double cormorant",    "Brandt's corm"= "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder")) + 
+  xlim(0.75, 1.25) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
+xlab("Relative biomass") + ylab("Predators with low diet proportion") + 
+labs(col = "End biomass", title= "A") +
+theme_bw() +
+theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-theme(legend.position= "none") + theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + 
+#theme(legend.position= "none") #if don't want legend
+  theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + 
 ggsave(width = 7, height = 5, "~/Documents/OTZ.manuscript/Images/dietunder.25.jpeg")
 change_2_2_plot
 ```
