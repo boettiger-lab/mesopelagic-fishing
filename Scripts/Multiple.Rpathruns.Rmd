@@ -256,6 +256,8 @@ sum_data_6 <- sum_data_6 %>% mutate("median.value" = cut(median_biomass,
                       labels = c("Decreasing", "Increasing"),
                       right = TRUE), "difference"= quant_97.5-quant_2.5)
 
+write.csv(sum_data_6, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/sum_data_6.csv")
+
 max(sum_data_6$difference)*100
 min(sum_data_6$difference)*100
 mean(sum_data_6$difference)*100
@@ -281,7 +283,9 @@ new_noncomm <- noncommerical_predators[- c(9,7,11,4,6,17,1,12,8,10,19,5,16,18,15
 
 #Filter datasets
 comm_value <- sum_data_6 %>% filter(spp %in% commercial_predators) 
+write.csv(comm_value, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/comm_value.csv")
 noncomm_value <- sum_data_6 %>% filter(spp %in% new_noncomm)
+write.csv(noncomm_value, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/noncomm_value.csv")
 
 #Make plots
 comm_value_500 <- comm_value %>% ggplot(aes(fill = median.value)) + 
