@@ -101,21 +101,10 @@ CalCur_unbal2_list <- list() #Creating an empty list to store vectors so can ind
 CalCur_unbal2_list[[439]]
 ```
 
-#Creating a balanced Ecopath model 
-```{r}
-Cal_bal2 <- list()
-for (i in 1:500) {
-Cal_bal2[[i]] <- rpath(CalCur_unbal2_list[[i]]) 
-  cbind(Cal_bal2[[i]]$Group, Cal_bal2[[i]]$EE)
-  cbind(Cal_bal2[[i]]$Group, Cal_bal2[[i]]$TL) 
-}
-Cal_bal2[[430]]
-```
+#Calculating outliers
 
-#Loop to calculate outliers
+##Biomass 
 ```{r}
-#Do this with balanced instead! 
-#Look at balanced data frame 
 seven_models <- CalCur_unbal2_list[c(67, 126, 237, 343, 396, 430, 472)]
 rest_of_models <- CalCur_unbal2_list[-c(67, 126, 237, 343, 396, 430, 472)]
 
@@ -135,15 +124,58 @@ seven_out <- seven_models[[i]]$model %>% dplyr::select(Biomass, QB, PB, EE, Grou
 outlier[i] <- seven_out %>% left_join(table_Biomass) %>% mutate(outlier= ifelse(Biomass < lower_outlier|Biomass > upper_outlier, TRUE, FALSE)) %>% select(outlier)
 }
 outlier[1]
+
 table_Biomass_7 <- bind_rows(seven_models) %>% group_by(Group) %>% summarize(biomass_493 = mean(Biomass), sd= sd(Biomass))
 ```
 
+##QB
 ```{r}
+seven_models <- CalCur_unbal2_list[c(67, 126, 237, 343, 396, 430, 472)]
+rest_of_models <- CalCur_unbal2_list[-c(67, 126, 237, 343, 396, 430, 472)]
 
+for (i in 1:493) {
+rest_of_models[[i]] <- rest_of_models[[i]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group== "mesopelagics")
+}
+
+table_QB <- bind_rows(rest_of_models) %>% group_by(Group) %>% summarize(IQR_QB= IQR(QB), quantile_lower = quantile(QB, 0.25), quantile_upper = quantile(QB, 0.75)) %>% mutate(lower_outlier = quantile_lower - (1.5*IQR_QB), upper_outlier= quantile_upper + (1.5*IQR_QB)) 
+
+outlier <- list()
+for (i in 1:7) {
+seven_out <- seven_models[[i]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group== "mesopelagics")
+outlier[i] <- seven_out %>% left_join(table_QB) %>% mutate(outlier= ifelse(QB < lower_outlier|QB > upper_outlier, TRUE, FALSE)) %>% select(outlier)
+print(outlier[i])
+}
 ```
 
+##PB
+```{r}
+seven_models <- CalCur_unbal2_list[c(67, 126, 237, 343, 396, 430, 472)]
+rest_of_models <- CalCur_unbal2_list[-c(67, 126, 237, 343, 396, 430, 472)]
 
+for (i in 1:493) {
+rest_of_models[[i]] <- rest_of_models[[i]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group== "mesopelagics")
+}
 
+table_PB <- bind_rows(rest_of_models) %>% group_by(Group) %>% summarize(IQR_PB= IQR(PB), quantile_lower = quantile(PB, 0.25), quantile_upper = quantile(PB, 0.75)) %>% mutate(lower_outlier = quantile_lower - (1.5*IQR_PB), upper_outlier= quantile_upper + (1.5*IQR_PB)) 
+
+outlier <- list()
+for (i in 1:7) {
+seven_out <- seven_models[[i]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group== "mesopelagics")
+outlier[i] <- seven_out %>% left_join(table_PB) %>% mutate(outlier= ifelse(PB < lower_outlier|PB > upper_outlier, TRUE, FALSE)) %>% select(outlier)
+print(outlier[i])
+}
+```
+
+#Creating a balanced Ecopath model 
+```{r}
+Cal_bal2 <- list()
+for (i in 1:500) {
+Cal_bal2[[i]] <- rpath(CalCur_unbal2_list[[i]]) 
+  cbind(Cal_bal2[[i]]$Group, Cal_bal2[[i]]$EE)
+  cbind(Cal_bal2[[i]]$Group, Cal_bal2[[i]]$TL) 
+}
+Cal_bal2[[430]]
+```
 
 #Creating base scenario 
 ```{r}
