@@ -388,23 +388,16 @@ table_Biomass_7 <- bind_rows(seven_models) %>% group_by(Group) %>% summarize(bio
 
 #Are the results outliers
 ```{r}
-seven_models_outliers <- bind_rows(data_6.2) %>% filter(X %in% c(67, 126, 237, 343, 396, 430, 472)) %>% arrange(spp)
-seven_models_outliers <- transform(seven_models_outliers,ID=as.numeric(factor(spp))) 
-seven_models_outliers <- seven_models_outliers %>% group_by(spp, ID) %>% summarise(mean_biomass = mean(biomass))
+seven_models_outliers <- bind_rows(data_6.2) %>% filter(X %in% c(67, 126, 237, 343, 396, 430, 472)) %>% arrange(X)
+seven_models_outliers <- transform(seven_models_outliers,ID=as.numeric(factor(spp))) %>% group_by(X)
 
-#Need to calculate IQR of rest_of_model_outliers before we find mean_biomass
-rest_of_models_outliers <- sum_data_6 %>% summarize(IQR_biomass = IQR(Biomass)) %>% select(spp, mean_biomass, quant_2.5, quant_97.5, IQR_biomass)
+rest_of_models_outliers <- entire_data_6 %>% group_by(spp) %>% summarize(IQR_biomass = IQR(biomass), quantile_lower = quantile(biomass, 0.25), quantile_upper = quantile(biomass, 0.75)) %>% mutate(lower_outlier = quantile_lower - (1.5*IQR_biomass), upper_outlier= quantile_upper + (1.5*IQR_biomass)) 
 
-table_Biomass <- bind_rows(rest_of_models) %>% group_by(Group) %>% summarize(IQR_biomass= IQR(Biomass), quantile_lower = quantile(Biomass, 0.025), quantile_upper = quantile(Biomass, 0.975)) %>% mutate(lower_outlier = quantile_lower - (1.5*IQR_biomass), upper_outlier= quantile_upper + (1.5*IQR_biomass)) 
-
-table_1 <- seven_models[[1]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group == "mesopelagics") %>% group_by(Group) %>% summarize(biomass_7= mean(Biomass))
-
-table_Biomass %>% left_join(table_1) %>% mutate(outlier= ifelse(biomass_7 < lower_outlier|biomass_7 > upper_outlier, TRUE, FALSE))
 
 outlier <- list()
 for (i in 1:7) {
-seven_out <- seven_models[[i]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group== "mesopelagics")
-outlier[i] <- seven_out %>% left_join(table_Biomass) %>% mutate(outlier= ifelse(Biomass < lower_outlier|Biomass > upper_outlier, TRUE, FALSE)) %>% select(outlier)
+seven_out <- seven_model_outliers %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group== "mesopelagics")
+outlier[i] <- seven_models_outliers %>% left_join(rest_of_models_outliers) %>% mutate(outlier= ifelse(Biomass < lower_outlier|Biomass > upper_outlier, TRUE, FALSE)) %>% select(outlier)
 }
 outlier[1]
 
