@@ -423,11 +423,18 @@ seven_models_outliers <- transform(seven_models_outliers,ID.X=as.numeric(factor(
 rest_of_models_outliers <- entire_data_6 %>% group_by(spp) %>% summarize(IQR_biomass = IQR(biomass), quantile_lower = quantile(biomass, 0.25), quantile_upper = quantile(biomass, 0.75)) %>% mutate(lower_outlier = quantile_lower - (1.5*IQR_biomass), upper_outlier= quantile_upper + (1.5*IQR_biomass)) 
 
 
+#This is what I'm struggling with
 outlier <- list()
 for (i in unique(seven_models_outliers$ID.X)){
-seven_out <- seven_models_outliers$ID.X[[i]]
-outlier[i] <- seven_out %>% left_join(rest_of_models_outliers) %>% mutate(outlier= ifelse(biomass < lower_outlier|biomass > upper_outlier, TRUE, FALSE)) %>% select(outlier)
+subdf <- subset(x=seven_models_outliers, subset=ID.X==i)
+outlier[i] <- subdf %>% group_by(Group) %>% left_join(rest_of_models_outliers) %>% mutate(outlier= ifelse(biomass < lower_outlier|biomass > upper_outlier, TRUE, FALSE)) %>% select(outlier)
 }
+
+outlier[1]
+
+
+
+
 ```
 
 
