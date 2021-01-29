@@ -101,46 +101,6 @@ CalCur_unbal2_list <- list() #Creating an empty list to store vectors so can ind
 CalCur_unbal2_list[[439]]
 ```
 
-#Calculating outliers
-
-##QB
-```{r}
-seven_models <- CalCur_unbal2_list[c(67, 126, 237, 343, 396, 430, 472)]
-rest_of_models <- CalCur_unbal2_list[-c(67, 126, 237, 343, 396, 430, 472)]
-
-for (i in 1:493) {
-rest_of_models[[i]] <- rest_of_models[[i]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group== "mesopelagics")
-}
-
-table_QB <- bind_rows(rest_of_models) %>% group_by(Group) %>% summarize(IQR_QB= IQR(QB), quantile_lower = quantile(QB, 0.25), quantile_upper = quantile(QB, 0.75)) %>% mutate(lower_outlier = quantile_lower - (1.5*IQR_QB), upper_outlier= quantile_upper + (1.5*IQR_QB)) 
-
-outlier <- list()
-for (i in 1:7) {
-seven_out <- seven_models[[i]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group== "mesopelagics")
-outlier[i] <- seven_out %>% left_join(table_QB) %>% mutate(outlier= ifelse(QB < lower_outlier|QB > upper_outlier, TRUE, FALSE)) %>% select(outlier)
-print(outlier[i])
-}
-```
-
-##PB
-```{r}
-seven_models <- CalCur_unbal2_list[c(67, 126, 237, 343, 396, 430, 472)]
-rest_of_models <- CalCur_unbal2_list[-c(67, 126, 237, 343, 396, 430, 472)]
-
-for (i in 1:493) {
-rest_of_models[[i]] <- rest_of_models[[i]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group== "mesopelagics")
-}
-
-table_PB <- bind_rows(rest_of_models) %>% group_by(Group) %>% summarize(IQR_PB= IQR(PB), quantile_lower = quantile(PB, 0.25), quantile_upper = quantile(PB, 0.75)) %>% mutate(lower_outlier = quantile_lower - (1.5*IQR_PB), upper_outlier= quantile_upper + (1.5*IQR_PB)) 
-
-outlier <- list()
-for (i in 1:7) {
-seven_out <- seven_models[[i]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group== "mesopelagics")
-outlier[i] <- seven_out %>% left_join(table_PB) %>% mutate(outlier= ifelse(PB < lower_outlier|PB > upper_outlier, TRUE, FALSE)) %>% select(outlier)
-print(outlier[i])
-}
-```
-
 #Creating a balanced Ecopath model 
 ```{r}
 Cal_bal2 <- list()
@@ -361,7 +321,76 @@ ggsave(width = 6, height = 4, "~/Documents/OTZ.Manuscript/Images/500.noncommerci
 noncomm_value_500
 ```
 
-##Biomass 
+#Averages of paramters
+```{r}
+#Biomass
+seven_models <- CalCur_unbal2_list[c(67, 126, 237, 343, 396, 430, 472)]
+rest_of_models <- CalCur_unbal2_list[-c(67, 126, 237, 343, 396, 430, 472)]
+
+for (i in 1:493) {
+rest_of_models[[i]] <- rest_of_models[[i]]$model %>% dplyr::select(Biomass, Group) 
+}
+seven_out <- list()
+for (i in 1:7) {
+seven_out[[i]] <- seven_models[[i]]$model %>% dplyr::select(Biomass, Group) 
+}
+
+Biomass_included <- bind_rows(rest_of_models) %>% group_by(Group) %>% summarize(mean_biomass = mean(Biomass)) %>% mutate(Model = "Included")
+Biomass_excluded <- bind_rows(seven_out) %>% group_by(Group) %>% summarize(mean_biomass = mean(Biomass)) %>% mutate(Model = "Excluded")
+Biomass_comp <- Biomass_included %>% bind_rows(Biomass_excluded) %>% arrange(Group)
+
+#QB
+seven_models <- CalCur_unbal2_list[c(67, 126, 237, 343, 396, 430, 472)]
+rest_of_models <- CalCur_unbal2_list[-c(67, 126, 237, 343, 396, 430, 472)]
+for (i in 1:493) {
+rest_of_models[[i]] <- rest_of_models[[i]]$model %>% dplyr::select(QB, Group) 
+}
+seven_out <- list()
+for (i in 1:7) {
+seven_out[[i]] <- seven_models[[i]]$model %>% dplyr::select(QB, Group) 
+}
+
+QB_included <- bind_rows(rest_of_models) %>% group_by(Group) %>% summarize(mean_QB = mean(QB)) %>% mutate(Model = "Included")
+QB_excluded <- bind_rows(seven_out) %>% group_by(Group) %>% summarize(mean_QB = mean(QB)) %>% mutate(Model = "Excluded")
+QB_comp <- QB_included %>% bind_rows(QB_excluded) %>% arrange(Group)
+
+#PB
+seven_models <- CalCur_unbal2_list[c(67, 126, 237, 343, 396, 430, 472)]
+rest_of_models <- CalCur_unbal2_list[-c(67, 126, 237, 343, 396, 430, 472)]
+for (i in 1:493) {
+rest_of_models[[i]] <- rest_of_models[[i]]$model %>% dplyr::select(PB, Group) 
+}
+seven_out <- list()
+for (i in 1:7) {
+seven_out[[i]] <- seven_models[[i]]$model %>% dplyr::select(PB, Group) 
+}
+
+PB_included <- bind_rows(rest_of_models) %>% group_by(Group) %>% summarize(mean_PB = mean(PB)) %>% mutate(Model = "Included")
+PB_excluded <- bind_rows(seven_out) %>% group_by(Group) %>% summarize(mean_PB = mean(PB)) %>% mutate(Model = "Excluded")
+PB_comp <- PB_included %>% bind_rows(PB_excluded) %>% arrange(Group)
+
+#EE
+seven_models <- CalCur_unbal2_list[c(67, 126, 237, 343, 396, 430, 472)]
+rest_of_models <- CalCur_unbal2_list[-c(67, 126, 237, 343, 396, 430, 472)]
+for (i in 1:493) {
+rest_of_models[[i]] <- rest_of_models[[i]]$model %>% dplyr::select(EE, Group) 
+}
+seven_out <- list()
+for (i in 1:7) {
+seven_out[[i]] <- seven_models[[i]]$model %>% dplyr::select(EE, Group) 
+}
+
+EE_included <- bind_rows(rest_of_models) %>% group_by(Group) %>% summarize(mean_EE = mean(EE)) %>% mutate(Model = "Included")
+EE_excluded <- bind_rows(seven_out) %>% group_by(Group) %>% summarize(mean_EE = mean(EE)) %>% mutate(Model = "Excluded")
+EE_comp <- EE_included %>% bind_rows(EE_excluded) %>% arrange(Group)
+
+write.csv(Biomass_comp, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/500.inputs/Biomass_comp.csv")
+write.csv(QB_comp, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/500.inputs/QB_comp.csv")
+write.csv(EE_comp, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/500.inputs/EE_comp.csv")
+write.csv(PB_comp, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/500.inputs/PB_comp.csv")
+```
+
+##Biomass- keep this for now  
 ```{r}
 seven_models <- CalCur_unbal2_list[c(67, 126, 237, 343, 396, 430, 472)]
 rest_of_models <- CalCur_unbal2_list[-c(67, 126, 237, 343, 396, 430, 472)]
@@ -381,7 +410,7 @@ for (i in 1:7) {
 seven_out <- seven_models[[i]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group== "mesopelagics")
 outlier[i] <- seven_out %>% left_join(table_Biomass) %>% mutate(outlier= ifelse(Biomass < lower_outlier|Biomass > upper_outlier, TRUE, FALSE)) %>% select(outlier)
 }
-outlier[1]
+outlier[7]
 
 table_Biomass_7 <- bind_rows(seven_models) %>% group_by(Group) %>% summarize(biomass_493 = mean(Biomass), sd= sd(Biomass))
 ```
@@ -389,19 +418,16 @@ table_Biomass_7 <- bind_rows(seven_models) %>% group_by(Group) %>% summarize(bio
 #Are the results outliers
 ```{r}
 seven_models_outliers <- bind_rows(data_6.2) %>% filter(X %in% c(67, 126, 237, 343, 396, 430, 472)) %>% arrange(X)
-seven_models_outliers <- transform(seven_models_outliers,ID=as.numeric(factor(spp))) %>% group_by(X)
+seven_models_outliers <- transform(seven_models_outliers,ID.X=as.numeric(factor(X))) %>% group_by(X)
 
 rest_of_models_outliers <- entire_data_6 %>% group_by(spp) %>% summarize(IQR_biomass = IQR(biomass), quantile_lower = quantile(biomass, 0.25), quantile_upper = quantile(biomass, 0.75)) %>% mutate(lower_outlier = quantile_lower - (1.5*IQR_biomass), upper_outlier= quantile_upper + (1.5*IQR_biomass)) 
 
 
 outlier <- list()
-for (i in 1:7) {
-seven_out <- seven_model_outliers %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group== "mesopelagics")
-outlier[i] <- seven_models_outliers %>% left_join(rest_of_models_outliers) %>% mutate(outlier= ifelse(Biomass < lower_outlier|Biomass > upper_outlier, TRUE, FALSE)) %>% select(outlier)
+for (i in unique(seven_models_outliers$ID.X)){
+seven_out <- seven_models_outliers$ID.X[[i]]
+outlier[i] <- seven_out %>% left_join(rest_of_models_outliers) %>% mutate(outlier= ifelse(biomass < lower_outlier|biomass > upper_outlier, TRUE, FALSE)) %>% select(outlier)
 }
-outlier[1]
-
-table_Biomass_7 <- bind_rows(seven_models) %>% group_by(Group) %>% summarize(biomass_493 = mean(Biomass), sd= sd(Biomass))
 ```
 
 
