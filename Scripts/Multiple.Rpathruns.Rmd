@@ -192,7 +192,7 @@ rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
 } 
 
 #Convert 500 rsim models into a data frame 
-names_spp.2 <- run6$params$spname[2:94]
+names_spp.2 <- run2$params$spname[2:94]
 z_6.2 <- list()
 data_6.2 <- list()
 for (i in 1:500) {
@@ -392,14 +392,16 @@ write.csv(PB_comp, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/500.inputs/P
 
 ##Biomass- keep this for now  
 ```{r}
-seven_models <- CalCur_unbal2_list[c(67, 126, 237, 343, 396, 430, 472)]
-rest_of_models <- CalCur_unbal2_list[-c(67, 126, 237, 343, 396, 430, 472)]
+seven_models_outliers <- CalCur_unbal2_list[c(67, 126, 237, 343, 396, 430, 472)]
+rest_of_models_outliers <- CalCur_unbal2_list[-c(67, 126, 237, 343, 396, 430, 472)]
+
+rest_of_models
 
 for (i in 1:493) {
-rest_of_models[[i]] <- rest_of_models[[i]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group== "mesopelagics")
+rest_of_models_outliers[[i]] <- rest_of_models_outliers[[i]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) 
 }
 
-table_Biomass <- bind_rows(rest_of_models) %>% group_by(Group) %>% summarize(IQR_biomass= IQR(Biomass), quantile_lower = quantile(Biomass, 0.025), quantile_upper = quantile(Biomass, 0.95)) %>% mutate(lower_outlier = quantile_lower - (1.5*IQR_biomass), upper_outlier= quantile_upper + (1.5*IQR_biomass)) 
+table_Biomass <- bind_rows(rest_of_models_outliers) %>% group_by(spp) %>% summarize(IQR_biomass= IQR(biomass), quantile_lower = quantile(biomass, 0.025), quantile_upper = quantile(biomass, 0.95)) %>% mutate(lower_outlier = quantile_lower - (1.5*IQR_biomass), upper_outlier= quantile_upper + (1.5*IQR_biomass)) 
 
 table_1 <- seven_models[[1]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group == "mesopelagics") %>% group_by(Group) %>% summarize(biomass_7= mean(Biomass))
 
@@ -417,10 +419,32 @@ table_Biomass_7 <- bind_rows(seven_models) %>% group_by(Group) %>% summarize(bio
 
 #Are the results outliers
 ```{r}
+df
+letters <- c("A", "B", "C", "D", "E", "F", "G")
+X <- c(67, 126, 237, 343, 396, 430, 472)
+letters <- letters %>% bind_cols(X) 
 seven_models_outliers <- bind_rows(data_6.2) %>% filter(X %in% c(67, 126, 237, 343, 396, 430, 472)) %>% arrange(X)
-seven_models_outliers <- transform(seven_models_outliers,ID.X=as.numeric(factor(X))) %>% group_by(X)
+seven_models_outliers <- seven_models_outliers %>% mutate(ID.X = revalue(X, c(67="A", 126="B", 237= "C", 343= "D", 396= "E", 430= "F", 472= "G")))
+
+seven_models_outliers <- bind_rows(data_6.2) %>% filter(X %in% c(67, 126, 237, 343, 396, 430, 472)) %>% arrange(X)
+seven_models_outliers <- transform(seven_models_outliers, ID.X=as.numeric(factor(X)))  
+seven_models_outliers <- seven_models_outliers %>% mutate(ID.X = revalue(c(67, 126, 237, 343, 396, 430, 472), c("A", "B", "C", "D", "E", "F", "G"))
+
+  X, c(67="A", 126="B", 237= "C", 343= "D", 396= "E", 430= "F", 472= "G")))
+  mutate(ID.X= as.character(X))
+
 
 rest_of_models_outliers <- entire_data_6 %>% group_by(spp) %>% summarize(IQR_biomass = IQR(biomass), quantile_lower = quantile(biomass, 0.25), quantile_upper = quantile(biomass, 0.75)) %>% mutate(lower_outlier = quantile_lower - (1.5*IQR_biomass), upper_outlier= quantile_upper + (1.5*IQR_biomass)) 
+
+seven_models_outliers <- seven_models_outliers %>% spread(ID.X, biomass) 
+
+test <- seven_models_outliers %>% left_join(rest_of_models_outliers) %>%
+  mutate(outlier1 = ifelse(1 < lower_outlier|1 > upper_outlier, TRUE, FALSE)) 
+
+
+
+%>% select(outlier)
+
 
 
 #This is what I'm struggling with
@@ -433,6 +457,19 @@ outlier[i] <- subdf %>% group_by(Group) %>% left_join(rest_of_models_outliers) %
 outlier[1]
 
 
+table_1 <- seven_models[[1]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group == "mesopelagics") %>% group_by(Group) %>% summarize(biomass_7= mean(Biomass))
+
+table_Biomass %>% left_join(table_1) %>% mutate(outlier= ifelse(biomass_7 < lower_outlier|biomass_7 > upper_outlier, TRUE, FALSE))
+
+outlier <- list()
+for (i in 1:7) {
+seven_out <- seven_models[[i]]$model %>% dplyr::select(Biomass, QB, PB, EE, Group) %>% filter(Group== "mesopelagics")
+outlier[i] <- seven_out %>% left_join(table_Biomass) %>% mutate(outlier= ifelse(Biomass < lower_outlier|Biomass > upper_outlier, TRUE, FALSE)) %>% select(outlier)
+}
+outlier[7]
+
+table_Biomass_7 <- bind_rows(seven_models) %>% group_by(Group) %>% summarize(biomass_493 = mean(Biomass), sd= sd(Biomass))
+```
 
 
 ```
