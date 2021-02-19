@@ -16,6 +16,7 @@ library(Rpath)
 library(cowplot)
 library(grid)
 library(gridExtra)
+library(ggpubr)
 ```
 
 #Importing code
@@ -176,7 +177,7 @@ plot1_mammals <- data_1 %>% filter(spp %in% mammals) %>% ggplot(aes(x= month, y 
 theme_bw() + 
 scale_color_discrete(type = "viridis", labels= c("Adult N. Ele. Seal" = "Adult n. elephant seal", "Juv. Ele. Seal"= "Juv. elephant seal", "Resident Orcas"= "Resident orcas", "Sea Lions"= "Sea lions", "Transient Orcas"= "Transient orcas")) + 
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Marine mammals", title= "A") + theme( legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12))
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Marine mammals", title= "A") + theme(legend.position= "none", legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12))
 ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/plot.mammals.50.jpeg")
 plot1_mammals
 
@@ -272,7 +273,7 @@ scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "
 xlab("Relative biomass") + ylab("Species with high diet proportion ") + labs(col = "End biomass", title= "A") + theme_bw() + theme(panel.border = element_blank()) +
 theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-theme(legend.position= "none", legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + 
+theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + 
 ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/dietover.25.jpeg")
 change_2_1_plot 
 
@@ -303,7 +304,7 @@ theme(axis.line = element_line(colour = "black")) +
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 #theme(legend.position= "none") #if don't want legend
   theme(legend.position= "none", legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + 
-ggsave(width = 7, height = 5, "~/Documents/OTZ.manuscript/Images/dietunder.25.jpeg")
+ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/dietunder.25.jpeg")
 change_2_2_plot
 ```
 
@@ -312,52 +313,32 @@ change_2_2_plot
 #Running simple stats on all depletion levels
 ```{r}
 #Find increase and decrease of all predators for scenarios 1-4
-biomass_increase_100 <- data_3 %>% filter(month==600, biomass >1) %>% mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
-biomass_increase_100
-
-biomass_decrease_100 <- data_3 %>% filter(month==600, biomass <1) %>% mutate(difference= (1-biomass), percent= (1-biomass)*100)
-biomass_decrease_100
-
-biomass_increase_80 <- data_4 %>% filter(month==600, biomass >1) %>% mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
-biomass_increase_80
-
-biomass_decrease_80 <- data_4 %>% filter(month==600, biomass <1) %>% mutate(difference= (1-biomass), percent = (1-biomass)*100)
-biomass_decrease_80
-
-biomass_increase_50 <- data_5 %>% filter(month==600, biomass >1) %>% mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
-biomass_increase_50
-
-biomass_decrease_50 <- data_5 %>% filter(month==600, biomass <1) %>% mutate(difference= (1-biomass), percent= (1-biomass)*100)
-biomass_decrease_50
-
-biomass_increase_25 <- data_6 %>% filter(month==600, biomass >1) %>% mutate(difference = abs(1-biomass), percent = abs(1-biomass)*100)
+biomass_increase_25 <- data_2 %>% filter(month==600, biomass >1) %>% mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
 biomass_increase_25
 
-biomass_decrease_25 <- data_6 %>% filter(month==600, biomass < 1) %>% mutate(difference= (1-biomass), percent= (1-biomass)*100)
+biomass_decrease_25 <- data_2 %>% filter(month==600, biomass <1) %>% mutate(difference= (1-biomass), percent= (1-biomass)*100)
 biomass_decrease_25
 
+biomass_increase_50 <- data_1 %>% filter(month==600, biomass >1) %>% mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
+biomass_increase_50
+
+biomass_decrease_50 <- data_1 %>% filter(month==600, biomass <1) %>% mutate(difference= (1-biomass), percent = (1-biomass)*100)
+biomass_decrease_50
+
 #Find species specific end biomass for 25% (and 50?) harvest rate 
-predators_end2.1 <- data_2 %>% filter(spp %in% commercial_predators, month== 600)
-predators_end2.1
+predators_end25_comm <- data_2 %>% filter(spp %in% commercial_predators, month== 600)
+predators_end25_nonc <- data_2 %>% filter(spp %in% noncommerical_predators, month== 600)
 
-predators_end2.2 <- data_2 %>% filter(spp %in% noncommerical_predators, month== 600)
-predators_end2.2
+predators_end50_comm <- data_1 %>% filter(spp %in% commercial_predators, month== 600)
 
-predators_end2.3 <- data_2 %>% filter(spp %in% predators_mesopelagic, month == 600)
-predators_end2.3
+predators_end50_nonc <- data_1 %>% filter(spp %in% noncommerical_predators, month== 600)
 
-predators_end <- data_1 %>% filter(spp %in% commercial_predators, month== 600)
-predators_end
+write.csv(predators_end25_comm, "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/commercial.end.25.csv")
+write.csv(predators_end25_nonc, "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/noncommercial.end.25.csv")
 
-predators_end2 <- data_1 %>% filter(spp %in% noncommerical_predators, month== 600)
-predators_end2
+write.csv(predators_end50_comm, "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/commercial.end.50.csv")
+write.csv(predators_end50_nonc, "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/noncommercial.end.50.csv")
 
-predators_end3 <- data_1 %>% filter(spp %in% predators_mesopelagic, month == 600)
-predators_end3
-
-write.csv(predators_end, "/Users/SallyDowd/Documents/commercial.end.csv")
-write.csv(predators_end2, "/Users/SallyDowd/Documents/noncommercial.end.csv")
-write.csv(predators_end3, "/Users/SallyDowd/Documents/predators.end.csv")
 ```
 
 
