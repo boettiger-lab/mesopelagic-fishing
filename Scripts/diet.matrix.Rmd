@@ -2,46 +2,36 @@
 title: "diet.matrix"
 output: html_document
 ---
-#Install necessary packages 
-```{r}
-install.packages("matrixStats")
-```
 
-#Direct to the folder where ever you are storing all the diet matrices
-```{r}
-models <- "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/DietMatrices"
-file.names <- dir(models, pattern = ".csv") # pulls all files from
-# folder that end in .csv (I had this because I also had files with other parameters)
+#File to look at how much of a predator's diet is made up of mesopelagic fish from the Ecopath model in Koehn et al. (2016)
 
-```
-
-#Grab specifically the diet files (should be the only files for you)
 ```{r}
+setwd("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/")
+getwd()
+models <- "~/DietMatrices"
+file.names <- dir(models, pattern = ".csv") #Will pull files that end in .csv 
+
+#Grab specifically the diet files 
 dietfiles = grep(pattern = 'diet', file.names, value = TRUE)
-```
 
+#Load diet file from original Ecopath model
 
-#Original diet
-```{r}
-origdiet = read.csv(file = "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/Diet_CalCur_USE.csv", header = TRUE)
+origdiet = read.csv(file = "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Diet_CalCur_USE.csv", header = TRUE)
 meso_row = which(origdiet[,1] == "mesopelagics") 
 ```
-
 
 #How many predators eating meospelagics
 ```{r}
 n = length(which(origdiet[15,-1] > 0)) # 42 predators have diets > 0 on mesopelagics 
 # not including column 1, which just had the row number 
-```
 
-#Make matrix to house all diets on mesopelagics 
-```{r}
+#Make diet matrix to house all diets on mesopelagics 
 preddiets = matrix(NA, nrow = 500, ncol = n) # 500 models, n predators 
 ```
 
-#Set where ever files are stored, or do need if using R projects 
+#Set where ever files are stored
 ```{r}
-setwd("~/Documents/OTZ.manuscript/Excel/DietMatrices")
+setwd("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/DietMatrices")
 for(i in 1:500) {
   file2 <- read.csv(dietfiles[i], header = TRUE)
   file2 = as.matrix(file2)

@@ -1,38 +1,37 @@
 ---
-title: "Untitled"
+title: "OTZ.results.newRpath.Rmd"
 output: html_document
 ---
 
+#Code to simulate the ecosystem-wide impacts of harvesting mesopelagic fishes on the California Current system
+#Code was originally created by Kerim Aydin (kerim.aydin@noaa.gov), modified by Laura Koehn, Sally Dowd, and Melissa Chapman 
+
 #Load required packages
 ```{r}
-library(tidyverse)
+library(Rpath)
 library(data.table)
-library(viridisLite)
-library(viridis)
+library(tidyr)
 library(dplyr)
 library(readxl)
 library(ggplot2)
-library(Rpath)
-library(cowplot)
-library(grid)
-library(gridExtra)
-library(ggpubr)
+library(tidyverse)
+library(viridis)
 ```
 
-#Importing code
+#Import csv files 
 ```{r}
 #Define code source for base and diet parameters
 Cbase <- "../Data/Groupinfo_CalCur-USE.csv"  # Base biomass, production, fishing, etc.
 Cdiet <- "../Data/Diet_CalCur_USE.csv"  # Diet matrix
 
-#Load unbalanced Ecopath model from csv files
+#Load unbalanced Ecopath model
 CalCur_unbal <- read.rpath.params(Cbase, Cdiet)
 
 #Read in created parameter files with read.rpath.params function
 check.rpath.params(CalCur_unbal)
 ```
 
-#Running Ecopath in R: Balance an unbalanced Ecopath object
+#Running Ecopath in R: Balance an unbalanced Ecopath object, convert Ecopath model to Rpath object
 ```{r}
 #Balance the scenario using rpath function 
 Cal_bal <- rpath(CalCur_unbal) 
@@ -43,19 +42,13 @@ cbind(Cal_bal$Group, Cal_bal$EE)
 cbind(Cal_bal$Group, Cal_bal$TL) 
 ```
 
-#Define species for plotting (go over this)
+#Define different sets of functional groups
 ```{r}
-#Koehn's defined functional groups 
 all_species <- Cal_bal$Group[1:92] 
 mammals <- Cal_bal$Group[71:85] 
 seabirds <- c(Cal_bal$Group[60:70], Cal_bal$Group[86:92])
 pred_fish  <- Cal_bal$Group[33:59] 
-
-#My customized defined functional groups 
-
-#Plankton
 Plankton <- c(Cal_bal$Group[1], Cal_bal$Group[5:10])
-#Forage fish 
 forage <- Cal_bal$Group[19:27]
 
 #All predators of mesopelagic fish 
@@ -66,22 +59,19 @@ predators_mesopelagic
 commercial_predators <- c(Cal_bal$Group[18], Cal_bal$Group[33], Cal_bal$Group[37:38], Cal_bal$Group[42:48], Cal_bal$Group[50:56], Cal_bal$Group[58:59])
 commercial_predators
 
-#Noncommercially valuable predators of mesopelagic fish
+#Non-commercially valuable predators of mesopelagic fish
 noncommerical_predators <- c(Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[33], Cal_bal$Group[37:38], Cal_bal$Group[43:47], Cal_bal$Group[50:56], Cal_bal$Group[58:60], Cal_bal$Group[63], Cal_bal$Group[65:67], Cal_bal$Group[69:70], Cal_bal$Group[72:73], Cal_bal$Group[76:80], Cal_bal$Group[82], Cal_bal$Group[85:88])
 noncommerical_predators
 
-#Diet proportion of mesopelagic fish less than 0.05
+#Predators that have a diet proportion of mesopelagic fish < 0.05
 diet_under_0.05 <- c(Cal_bal$Group[15], Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[37], Cal_bal$Group[43:47], Cal_bal$Group[50], Cal_bal$Group[52:53], Cal_bal$Group[55], Cal_bal$Group[58:59], Cal_bal$Group[60], Cal_bal$Group[65:67], Cal_bal$Group[69],Cal_bal$Group[72:73], Cal_bal$Group[77:80], Cal_bal$Group[82], Cal_bal$Group[86:88])
 
 diet_under_0.05_2 <- c(Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[37], Cal_bal$Group[43:47], Cal_bal$Group[50], Cal_bal$Group[52:53], Cal_bal$Group[55], Cal_bal$Group[58:59], Cal_bal$Group[60], Cal_bal$Group[65:67], Cal_bal$Group[69],Cal_bal$Group[72:73], Cal_bal$Group[77:80], Cal_bal$Group[82], Cal_bal$Group[86:88])
 diet_under_0.05_2
 
-#Diet proportion of mesopelagic fish equal to or greater than 0.05
+#Predators that have a diet proportion of mesopelagic fish > 0.05
 diet_over_0.05 <- c(Cal_bal$Group[29], Cal_bal$Group[33], Cal_bal$Group[38], Cal_bal$Group[42], Cal_bal$Group[48], Cal_bal$Group[51], Cal_bal$Group[54], Cal_bal$Group[56], Cal_bal$Group[63], Cal_bal$Group[70], Cal_bal$Group[76], Cal_bal$Group[85])
 diet_over_0.05
-
-#Highest diet proportion 
-highest_diet <- c(Cal_bal$Group[70], Cal_bal$Group[56], Cal_bal$Group[12])
 
 #Predators of mesopelagic fish with annual economic value over $1/lb 
 high.price <- c(Cal_bal$Group[47], Cal_bal$Group[45], Cal_bal$Group[38], Cal_bal$Group[55], Cal_bal$Group[46], Cal_bal$Group[43])
@@ -98,14 +88,13 @@ run0 <- rsim.run(scene0, method='AB', years=yearlist)
 rsim.plot(run0,all_species)
 ```
 
-
-#Helper function to look up the ending biomass of a scenario
+#Function to look up the ending biomass of a scenario
 ```{r}
 end_biomass <- function(rsim){return(rsim$out_Biomass[dim(rsim$out_Biomass)[1], 2:(dim(rsim$out_Biomass)[2])])}
 end_biomass
 ```
 
-#DEPLETION LEVEL OF 50%
+#Scenario 7: Mesopelagic harvest level of 50%
 #Run harvest scenario
 ```{r}
 target_sp <- "mesopelagics" #Define target species
@@ -121,11 +110,11 @@ assessment
 #Calculate total catch by multiplying target harvest rate by assessment 
   catches <- target_F * assessment
   
-#Apply each catch to the target species
+#Apply catch to the target species
   for (sp in target_sp){
     scene1 <- adjust.fishing(scene1, "ForcedCatch", sp, yr, value=catches[sp])
   }
-  # run 1 year
+  #Run 1 year
   run1 <- rsim.step(scene1, run1, method='AB', year.end=yr) 
 }  
 rsim.plot(run1,all_species)  
@@ -149,27 +138,28 @@ rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
 
 names_spp <- run1$params$spname[2:94]
 
-#Need to make z into data frame
+#Make run1 a dataframe 
 z_1 <-rsim.plot.fun(run1)
 z_1<-as.data.frame(z_1)
 names(z_1) <- names_spp
 z_1$month <- 1:600
 data_1 <- gather(z_1, key = spp, value = biomass, -month )
 
+#Define a common ggplot theme 
+standard_theme <- theme_bw() + theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text.align= 0, legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) 
+
 #Plot functional group biomass over the 50-year simulation
 #Graph with commercially valuable predators
 plot1_comm <- data_1 %>% filter(spp %in% commercial_predators) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") +
-scale_color_discrete(type = "viridis", labels= c("Greenstriped" = expression(bold("Greenstriped rockfish")), "P. Ocean Perch"= expression(bold("P. ocean perch")), "Albacore" = expression(bold("Albacore")), "Arrowtooth" = expression(bold("Arrowtooth flounder")), "Canary rock."= expression(bold("Canary rock.")), "Lingcod"= expression(bold("Lingcod")), "Longspine thorny."= expression(bold("Longspine thornyhead")), "Other cephalopod"= expression(bold("Other cephal.")), "Sablefish"= expression(bold("Sablefish")), "Salmon"= expression(bold("Salmon")), "Sharks"= expression(bold("Sharks")), "Shelf rock."= expression(bold("Shelf rockfish")), "Shortspine thorny."= expression(bold("Shortspine thornyhead")), "Skates"= expression(bold("Skates")), "Slope rock."= expression(bold("Slope rockfish")), "Splitnose rockfish"= expression(bold("Splitnose rockfish")), "Widow rock."= expression(bold("Widow rockfish")), "Yellowtail rock."= expression(bold("Yellowtail rockfish")))) + 
-  theme_bw() + theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour= "Commercial predators", title= "A") + theme(legend.text.align= 0, legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + ggsave(width = 6, height = 6, "~/Documents/OTZ.manuscript/Images/plot.commercial.50.jpeg")
+scale_color_discrete(type = "viridis", labels= c("Greenstriped" = expression(bold("Greenstriped rockfish")), "P. Ocean Perch"= expression(bold("P. ocean perch")), "Albacore" = expression(bold("Albacore")), "Arrowtooth" = expression(bold("Arrowtooth flounder")), "Canary rock."= expression(bold("Canary rock.")), "Lingcod"= expression(bold("Lingcod")), "Longspine thorny."= expression(bold("Longspine thornyhead")), "Other cephalopod"= expression(bold("Other cephal.")), "Sablefish"= expression(bold("Sablefish")), "Salmon"= expression(bold("Salmon")), "Sharks"= expression(bold("Sharks")), "Shelf rock."= expression(bold("Shelf rockfish")), "Shortspine thorny."= expression(bold("Shortspine thornyhead")), "Skates"= expression(bold("Skates")), "Slope rock."= expression(bold("Slope rockfish")), "Splitnose rockfish"= expression(bold("Splitnose rockfish")), "Widow rock."= expression(bold("Widow rockfish")), "Yellowtail rock."= expression(bold("Yellowtail rockfish")))) + labs(colour= "Commercial predators", title= "A") + standard_theme + ggsave(width = 6, height = 6, "~/Documents/OTZ.manuscript/Images/plot.commercial.50.jpeg")
 plot1_comm    
 
-#Graph with noncommercially valuable predators
+#Graph with non-commercially valuable predators
 new_noncomm <- noncommerical_predators[- c(9,7,11,4,6,17,1,12,8,10,19,5,16,18,15,14,13,3)] #Remove predators that have commercial value as well 
 plot1_noncomm <- data_1 %>% filter(spp %in% new_noncomm) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
 scale_color_discrete(type = "viridis", labels= c("Western Gull" = "Western gull", "Tufted Puffin" = "Tufted puffin", "Sea Lions"= "Sea lions", "Resident Orcas"= "Resident orcas", "Leach's S. Petrel" ="Leach's s. petrel", "Juv. Ele. Seal"="Juv. elephant seal", "Double corm."= "Double cormorant", "Brandt's corm." = "Brandt's cormorant", "Juv. rock." = "Juv. rockfish")) + 
-  theme_bw() + theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour= "Non-commercial predators", title= "B") + theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + ggsave(width = 6, height = 6, "~/Documents/OTZ.manuscript/Images/plot.noncommercial.50.jpeg")
+ labs(colour= "Non-commercial predators", title= "B") + ggsave(width = 6, height = 6, "~/Documents/OTZ.manuscript/Images/plot.noncommercial.50.jpeg")
 plot1_noncomm    
 
 #Graph for marine mammals
@@ -177,33 +167,23 @@ plot1_mammals <- data_1 %>% filter(spp %in% mammals) %>% ggplot(aes(x= month, y 
 theme_bw() + 
 scale_color_discrete(type = "viridis", labels= c("Adult N. Ele. Seal" = "Adult n. elephant seal", "Juv. Ele. Seal"= "Juv. elephant seal", "Resident Orcas"= "Resident orcas", "Sea Lions"= "Sea lions", "Transient Orcas"= "Transient orcas")) + 
 theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Marine mammals", title= "A") + theme(legend.position= "none", legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12))
+labs(colour = "Marine mammals", title= "A") +
 ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/plot.mammals.50.jpeg")
 plot1_mammals
-
 #Seperates legend and saves it as pdf document 
 legend <- get_legend(plot1_mammals)
 pdf("/Users/SallyDowd/Documents/OTZ.manuscript/Images/Legends/mammals.legend.pdf")
 grid.draw(legend)
 dev.off()
 
-#Graph for species with highest economic value, NEED to change species names?
+#Graph for species with highest economic value
 plot1_high.price <- data_1 %>% filter(spp %in% high.price) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
-theme_bw() + 
-scale_color_discrete(type= "viridis", labels= c("Albacore", "Lingcod", "Sablefish", "Salmon", "Shelf rockfish", "Shortspine thornyhead")) + 
-theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + labs(colour = "Commercial predators", title= "B") + theme(legend.position= "none", legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) 
-#ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/plot.highprice.50.jpeg")
+scale_color_discrete(type= "viridis", labels= c("Albacore", "Lingcod", "Sablefish", "Salmon", "Shelf rockfish", "Shortspine thornyhead")) + labs(colour = "Commercial predators", title= "B") + standard_theme
+ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/plot.highprice.50.jpeg")
 plot1_high.price
-
-#Seperates legend and saves it as pdf document 
-legend <- get_legend(plot1_high.price)
-pdf("/Users/SallyDowd/Documents/OTZ.manuscript/Images/Legends/price.legend.pdf", width= 6, height= 5)
-grid.draw(legend)
-dev.off()
 ```
 
-#Depletion level of 25%
+#Scenario 6: Mesopelagic harvest level of 25%
 ```{r}
 target_sp <- "mesopelagics"
 target_F <- 0.25
@@ -219,30 +199,28 @@ assessment <- end_biomass(run2)[target_sp] * (runif(length(target_sp)) + 0.5) #a
 assessment
   # convert target F * assessment to a total catch 
   catches <- target_F * assessment
-  # apply each catch to each species
+  # apply the catch to mesopelagic fish
   for (sp in target_sp){
     scene2 <- adjust.fishing(scene2, "ForcedCatch", sp, yr, value=catches[sp])
   }
-  # run 1 year
-  run2 <- rsim.step(scene2, run2, method = 'AB', year.end=yr)  #Says in Rsim document on NOAA github that older versions of Ecosim use AB and new versions use 'RK4', default for Rpath is RK4 but we aren't using it??
+  #run 1 year
+  run2 <- rsim.step(scene2, run2, method = 'AB', year.end=yr)  
 }  
 rsim.plot(run2,all_species)  
 ```
-#Modify data
 
+#Change over time graphs 
 ```{r}
+#Modify data
 names_spp <- run2$params$spname[2:94]
-
-#Need to make z into data frame
+#Need to make run2 a data frame
 z_2 <-rsim.plot.fun(run2)
 z_2<-as.data.frame(z_2)
 names(z_2) <- names_spp
 z_2$month <- 1:600
 data_2 <- gather(z_2, key = spp, value = biomass, -month )
-```
 
-#Change over time graphs 
-```{r}
+#Change overtime plots
 change_2_overtime_df <- function(species) {
   x = seq(0,1, length.out = length(species))
   color = viridis(n = length(species), option= "B")
@@ -264,26 +242,16 @@ change_2_1 <- change_2_1_df %>% mutate(value = round(as.numeric(paste(value)), 2
                       labels = c("Decreasing", "Neither", "Increasing"),
                       right = TRUE)) %>% arrange(value)
 
-#Change species labels? change text size 
 change_2_1_plot <- change_2_1 %>% ggplot(aes(col = result)) + geom_point(aes(x=value, y=reorder(species, desc(species)))) + 
 scale_colour_grey() + 
 scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P. ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + 
   geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
   xlim(0.75, 1.25) + 
-xlab("Relative biomass") + ylab("Species with high diet proportion ") + labs(col = "End biomass", title= "A") + theme_bw() + theme(panel.border = element_blank()) +
-theme(axis.line = element_line(colour = "black")) +
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + 
+xlab("Relative biomass") + ylab("Species with high diet proportion ") + labs(col = "End biomass", title= "A") + standard_theme + 
 ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/dietover.25.jpeg")
 change_2_1_plot 
 
-legend <- get_legend(change_2_1_plot)
-pdf("/Users/SallyDowd/Documents/OTZ.manuscript/Images/Legends/diet.legend.pdf", width= 6, height= 5)
-grid.draw(legend)
-dev.off()
-
 #3.5: Diet under 0.05 
-
 change_2_2_df<- change_2_overtime_df(diet_under_0.05_2)
 change_2_2_df <- as.data.frame(change_2_2_df)
 change_2_2 <- change_2_2_df %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, 
@@ -291,28 +259,19 @@ change_2_2 <- change_2_2_df %>% mutate(value = round(as.numeric(paste(value)), 2
                       labels = c("Decreasing", "Neither", "Increasing"),
                       right = TRUE)) %>% arrange(value)
 
-
 change_2_2_plot <- change_2_2 %>% ggplot(aes(col= result)) + geom_point(aes(x= value, y=reorder(species, desc(species)))) + 
 scale_colour_grey() +  
  scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Juv. Ele. Seal"= "Juv. elephant seal", "Greenstriped"= "Greenstriped rockfish", "Double corm."= "Double cormorant",    "Brandt's corm."= "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Juv. rock."= "Juvenile rockfish", "Other cephal."= "Other cephalopod", "Shortspine thorny."= "Shortspine thornyhead", "Widow rock."= "Widow rockfish")) + 
   xlim(0.75, 1.25) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
 xlab("Relative biomass") + ylab("Species with low diet proportion") + 
-labs(col = "End biomass", title= "A") +
-theme_bw() +
-theme(panel.border = element_blank()) +
-theme(axis.line = element_line(colour = "black")) +
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-#theme(legend.position= "none") #if don't want legend
-  theme(legend.position= "none", legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + 
+labs(col = "End biomass", title= "A") + standard_theme + 
 ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/dietunder.25.jpeg")
 change_2_2_plot
 ```
 
-
-
-#Running simple stats on all depletion levels
+#Simple calculations to look at change in biomass 
 ```{r}
-#Find increase and decrease of all predators for scenarios 1-4
+#Find which species increased or decreased in scenarios 6 and 7 
 biomass_increase_25 <- data_2 %>% filter(month==600, biomass >1) %>% mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
 biomass_increase_25
 
@@ -325,7 +284,7 @@ biomass_increase_50
 biomass_decrease_50 <- data_1 %>% filter(month==600, biomass <1) %>% mutate(difference= (1-biomass), percent = (1-biomass)*100)
 biomass_decrease_50
 
-#Find species specific end biomass for 25% (and 50?) harvest rate 
+#Find species specific relative end biomass for 25% and 50% harvest rate 
 predators_end25_comm <- data_2 %>% filter(spp %in% commercial_predators, month== 600)
 predators_end25_nonc <- data_2 %>% filter(spp %in% noncommerical_predators, month== 600)
 
@@ -333,15 +292,11 @@ predators_end50_comm <- data_1 %>% filter(spp %in% commercial_predators, month==
 
 predators_end50_nonc <- data_1 %>% filter(spp %in% noncommerical_predators, month== 600)
 
+#Save the files 
 write.csv(predators_end25_comm, "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/commercial.end.25.csv")
 write.csv(predators_end25_nonc, "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/noncommercial.end.25.csv")
-
 write.csv(predators_end50_comm, "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/commercial.end.50.csv")
 write.csv(predators_end50_nonc, "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/noncommercial.end.50.csv")
-
 ```
-
-
-
 
 
