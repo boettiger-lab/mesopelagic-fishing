@@ -32,49 +32,99 @@ Cdiet_list <- list()
 #Don't need to run this again! Was just to modify datasets originally (have already saved them)
 ```{r}
 #Add columns to base parameters
-groups <- GroupInfo_CalCur_USE %>%
-  select(Group, Type, Unassim, BioAcc, ProdCons, DetInput, DetritusFate, Fleet1_Discards) %>%
-  mutate(X = 1:94)
-groups
+#groups <- GroupInfo_CalCur_USE %>%
+ # select(Group, Type, Unassim, BioAcc, ProdCons, DetInput, DetritusFate, Fleet1_Discards) %>%
+  #mutate(X = 1:94)
+#groups
 
 #Extract row 94 from Group info (Fleet 1)
-Fleet1 <- GroupInfo_CalCur_USE[94, ] %>% select(Biomass, EE, PB, QB, Fleet1_Landings) %>% mutate(X= 94)
+#Fleet1 <- GroupInfo_CalCur_USE[94, ] %>% select(Biomass, EE, PB, QB, Fleet1_Landings) %>% mutate(X= 94)
 
 #Rename rows in diet files 
-groups2 <- Diet_CalCur_USE %>% select(DIETS) %>% mutate(X= 1:94)
+#groups2 <- Diet_CalCur_USE %>% select(DIETS) %>% mutate(X= 1:94)
 
 #Rename columns in diet file
-group_vector <- groups2$DIETS[1:92]
-group_vector <- as.data.frame(c("DIETS", group_vector))
-group_vector <- groups2[,"DIETS"]
+#group_vector <- groups2$DIETS[1:92]
+#group_vector <- as.data.frame(c("DIETS", group_vector))
+#group_vector <- groups2[,"DIETS"]
 
-test <- read_csv("../Data/DietMatrices/diet100227.csv")
-test_vector <- colnames(test)[1:93]
+#test <- read_csv("../Data/DietMatrices/diet100227.csv")
+#test_vector <- colnames(test)[1:93]
 
 #First loop for group: rename columns, add Fleet 1 row (assigned position X=94), add new parameters (columns) onto dataset, redu column order
 #for (i in 1:500) {
- Cbase_list[[i]] <- read.csv(base_list[i]) %>% 
-    rename(Biomass = "V1", PB = "V2", QB = "V3", EE = "V4", Fleet1_Landings = "V5")
- Cbase_list[[i]] <- bind_rows(Fleet1, Cbase_list[[i]]) %>% arrange(X) %>% left_join(groups, by= "X") %>% select(-X) %>% relocate(Group)
-col_order <- c("Group", "Biomass", "EE", "PB", "QB", "Type", "Unassim", "BioAcc", "ProdCons", "DetInput", "DetritusFate", "Fleet1_Landings", "Fleet1_Discards")
-Cbase_list[[i]] <- Cbase_list[[i]][, col_order]
-write.csv(Cbase_list[[i]], paste("output", base_list[i]))
-}
+# Cbase_list[[i]] <- read.csv(base_list[i]) %>% 
+    #rename(Biomass = "V1", PB = "V2", QB = "V3", EE = "V4", Fleet1_Landings = "V5")
+ #Cbase_list[[i]] <- bind_rows(Fleet1, Cbase_list[[i]]) %>% arrange(X) %>% left_join(groups, by= "X") %>% select(-X) %>% relocate(Group)
+#col_order <- c("Group", "Biomass", "EE", "PB", "QB", "Type", "Unassim", "BioAcc", "ProdCons", "DetInput", "DetritusFate", "Fleet1_Landings", "Fleet1_Discards")
+#Cbase_list[[i]] <- Cbase_list[[i]][, col_order]
+#write.csv(Cbase_list[[i]], paste("output", base_list[i]))
+#}
 
-z<- read_csv(base_list[1])
+#z<- read_csv(base_list[1])
 
-colnamesgroups<- c("DIETS", group_vector[1:93])
+#colnamesgroups<- c("DIETS", group_vector[1:93])
 #Diet matrices: #REMOVE IMPORT ROW??? ROW 94 (V93) IN TEST DATA
 #for (i in 1:500) {
-Cdiet_list[[i]] <- read_csv(diet_list[i], col_names = colnamesgroups ) %>% select(-Detritus)
-Cdiet_list[[i]]<- Cdiet_list[[i]][-1,]
-Cdiet_list[[i]] <- Cdiet_list[[i]] %>%
-  mutate(DIETS = c(colnamesgroups[2:94], "Import"))
-write.csv(Cdiet_list[[i]], diet_list[i])
-}
+#Cdiet_list[[i]] <- read_csv(diet_list[i], col_names = colnamesgroups ) %>% select(-Detritus)
+#Cdiet_list[[i]]<- Cdiet_list[[i]][-1,]
+#Cdiet_list[[i]] <- Cdiet_list[[i]] %>%
+ # mutate(DIETS = c(colnamesgroups[2:94], "Import"))
+#write.csv(Cdiet_list[[i]], diet_list[i])
+#}
 
-z2 <- read_csv(diet_list[1])
+#z2 <- read_csv(diet_list[1])
 
+```
+
+#Need to load in some data/functions from OTZ.results.newRpath.Rmd file to make some of the data manipulation easier
+```{r}
+#Original scenario
+Cbase <- "../Data/Groupinfo_CalCur-USE.csv"  
+Cdiet <- "../Data/Diet_CalCur_USE.csv"  
+#Load unbalanced Ecopath model
+CalCur_unbal <- read.rpath.params(Cbase, Cdiet)
+check.rpath.params(CalCur_unbal)
+#Balance original Ecopath model
+Cal_bal <- rpath(CalCur_unbal) 
+Cal_bal
+
+#Base Scenario
+yearlist = 2001:2050
+base_sim_scene <- rsim.scenario(Cal_bal, CalCur_unbal, years = yearlist)
+scene0 <- base_sim_scene
+run0 <- rsim.run(scene0, method='AB', years=yearlist) 
+
+#End bimoass function 
+end_biomass <- function(rsim){return(rsim$out_Biomass[dim(rsim$out_Biomass)[1], 2:(dim(rsim$out_Biomass)[2])])}
+end_biomass
+
+#Mesopelagic harvest level of 25% applied to original model
+target_sp <- "mesopelagics"
+target_F <- 0.25
+names(target_F) <- target_sp 
+scene2 <- copy(base_sim_scene)
+run2 <- rsim.run(scene2, method = 'AB', years=2001)
+for (yr in 2002:2050){
+  # stock assessment based on current biomass * error
+  # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
+assessment <- end_biomass(run2)[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
+assessment
+  # convert target F * assessment to a total catch 
+  catches <- target_F * assessment
+  # apply the catch to mesopelagic fish
+  for (sp in target_sp){
+    scene2 <- adjust.fishing(scene2, "ForcedCatch", sp, yr, value=catches[sp])
+  }
+  #run 1 year
+  run2 <- rsim.step(scene2, run2, method = 'AB', year.end=yr)  
+}  
+
+#Original groups
+noncommerical_predators <- c(Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[33], Cal_bal$Group[37:38], Cal_bal$Group[43:47], Cal_bal$Group[50:56], Cal_bal$Group[58:60], Cal_bal$Group[63], Cal_bal$Group[65:67], Cal_bal$Group[69:70], Cal_bal$Group[72:73], Cal_bal$Group[76:80], Cal_bal$Group[82], Cal_bal$Group[85:88])
+noncommerical_predators
+commercial_predators <- c(Cal_bal$Group[18], Cal_bal$Group[33], Cal_bal$Group[37:38], Cal_bal$Group[42:48], Cal_bal$Group[50:56], Cal_bal$Group[58:59])
+commercial_predators
 ```
 
 #Loop through 500 data sets!
@@ -109,8 +159,10 @@ Cal_bal2[[i]] <- rpath(CalCur_unbal2_list[[i]])
 }
 ```
 
+
 #Creating 500 different base scenarios 
 ```{r}
+#Define species
 all_species <- Cal_bal$Group[1:92] 
 
 #Base scenario
@@ -125,12 +177,6 @@ scene0.2[[i]] <- base_sim_scene2[[i]]
 run0.2[[i]] <- rsim.run(scene0.2[[i]], method='AB', years=yearlist) 
   }
 
-```
-
-#Create function to look at end biomass 
-```{r}
-end_biomass <- function(rsim){return(rsim$out_Biomass[dim(rsim$out_Biomass)[1], 2:(dim(rsim$out_Biomass)[2])])}
-end_biomass
 ```
 
 #Scenario 8: 25% harvest rate on mesopelagics for the 500 datasets
@@ -194,19 +240,6 @@ data_6.2[[i]] <- data_6.2[[i]] %>% filter(month==600) %>% mutate(X= i)
 
 ```
 
-#Check to see if the seven datasets that produce unrealistic biomass estimates are outliers 
-```{r}
-rest_of_models_outliers <- entire_data_6 %>% group_by(spp) %>% summarize(IQR_biomass = IQR(biomass), quantile_lower = quantile(biomass, 0.25), quantile_upper = quantile(biomass, 0.75)) %>% mutate(lower_outlier = quantile_lower - (1.5*IQR_biomass), upper_outlier= quantile_upper + (1.5*IQR_biomass)) 
-
-seven_models_outliers <- bind_rows(data_6.2) %>% filter(X %in% c(67, 126, 237, 343, 396, 430, 472)) %>% arrange(X)
-seven_models_outliers <- transform(seven_models_outliers, ID.X=as.numeric(factor(X))) 
-seven_models_outliers <- seven_models_outliers %>% spread(ID.X, biomass) %>% rename("model1"= "1", "model2"= "2", "model3"= "3", "model4"= "4", "model5"= "5", "model6"= "6", "model7" = "7")
-
-#Each species final biomass in each of the 7 models are outliers 
-test <- seven_models_outliers %>% left_join(rest_of_models_outliers) %>% mutate(outlier1 = ifelse(model1 < lower_outlier|model1 > upper_outlier, TRUE, FALSE), outlier2 = ifelse(model2 < lower_outlier|model2 > upper_outlier, TRUE, FALSE), outlier3 = ifelse(model3 < lower_outlier|model3 > upper_outlier, TRUE, FALSE), outlier4 = ifelse(model4 < lower_outlier|model4 > upper_outlier, TRUE, FALSE), outlier5 = ifelse(model5 < lower_outlier|model5 > upper_outlier, TRUE, FALSE), outlier6 = ifelse(model6 < lower_outlier|model6 > upper_outlier, TRUE, FALSE), outlier7 = ifelse(model7 < lower_outlier|model7 > upper_outlier, TRUE, FALSE))
-
-```
-
 #Confidence intervals: Calculate 95% CI for each model at month 600 (last month in model) for commercially and non-commerically valuable species 
 
 ```{r}
@@ -257,7 +290,20 @@ sum_data_6 <- sum_data_6 %>% mutate("median.value" = cut(median_biomass,
 write.csv(sum_data_6, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/sum_data_6.csv")
 ```
 
-#Graph
+#Check to see if the seven datasets that produce unrealistic biomass estimates are outliers 
+```{r}
+rest_of_models_outliers <- entire_data_6 %>% group_by(spp) %>% summarize(IQR_biomass = IQR(biomass), quantile_lower = quantile(biomass, 0.25), quantile_upper = quantile(biomass, 0.75)) %>% mutate(lower_outlier = quantile_lower - (1.5*IQR_biomass), upper_outlier= quantile_upper + (1.5*IQR_biomass)) 
+
+seven_models_outliers <- bind_rows(data_6.2) %>% filter(X %in% c(67, 126, 237, 343, 396, 430, 472)) %>% arrange(X)
+seven_models_outliers <- transform(seven_models_outliers, ID.X=as.numeric(factor(X))) 
+seven_models_outliers <- seven_models_outliers %>% spread(ID.X, biomass) %>% rename("model1"= "1", "model2"= "2", "model3"= "3", "model4"= "4", "model5"= "5", "model6"= "6", "model7" = "7")
+
+#Each species final biomass in each of the 7 models are outliers 
+test <- seven_models_outliers %>% left_join(rest_of_models_outliers) %>% mutate(outlier1 = ifelse(model1 < lower_outlier|model1 > upper_outlier, TRUE, FALSE), outlier2 = ifelse(model2 < lower_outlier|model2 > upper_outlier, TRUE, FALSE), outlier3 = ifelse(model3 < lower_outlier|model3 > upper_outlier, TRUE, FALSE), outlier4 = ifelse(model4 < lower_outlier|model4 > upper_outlier, TRUE, FALSE), outlier5 = ifelse(model5 < lower_outlier|model5 > upper_outlier, TRUE, FALSE), outlier6 = ifelse(model6 < lower_outlier|model6 > upper_outlier, TRUE, FALSE), outlier7 = ifelse(model7 < lower_outlier|model7 > upper_outlier, TRUE, FALSE))
+
+```
+
+#Graphs
 ```{r}
 #Filter datasets for commercial and non-commercial predators of mesopelagic fish
 new_noncomm <- noncommerical_predators[- c(9,7,11,4,6,17,1,12,8,10,19,5,16,18,15,14,13,3)] #Define group that has non-commercial predators that only had non-commercial value (not commercial value as well)
@@ -280,11 +326,6 @@ theme(axis.line = element_line(colour = "black")) +
 theme(legend.position= "none", panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
 ggsave(width = 6, height = 4, "~/Documents/OTZ.Manuscript/Images/500.commercial.25.jpeg")
 comm_value_500
-
-legend <- get_legend(comm_value_500)
-pdf("/Users/SallyDowd/Documents/OTZ.manuscript/Images/Legends/multiple.legend.pdf", width= 6, height= 5)
-grid.draw(legend)
-dev.off()
 
 noncomm_value_500 <- noncomm_value %>% ggplot(aes(fill = median.value)) + geom_pointrange(aes(y=spp, x=median_biomass, xmin=quant_2.5, xmax= quant_97.5), size=0.5, color="black", shape=22) + 
 scale_fill_grey() + 
@@ -362,8 +403,8 @@ EE_included <- bind_rows(rest_of_models) %>% group_by(Group) %>% summarize(mean_
 EE_excluded <- bind_rows(seven_out) %>% group_by(Group) %>% summarize(mean_EE = mean(EE)) %>% mutate(Model = "Excluded")
 EE_comp <- EE_included %>% bind_rows(EE_excluded) %>% arrange(Group)
 
-write.csv(Biomass_comp, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/500.inputs/Biomass_comp.csv")
-write.csv(QB_comp, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/500.inputs/QB_comp.csv")
-write.csv(EE_comp, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/500.inputs/EE_comp.csv")
-write.csv(PB_comp, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/500.inputs/PB_comp.csv")
+#write.csv(Biomass_comp, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/500.inputs/Biomass_comp.csv")
+#write.csv(QB_comp, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/500.inputs/QB_comp.csv")
+#write.csv(EE_comp, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/500.inputs/EE_comp.csv")
+#write.csv(PB_comp, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/500.inputs/PB_comp.csv")
 ```

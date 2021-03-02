@@ -171,10 +171,10 @@ labs(colour = "Marine mammals", title= "A") +
 ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/plot.mammals.50.jpeg")
 plot1_mammals
 #Seperates legend and saves it as pdf document 
-legend <- get_legend(plot1_mammals)
-pdf("/Users/SallyDowd/Documents/OTZ.manuscript/Images/Legends/mammals.legend.pdf")
-grid.draw(legend)
-dev.off()
+#legend <- get_legend(plot1_mammals)
+#pdf("/Users/SallyDowd/Documents/OTZ.manuscript/Images/Legends/mammals.legend.pdf")
+#grid.draw(legend)
+#dev.off()
 
 #Graph for species with highest economic value
 plot1_high.price <- data_1 %>% filter(spp %in% high.price) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
