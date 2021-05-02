@@ -264,7 +264,7 @@ scale_colour_grey() +
  scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Juv. Ele. Seal"= "Juv. elephant seal", "Greenstriped"= "Greenstriped rockfish", "Double corm."= "Double cormorant",    "Brandt's corm."= "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Juv. rock."= "Juvenile rockfish", "Other cephal."= "Other cephalopod", "Shortspine thorny."= "Shortspine thornyhead", "Widow rock."= "Widow rockfish")) + 
   xlim(0.75, 1.25) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
 xlab("Relative biomass") + ylab("Species with low diet proportion") + 
-labs(col = "End biomass", title= "A") + standard_theme + 
+labs(col = "End biomass", title= "B") + standard_theme + 
 ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/dietunder.25.jpeg")
 change_2_2_plot
 ```
