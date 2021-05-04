@@ -181,6 +181,12 @@ plot1_high.price <- data_1 %>% filter(spp %in% high.price) %>% ggplot(aes(x= mon
 scale_color_discrete(type= "viridis", labels= c("Albacore", "Lingcod", "Sablefish", "Salmon", "Shelf rockfish", "Shortspine thornyhead")) + labs(colour = "Commercial predators", title= "B") + standard_theme
 ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/plot.highprice.50.jpeg")
 plot1_high.price
+
+#Graph for forage fish species
+plot1_forage <- data_1 %>% filter(spp %in% forage) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+scale_color_discrete(type= "viridis", labels= c("Anchovy", "Herring", "Market squid", "Other smelt", "Pacific mackerel", "Sand lance", "Sardine", "Saury", "Whitebait smelt")) + labs(colour = "Forage fish") +  standard_theme + 
+ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/plot.forage.50.jpeg")
+plot1_forage
 ```
 
 #Scenario 6: Mesopelagic harvest level of 25%
