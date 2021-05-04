@@ -16,6 +16,7 @@ Diet <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Die
 predators_of_mesopelagic <- Diet[,c(1,16,19, 29:30, 34, 38:39, 43:49, 51:57, 59:61, 64, 66:68, 70:71, 73:74, 77:81, 83, 86:89)]
 mesopelagic.pred <- Diet[15, c(1,16,19, 29:30, 34, 38:39, 43:49, 51:57, 59:61, 64, 66:68, 70:71, 73:74, 77:81, 83, 86:89)]
 forage.pred <- Diet[19:27, c(1,16,19, 29:30, 34, 38:39, 43:49, 51:57, 59:61, 64, 66:68, 70:71, 73:74, 77:81, 83, 86:89)]
+euphausiids <- Diet[7, c(1,16,19, 29:30, 34, 38:39, 43:49, 51:57, 59:61, 64, 66:68, 70:71, 73:74, 77:81, 83, 86:89)]
 
 species <- as.data.frame(forage.pred$DIETS) %>% mutate(X=1:9) %>% rename("Species"= "forage.pred$DIETS")
 #Check if this is right 
@@ -25,6 +26,9 @@ forage <- forage %>% rename("Max diet"= "forage.pred$MAX") %>% left_join(species
 forage
 mesopelagic.pred$MAX <- apply(mesopelagic.pred[,-1],1,max,na.rm=TRUE)
 mesopelagic <- as.data.frame(mesopelagic.pred$MAX) %>% rename("Max diet"= "mesopelagic.pred$MAX") %>% mutate("Species"= "mesopelagic fish")
-combination <- bind_rows(forage, mesopelagic)
+euphausiids$MAX <- apply(euphausiids[,-1],1,max,na.rm=TRUE)
+euphausiids <- as.data.frame(euphausiids$MAX) %>% rename("Max diet"= "euphausiids$MAX") %>% mutate("Species"= "euphausiids")
+
+combination <- bind_rows(forage, mesopelagic, euphausiids)
 ```
 
