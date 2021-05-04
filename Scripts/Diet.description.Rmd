@@ -1,0 +1,22 @@
+---
+title: "Diet.description"
+output: html_document
+---
+
+#Load Libraries
+```{r}
+library(dplyr)
+library(readr)
+```
+
+#Define datasets
+```{r}
+Diet <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Diet_CalCur_USE.csv")  
+  
+predators_mesopelagic <- Diet[,c(1,16,19, 29:30, 34, 38:39, 43:49, 51:57, 59:61, 64, 66:68, 70:71, 73:74, 77:81, 83, 86:89)]
+predators_mesopelagic
+mesopelagic.pred <- Diet[15, c(1,16,19, 29:30, 34, 38:39, 43:49, 51:57, 59:61, 64, 66:68, 70:71, 73:74, 77:81, 83, 86:89)]
+forage.pred <- Diet[19:27, c(1,16,19, 29:30, 34, 38:39, 43:49, 51:57, 59:61, 64, 66:68, 70:71, 73:74, 77:81, 83, 86:89)]
+  
+```
+
