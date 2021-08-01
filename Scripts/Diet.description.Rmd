@@ -32,3 +32,23 @@ euphausiids <- as.data.frame(euphausiids$MAX) %>% rename("Max diet"= "euphausiid
 combination <- bind_rows(forage, mesopelagic, euphausiids)
 ```
 
+#Predators of mesopelagic fish: diet dependence on mesopelagics and forage fish
+```{r}
+#For each predator of mesopelagic fish find their prey items that make up at least 5% of their diet
+
+test <- list()
+for (i in 2:ncol(predators_of_mesopelagic)){
+for (j in 1:nrow(predators_of_mesopelagic)){
+
+test[[i]][,i]
+}
+test
+
+predators_of_mesopelagic[which(predators_of_mesopelagic <= 0.05)] = "NA"
+ CalCur_unbal2_list[[i]][[1]][93, 5] <- NA
+
+ #Webplot highlighting predator and prey connections to mesopelagic fish  
+webplot(Cal_bal, eco.name= attr(Cal_bal, "California Current"), line.col="grey", labels=TRUE, highlight= "mesopelagics", highlight.col= c("blue", "red", "NA"), label.num=TRUE, label.cex=0.7, fleets=FALSE)
+
+```
+
