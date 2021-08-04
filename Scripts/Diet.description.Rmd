@@ -7,6 +7,48 @@ output: html_document
 ```{r}
 library(dplyr)
 library(readr)
+library(Rpath)
+```
+
+#Functions needed- turn R markdown into R script eventually so can just source the functions
+```{r}
+target_sp <- "mesopelagics"
+target_F <- 0.25
+names(target_F) <- target_sp 
+
+library(data.table)
+scene2 <- copy(base_sim_scene)
+run2 <- rsim.run(scene2, method = 'AB', years=2001)
+for (yr in 2002:2050){
+  # stock assessment based on current biomass * error
+  # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
+assessment <- end_biomass(run2)[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
+assessment
+  # convert target F * assessment to a total catch 
+  catches <- target_F * assessment
+  # apply the catch to mesopelagic fish
+  for (sp in target_sp){
+    scene2 <- adjust.fishing(scene2, "ForcedCatch", sp, yr, value=catches[sp])
+  }
+  #run 1 year
+  run2 <- rsim.step(scene2, run2, method = 'AB', year.end=yr)  
+}  
+rsim.plot(run2,all_species)  
+
+rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
+  opar <- par(no.readonly = T)
+  if(indplot == F){
+    biomass <- Rsim.output$out_Biomass[, 2:ncol(Rsim.output$out_Biomass)]
+    n <- ncol(biomass)
+    start.bio <- biomass[1, ]
+    start.bio[which(start.bio == 0)] <- 1
+    rel.bio <- matrix(NA, dim(biomass)[1], dim(biomass)[2])
+    for(isp in 1:n) rel.bio[, isp] <- biomass[, isp] / start.bio[isp]
+  }
+  rel.bio
+} 
+
+names_spp <- run1$params$spname[2:94]
 ```
 
 #Define datasets
@@ -14,7 +56,8 @@ library(readr)
 Diet <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Diet_CalCur_USE.csv")  
   
 predators_of_mesopelagic <- Diet[,c(1,16,19, 29:30, 34, 38:39, 43:49, 51:57, 59:61, 64, 66:68, 70:71, 73:74, 77:81, 83, 86:89)]
-mesopelagic.pred <- Diet[15, c(1,16,19, 29:30, 34, 38:39, 43:49, 51:57, 59:61, 64, 66:68, 70:71, 73:74, 77:81, 83, 86:89)]
+mesopelagic_pred <- Diet[15, c(1,16,19, 29:30, 34, 38:39, 43:49, 51:57, 59:61, 64, 66:68, 70:71, 73:74, 77:81, 83, 86:89)]
+prey_of_mesopelagic <- Diet[c(3,6:10,15,18), c(1,16)]
 forage.pred <- Diet[19:27, c(1,16,19, 29:30, 34, 38:39, 43:49, 51:57, 59:61, 64, 66:68, 70:71, 73:74, 77:81, 83, 86:89)]
 euphausiids <- Diet[7, c(1,16,19, 29:30, 34, 38:39, 43:49, 51:57, 59:61, 64, 66:68, 70:71, 73:74, 77:81, 83, 86:89)]
 
@@ -35,20 +78,22 @@ combination <- bind_rows(forage, mesopelagic, euphausiids)
 #Predators of mesopelagic fish: diet dependence on mesopelagics and forage fish
 ```{r}
 #For each predator of mesopelagic fish find their prey items that make up at least 5% of their diet
-
-test <- list()
-for (i in 2:ncol(predators_of_mesopelagic)){
-for (j in 1:nrow(predators_of_mesopelagic)){
-
-test[[i]][,i]
-}
-test
-
-predators_of_mesopelagic[which(predators_of_mesopelagic <= 0.05)] = "NA"
- CalCur_unbal2_list[[i]][[1]][93, 5] <- NA
+predators_of_mesopelagic
 
  #Webplot highlighting predator and prey connections to mesopelagic fish  
 webplot(Cal_bal, eco.name= attr(Cal_bal, "California Current"), line.col="grey", labels=TRUE, highlight= "mesopelagics", highlight.col= c("blue", "red", "NA"), label.num=TRUE, label.cex=0.7, fleets=FALSE)
-
 ```
+
+```{r}
+#Make run2 a dataframe 
+z_2 <-rsim.plot.fun(run2)
+z_2<-as.data.frame(z_2)
+names(z_2) <- names_spp
+z_2$month <- 1:600
+library(tidyr)
+data_2 <- gather(z_2, key = spp, value = biomass, -month)
+
+data_2 %>% filter(spp %in% c(predators_of_mesopelagic, mesopelagic_pred))
+```
+
 

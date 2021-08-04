@@ -305,4 +305,88 @@ write.csv(predators_end50_comm, "/Users/SallyDowd/Documents/OTZ.manuscript/Excel
 write.csv(predators_end50_nonc, "/Users/SallyDowd/Documents/OTZ.manuscript/Excel/noncommercial.end.50.csv")
 ```
 
+#Harvesting euphasiids at 25% and 50% to examine changes in mesopelagic fish predator biomass
+```{r}
+#50% harvest rate
+target_sp <- "euphausiids"
+target_F <- 0.50
+names(target_F) <- target_sp 
+
+library(data.table)
+scene1_euph <- copy(base_sim_scene)
+run1_euph <- rsim.run(scene1_euph, method = 'AB', years=2001)
+for (yr in 2002:2050){
+  # stock assessment based on current biomass * error
+  # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)
+assessment <- end_biomass(run1_euph)[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
+assessment
+  # convert target F * assessment to a total catch 
+  catches <- target_F * assessment
+  # apply the catch to mesopelagic fish
+  for (sp in target_sp){
+   scene1_euph <- adjust.fishing(scene1_euph, "ForcedCatch", sp, yr, value=catches[sp])
+  }
+  #run 1 year
+  run1_euph <- rsim.step(scene1_euph, run1_euph, method = 'AB', year.end=yr)  
+}  
+rsim.plot(run1_euph,all_species)  
+rsim.plot(run1,all_species) 
+
+z_1_euph <-rsim.plot.fun(run1_euph)
+z_1_euph <-as.data.frame(z_1_euph)
+names(z_1_euph) <- names_spp
+z_1_euph$month <- 1:600
+data_1_euph <- gather(z_1_euph, key = spp, value = biomass, -month )
+
+#25% harvest rate
+target_sp <- "euphausiids"
+target_F <- 0.50
+names(target_F) <- target_sp 
+
+library(data.table)
+scene2_euph <- copy(base_sim_scene)
+run2_euph <- rsim.run(scene2_euph, method = 'AB', years=2001)
+for (yr in 2002:2050){
+  # stock assessment based on current biomass * error
+  # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)
+assessment <- end_biomass(run2_euph)[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
+assessment
+  # convert target F * assessment to a total catch 
+  catches <- target_F * assessment
+  # apply the catch to mesopelagic fish
+  for (sp in target_sp){
+   scene2_euph <- adjust.fishing(scene2_euph, "ForcedCatch", sp, yr, value=catches[sp])
+  }
+  #run 1 year
+  run2_euph <- rsim.step(scene2_euph, run2_euph, method = 'AB', year.end=yr)  
+}  
+rsim.plot(run2_euph,all_species)  
+
+z_2_euph <-rsim.plot.fun(run2_euph)
+z_2_euph <-as.data.frame(z_2_euph)
+names(z_2_euph) <- names_spp
+z_2_euph$month <- 1:600
+data_2_euph <- gather(z_2_euph, key = spp, value = biomass, -month )
+
+biomass_increase_25 <- data_2_euph %>% filter(month==600, biomass >1) %>% mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
+biomass_increase_25
+
+biomass_decrease_25 <- data_2_euph %>% filter(month==600, biomass <1) %>% mutate(difference= (1-biomass), percent= (1-biomass)*100)
+biomass_decrease_25
+
+biomass_increase_50 <- data_1_euph %>% filter(month==600, biomass >1) %>% mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
+biomass_increase_50
+
+biomass_decrease_50 <- data_1_euph %>% filter(month==600, biomass <1) %>% mutate(difference= (1-biomass), percent = (1-biomass)*100)
+biomass_decrease_50
+
+#Find species specific relative end biomass for 25% and 50% harvest rate 
+predators_end25_comm <- data_2_euph %>% filter(spp %in% commercial_predators, month== 600)
+predators_end25_nonc <- data_2_euph %>% filter(spp %in% noncommerical_predators, month== 600)
+
+predators_end50_comm <- data_1_euph %>% filter(spp %in% commercial_predators, month== 600)
+
+predators_end50_nonc <- data_1_euph %>% filter(spp %in% noncommerical_predators, month== 600)
+```
+
 
