@@ -8,6 +8,7 @@ output: html_document
 library(dplyr)
 library(readr)
 library(Rpath)
+library(tidyverse)
 ```
 
 #Functions needed- turn R markdown into R script eventually so can just source the functions
@@ -49,6 +50,10 @@ rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
 } 
 
 names_spp <- run1$params$spname[2:94]
+
+standard_theme <- theme_bw() + theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text.align= 0, legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) 
+
 ```
 
 #Define datasets
@@ -94,6 +99,25 @@ library(tidyr)
 data_2 <- gather(z_2, key = spp, value = biomass, -month)
 
 data_2 %>% filter(spp %in% c(predators_of_mesopelagic, mesopelagic_pred))
+```
+
+```{r}
+pred_mesopelagic_prey <- predators_of_mesopelagic %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% select(DIETS) %>% unique() %>% rename(spp = DIETS) %>% mutate(classification= "other prey") #Make dataset longer by increasing number of rows, only select prey when at least one predators depends on them for >= 5% of their diet
+predators_mesopelagics <- as.data.frame(predators_mesopelagic) %>% mutate(classification= "predators") %>% rename(spp= predators_mesopelagic)
+combo <- rbind(pred_mesopelagic_prey, predators_mesopelagics)
+
+GroupInfo_edt <- GroupInfo_CalCur_USE %>% select(Group, Biomass) %>% rename(spp= Group) #select original biomass from group info 
+data_2_edt <- data_2 %>% left_join(GroupInfo_edt, by= "spp") %>% left_join(combo, by= "spp") %>% drop_na() %>% group_by(classification, month) %>% mutate(total_biomass = sum(Biomass)) %>% #sum initial biomass of each species classification by month
+ungroup() %>% mutate(percent_biomass= Biomass/total_biomass) %>% #divide initial biomass for a species by total biomass for a species group
+mutate(weighted_biomass = biomass*percent_biomass) %>%
+#get weighted biomass by multiplying relative biomass by percent biomass 
+group_by(classification, month) %>% summarize(agg_rel_biomass= sum(weighted_biomass))
+#get aggregated relative biomass for each species classification by summing weighted biomass for each species classification for each month  
+mesopelagics_only <- data_2 %>% filter(spp== "mesopelagics")
+ggplot() + geom_line(data=data_2_edt, aes(x=month, y=agg_rel_biomass, col= as.factor(classification))) + geom_line(data=mesopelagics_only, aes(x = month, y = biomass), color = "blue") + 
+  xlab("Month") + ylab("Relative biomass") + 
+scale_color_discrete(type = "viridis") + standard_theme
+
 ```
 
 
