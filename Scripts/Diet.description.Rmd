@@ -99,6 +99,8 @@ library(tidyr)
 data_2 <- gather(z_2, key = spp, value = biomass, -month)
 
 data_2 %>% filter(spp %in% c(predators_of_mesopelagic, mesopelagic_pred))
+
+frate.table(scene0)
 ```
 
 #Weighted aggregate biomass for predators of mesopelagic fish, other prey of mesopelagic fish and then mesopelagics seperate 
@@ -119,6 +121,16 @@ mesopelagics_only <- data_2 %>% filter(spp== "mesopelagics") %>% rename(Mesopela
 ggplot() + geom_line(data=data_2_edt, aes(x=month, y=agg_rel_biomass, col= as.factor(classification))) + geom_line(data=mesopelagics_only, aes(x = month, y = biomass, col= "Mesopelagics")) + labs(col= "Species classification") +
   xlab("Month") + ylab("Relative biomass") + 
 scale_color_discrete(type = "viridis") + standard_theme + ggsave(width = 6, height = 6, "/Users/sallydowd/Documents/OTZ.manuscript/Images/preds.otherprey.25.jpeg")
+```
+
+#Exploring why euphausiids and forage fish increase
+```{r}
+forage <- Cal_bal$Group[19:27]
+
+plot_forage <- data_2 %>% filter(spp %in% forage) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + scale_color_discrete(type= "viridis", labels= c("Pacific Mackerel" = "Pacific mackerel")) + xlab("Month") + ylab("Relative biomass") +
+ labs(colour= "Forage fish", title= "B") + standard_theme #+ ggsave(width = 6, height = 6, "~/Documents/OTZ.manuscript/Images/plot.noncommercial.50.jpeg")
+plot_forage
+
 
 ```
 
