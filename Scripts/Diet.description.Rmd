@@ -101,9 +101,11 @@ data_2 <- gather(z_2, key = spp, value = biomass, -month)
 data_2 %>% filter(spp %in% c(predators_of_mesopelagic, mesopelagic_pred))
 ```
 
+#Weighted aggregate biomass for predators of mesopelagic fish, other prey of mesopelagic fish and then mesopelagics seperate 
 ```{r}
-pred_mesopelagic_prey <- predators_of_mesopelagic %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% select(DIETS) %>% unique() %>% rename(spp = DIETS) %>% mutate(classification= "other prey") #Make dataset longer by increasing number of rows, only select prey when at least one predators depends on them for >= 5% of their diet
-predators_mesopelagics <- as.data.frame(predators_mesopelagic) %>% mutate(classification= "predators") %>% rename(spp= predators_mesopelagic)
+pred_mesopelagic_prey <- predators_of_mesopelagic %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% select(DIETS) %>% unique() %>% rename(spp = DIETS) %>% mutate(classification= "Other prey") #Make dataset longer by increasing number of rows, only select prey when at least one predators depends on them for >= 5% of their diet
+#Remove mesopelagics as predator of mesopelagics, not included as non-commercial or commercial predator in the study
+predators_mesopelagics <- as.data.frame(predators_mesopelagic) %>% mutate(classification= "Predators") %>% rename(spp= predators_mesopelagic) %>% filter(!spp== "mesopelagics")
 combo <- rbind(pred_mesopelagic_prey, predators_mesopelagics)
 
 GroupInfo_edt <- GroupInfo_CalCur_USE %>% select(Group, Biomass) %>% rename(spp= Group) #select original biomass from group info 
@@ -113,10 +115,10 @@ mutate(weighted_biomass = biomass*percent_biomass) %>%
 #get weighted biomass by multiplying relative biomass by percent biomass 
 group_by(classification, month) %>% summarize(agg_rel_biomass= sum(weighted_biomass))
 #get aggregated relative biomass for each species classification by summing weighted biomass for each species classification for each month  
-mesopelagics_only <- data_2 %>% filter(spp== "mesopelagics")
-ggplot() + geom_line(data=data_2_edt, aes(x=month, y=agg_rel_biomass, col= as.factor(classification))) + geom_line(data=mesopelagics_only, aes(x = month, y = biomass), color = "blue") + 
+mesopelagics_only <- data_2 %>% filter(spp== "mesopelagics") %>% rename(Mesopelagics= "spp")
+ggplot() + geom_line(data=data_2_edt, aes(x=month, y=agg_rel_biomass, col= as.factor(classification))) + geom_line(data=mesopelagics_only, aes(x = month, y = biomass, col= "Mesopelagics")) + labs(col= "Species classification") +
   xlab("Month") + ylab("Relative biomass") + 
-scale_color_discrete(type = "viridis") + standard_theme
+scale_color_discrete(type = "viridis") + standard_theme + ggsave(width = 6, height = 6, "/Users/sallydowd/Documents/OTZ.manuscript/Images/preds.otherprey.25.jpeg")
 
 ```
 
