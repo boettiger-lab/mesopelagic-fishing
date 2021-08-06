@@ -78,6 +78,8 @@ euphausiids$MAX <- apply(euphausiids[,-1],1,max,na.rm=TRUE)
 euphausiids <- as.data.frame(euphausiids$MAX) %>% rename("Max diet"= "euphausiids$MAX") %>% mutate("Species"= "euphausiids")
 
 combination <- bind_rows(forage, mesopelagic, euphausiids)
+
+predators_of_mesopelagic[15,]
 ```
 
 #Predators of mesopelagic fish: diet dependence on mesopelagics and forage fish
