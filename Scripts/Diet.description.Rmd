@@ -9,6 +9,8 @@ library(dplyr)
 library(readr)
 library(Rpath)
 library(tidyverse)
+
+GroupInfo_CalCur_USE <- read_csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/GroupInfo_CalCur-USE.csv")
 ```
 
 #Functions needed- turn R markdown into R script eventually so can just source the functions
@@ -107,10 +109,11 @@ frate.table(scene0)
 
 #Weighted aggregate biomass for predators of mesopelagic fish, other prey of mesopelagic fish and then mesopelagics seperate 
 ```{r}
-pred_mesopelagic_prey <- predators_of_mesopelagic %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% select(DIETS) %>% unique() %>% rename(spp = DIETS) %>% mutate(classification= "Other prey") #Make dataset longer by increasing number of rows, only select prey when at least one predators depends on them for >= 5% of their diet
+#Pred_mesopelagic_prey_0.05 is made up of the predators of mesopelagic fish that have other prey consisting of at least 5% of their diet, predators_mesopelagic_0.05 are the predators of mesopelagic fish that have at least 5% of their diet consist of mesopelagics 
+pred_mesopelagic_prey_0.05 <- predators_of_mesopelagic %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% select(DIETS) %>% unique() %>% rename(spp = DIETS) %>% mutate(classification= "Other prey") #Make dataset longer by increasing number of rows, only select prey when at least one predators depends on them for >= 5% of their diet
 #Remove mesopelagics as predator of mesopelagics, not included as non-commercial or commercial predator in the study
-predators_mesopelagics <- as.data.frame(predators_mesopelagic) %>% mutate(classification= "Predators") %>% rename(spp= predators_mesopelagic) %>% filter(!spp== "mesopelagics")
-combo <- rbind(pred_mesopelagic_prey, predators_mesopelagics)
+predators_mesopelagic_0.05 <- predators_of_mesopelagic[15,] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% select(name) %>% mutate(classification= "Predators") %>% rename(spp= name)
+combo <- rbind(pred_mesopelagic_prey_0.05, predators_mesopelagic_0.05)
 
 GroupInfo_edt <- GroupInfo_CalCur_USE %>% select(Group, Biomass) %>% rename(spp= Group) #select original biomass from group info 
 data_2_edt <- data_2 %>% left_join(GroupInfo_edt, by= "spp") %>% left_join(combo, by= "spp") %>% drop_na() %>% group_by(classification, month) %>% mutate(total_biomass = sum(Biomass)) %>% #sum initial biomass of each species classification by month
@@ -123,6 +126,23 @@ mesopelagics_only <- data_2 %>% filter(spp== "mesopelagics") %>% rename(Mesopela
 ggplot() + geom_line(data=data_2_edt, aes(x=month, y=agg_rel_biomass, col= as.factor(classification))) + geom_line(data=mesopelagics_only, aes(x = month, y = biomass, col= "Mesopelagics")) + labs(col= "Species classification") +
   xlab("Month") + ylab("Relative biomass") + 
 scale_color_discrete(type = "viridis") + standard_theme + ggsave(width = 6, height = 6, "/Users/sallydowd/Documents/OTZ.manuscript/Images/preds.otherprey.25.jpeg")
+```
+
+```{r}
+#Identify prey of mesopelagics where higher diet proportion predators of mesopelagic fish have at least 0.05 in their diet 
+prey_of_mesopelagic_preds <- Diet[c(3,6:10,18), c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% rename(spp= name) 
+
+avg_pmp <- prey_of_mesopelagic_preds %>% summarize(mean(value)) #mean value of diet composition for predators on mesopelagic prey
+avg_pmf <- predators_of_mesopelagic[15,] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% summarize(mean(value)) #mean value of diet composition for mesopelagic predators on mesopelagic fish
+avg_mfmp <- Diet[c(3,6,7, 8:10, 18), c(1,16)] %>% summarize(mean(mesopelagics)) #mean value of diet composition for mesopelagic fish on mesopelagic prey
+avg_mpp <- Diet[c(29,33,38, 42, 48, 51, 54, 56, 63, 70,76,85), c(1,4,7,8, 9:11, 19)] %>% pivot_longer(-DIETS) %>% summarize(mean(value)) #mean value of diet composition for mesopelagic prey on mesopelagic predators
+avg_mfp <- Diet[c(29,33,38, 42, 48, 51, 54, 56, 63, 70,76,85), c(1,16)] %>% summarize(mean(value))
+#mean value of diet composition for mesopelagic fish on mesopelagic predators
+avg_mpmf <- Diet[15, c(1,4,7,8, 9:11, 19)] %>% pivot_longer(-DIETS) %>% summarize(mean(value)) #mean value of diet composition for mesopelagic prey on mesopelagic fish
+avgsmpmp <- Diet[c(3,6,7, 8:10, 18), c(1,4,7,8, 9:11, 19)]  %>% pivot_longer(-DIETS) %>% summarize(mean(value))
+  #mean value of diet composition for mesopelagic prey on mesopelagic prey
+avg_pp <- Diet[c(29,33,38, 42, 48, 51, 54, 56, 63, 70,76,85), c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% summarize(mean(value))
+ #mean value of diet composition for mesopelagic predators on mesopelagic predators
 ```
 
 #Exploring why euphausiids and forage fish increase
