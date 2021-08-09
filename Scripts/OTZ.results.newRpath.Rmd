@@ -213,6 +213,7 @@ assessment
   run2 <- rsim.step(scene2, run2, method = 'AB', year.end=yr)  
 }  
 rsim.plot(run2,all_species)  
+
 ```
 
 #Change over time graphs 
@@ -225,7 +226,7 @@ z_2<-as.data.frame(z_2)
 names(z_2) <- names_spp
 z_2$month <- 1:600
 data_2 <- gather(z_2, key = spp, value = biomass, -month )
-
+data_2 %>% filter(spp== "mesopelagics")
 #Change overtime plots
 change_2_overtime_df <- function(species) {
   x = seq(0,1, length.out = length(species))
@@ -389,11 +390,46 @@ predators_end50_nonc <- data_1_euph %>% filter(spp %in% noncommerical_predators,
 
 ```{r}
 #When you do ForcedFrate instead of ForcedCatch you still get similar graphs one just has more bumpiness to it 
-test <- adjust.fishing(scene0, "ForcedFRate", "mesopelagics", 2001:2050, value=0.50)
-Fishing.rate <- rsim.run(test, method = 'AB', years= 2001:2050) 
+test <- adjust.fishing(scene0, "ForcedFRate", "mesopelagics", 2001:2020, value=0.50)
+Fishing.rate <- rsim.run(test, method = 'AB', years= 2001:2020) 
 rsim.plot(Fishing.rate, all_species)
 rsim.plot(run1, all_species)
 
+test2 <- adjust.forcing(scene0, "ForcedBio", "mesopelagics", 2001:2050, value=(0.75*9.933774834))
+biomass_adj <- rsim.run(test2, method = 'AB', years= 2001:2050) 
+rsim.plot(biomass_adj, all_species)
+rsim.plot(run2, all_species)
+
+test3 <- adjust.forcing(scene0, "ForcedBio", "mesopelagics", 2001:2050, value=(0.50*9.933774834))
+biomass_adj3 <- rsim.run(test3, method = 'AB', years= 2001:2050) 
+rsim.plot(biomass_adj3, all_species)
+rsim.plot(run1, all_species)
+
+target_sp <- "mesopelagics"
+
+scene2 <- copy(base_sim_scene)
+run2 <- rsim.run(scene2, method = 'AB', years=2001)
+for (yr in 2002:2050){
+assessment <- end_biomass(run2)[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
+assessment
+  # convert target F * assessment to a total catch 
+  catches <- target_F * assessment
+  # apply the catch to mesopelagic fish
+  for (sp in target_sp){
+    scene2 <- adjust.fishing(scene2, "ForcedCatch", sp, yr, value=catches[sp])
+  }
+  #run 1 year
+  run2 <- rsim.step(scene2, run2, method = 'AB', year.end=yr)  
+}  
+rsim.plot(run2,all_species)  
+
+
+rsim.plot(run1,all_species)  
+rsim.plot(run2,all_species)  
+
+data_2 %>% filter(spp== "mesopelagics")
+
+(9.933774834*0.75)*0.75
 ```
 
 
