@@ -107,7 +107,7 @@ data_2 %>% filter(spp %in% c(predators_of_mesopelagic, mesopelagic_pred))
 frate.table(scene0)
 ```
 
-#Weighted aggregate biomass for predators of mesopelagic fish, other prey of mesopelagic fish and then mesopelagics seperate 
+#Grouped graph: weighted aggregate biomass for predators of mesopelagic fish, other prey of predators of mesopelagic fish (not just prey of mesopelagic fish)
 ```{r}
 #Pred_mesopelagic_prey_0.05 is made up of the predators of mesopelagic fish that have other prey consisting of at least 5% of their diet, predators_mesopelagic_0.05 are the predators of mesopelagic fish that have at least 5% of their diet consist of mesopelagics 
 pred_mesopelagic_prey_0.05 <- predators_of_mesopelagic %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% select(DIETS) %>% unique() %>% rename(spp = DIETS) %>% mutate(classification= "Other prey") #Make dataset longer by increasing number of rows, only select prey when at least one predators depends on them for >= 5% of their diet
@@ -124,6 +124,27 @@ group_by(classification, month) %>% summarize(agg_rel_biomass= sum(weighted_biom
 #get aggregated relative biomass for each species classification by summing weighted biomass for each species classification for each month  
 mesopelagics_only <- data_2 %>% filter(spp== "mesopelagics") %>% rename(Mesopelagics= "spp")
 ggplot() + geom_line(data=data_2_edt, aes(x=month, y=agg_rel_biomass, col= as.factor(classification))) + geom_line(data=mesopelagics_only, aes(x = month, y = biomass, col= "Mesopelagics")) + labs(col= "Species classification") +
+  xlab("Month") + ylab("Relative biomass") + 
+scale_color_discrete(type = "viridis") + standard_theme + ggsave(width = 6, height = 6, "/Users/sallydowd/Documents/OTZ.manuscript/Images/preds.otherprey.25.jpeg")
+```
+
+#Ungrouped graph: In this case the other prey is predators of mesopelagic fish that have >= 5% of their diet depend on prey of mesopelagic fish 
+#Show non-intuitive predators (ones that increased) + show major prey of mesopelagics
+```{r}
+pmp_df <- Diet[c(3,6:10,18), c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% select(DIETS) %>% rename(spp= DIETS) %>% mutate(Classification= "Mesopelagic fish prey")
+pmp_df <- prey_of_mesopelagic_preds[!duplicated(prey_of_mesopelagic_preds$spp),] #High diet proportion predators of mesopelagic fish that consume at least 5% of mesopelagic fish prey
+pmf_df <- predators_of_mesopelagic[15,] %>% rename("Juv. hake" = "Juv..hake", "Yellowtail rock."= "Yellowtail.rock.", "Shelf rock."= "Shelf.rock.", "P. Ocean Perch"= "P..Ocean.Perch", "Longspine thorny."= "Longspine.thorny.", "Tufted Puffin"= "Tufted.Puffin", "Leach's S. Petrel"= "Leach.s.S..Petrel","Fin whale"= "Fin.whale", "Slope rock."= "Slope.rock.") %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% select(name) %>% mutate(Classification= "Predators") %>% rename(spp=name)
+combo <- rbind(pmp_df, pmf_df)
+data_2_edt <- data_2 %>% left_join(combo, by= "spp") %>% drop_na()
+
+data_2_edt %>% 
+filter(spp == c("Fin whale", "Yellowtail rock.", "Juv. hake", "Grenadiers", "euphausiids", "copepods", "carniv-zoops")) %>% ggplot() + geom_line(aes(x=month, y=biomass, col= spp, linetype= Classification))
+  
+
+predators_of_mesopelagic %>% pivot_longer(-DIETS) %>% filter(value >= 0.05, name== "Grenadiers")
+#Fin whale: euphausiids as main, yellowtail. rock.: euphausiids as main, Juv. hake: copepods as main, other cephal. important for grenadiers
+
++ geom_line(data=mesopelagics_only, aes(x = month, y = biomass, col= "Mesopelagics")) + labs(col= "Species classification") +
   xlab("Month") + ylab("Relative biomass") + 
 scale_color_discrete(type = "viridis") + standard_theme + ggsave(width = 6, height = 6, "/Users/sallydowd/Documents/OTZ.manuscript/Images/preds.otherprey.25.jpeg")
 ```
