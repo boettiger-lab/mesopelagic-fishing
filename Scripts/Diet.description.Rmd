@@ -156,28 +156,36 @@ scale_color_discrete(type = "viridis") + standard_theme + ggsave(width = 6, heig
 #Identify prey of mesopelagics where higher diet proportion predators of mesopelagic fish have at least 0.05 in their diet 
 prey_of_mesopelagic_preds <- Diet[c(3,6:10,18), c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% rename(spp= name) 
 
-avg_pmp <- prey_of_mesopelagic_preds %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(Biomass)) %>% mutate(percent_biomass= Biomass/total_biomass) %>% mutate(weighted_biomass = 1*percent_biomass) %>% mutate(weighted_diet= weighted_biomass*value) %>% summarize(sum(weighted_diet)) #weighted value of diet composition for predators on mesopelagic prey
+avg_pmp <- prey_of_mesopelagic_preds %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(unique(Biomass))) %>% mutate(bio_DC_weight = (Biomass*value)/total_biomass) %>% summarize(sum(bio_DC_weight))
+#weighted value of diet composition for predators on mesopelagic prey
 
-avg_pmf <- predators_of_mesopelagic[15,] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% rename(spp= name) %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(Biomass)) %>% mutate(percent_biomass= Biomass/total_biomass) %>% mutate(weighted_biomass = 1*percent_biomass) %>% mutate(weighted_diet= weighted_biomass*value) %>% summarize(sum(weighted_diet))
+avg_pmf <- predators_of_mesopelagic[15,] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% rename(spp= name) %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(unique(Biomass))) %>% mutate(bio_DC_weight = (Biomass*value)/total_biomass) %>% summarize(sum(bio_DC_weight))
 #weighted value of diet composition for mesopelagic predators on mesopelagic fish
 
 avg_mfmp <- Diet[c(3,6,7, 8:10, 18), c(1,16)] %>% summarize(sum(mesopelagics))
 #non-weighted value (just sum) of diet composition for mesopelagic fish on mesopelagic prey
 
-avg_mpp <- Diet[c(29,33,38, 42, 48, 51, 54, 56, 63, 70,76,85), c(1,4,7,8, 9:11, 19)] %>% pivot_longer(-DIETS) %>% rename(spp= name) %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(Biomass)) %>% mutate(percent_biomass= Biomass/total_biomass) %>% mutate(weighted_biomass = 1*percent_biomass) %>% mutate(weighted_diet= weighted_biomass*value) %>% summarize(sum(weighted_diet))
+avg_mpp <- Diet[c(29,33,38, 42, 48, 51, 54, 56, 63, 70,76,85), c(1,4,7,8, 9:11, 19)] %>% pivot_longer(-DIETS) %>% rename(spp= name) %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(unique(Biomass))) %>% mutate(bio_DC_weight = (Biomass*value)/total_biomass) %>% summarize(sum(bio_DC_weight))
 #weighted value of diet composition for mesopelagic prey on mesopelagic predators
 
-avg_mfp <- Diet[c(29,33,38, 42, 48, 51, 54, 56, 63, 70,76,85), c(1,16)] %>% summarize(mean(value))
+avg_mfp <- Diet[c(29,33,38, 42, 48, 51, 54, 56, 63, 70,76,85), c(1,16)] %>% summarize(mean(mesopelagics))
 #weighted value of diet composition for mesopelagic fish on mesopelagic predators
 
-avg_mpmf <- Diet[15, c(1,4,7,8, 9:11, 19)] %>% pivot_longer(-DIETS) %>% rename(spp= name) %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(Biomass)) %>% mutate(percent_biomass= Biomass/total_biomass) %>% mutate(weighted_biomass = 1*percent_biomass) %>% mutate(weighted_diet= weighted_biomass*value) %>% summarize(sum(weighted_diet)) #weighted value of diet composition for mesopelagic prey on mesopelagic fish
+avg_mpmf <- Diet[15, c(1,4,7,8, 9:11, 19)] %>% pivot_longer(-DIETS) %>% rename(spp= name) %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(unique(Biomass))) %>% mutate(bio_DC_weight = (Biomass*value)/total_biomass) %>% summarize(sum(bio_DC_weight))
+#weighted value of diet composition for mesopelagic prey on mesopelagic fish
 
-avgsmpmp <- Diet[c(3,6,7, 8:10, 18), c(1,4,7,8, 9:11, 19)] %>% pivot_longer(-DIETS) %>% rename(spp= name) %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(Biomass)) %>% mutate(percent_biomass= Biomass/total_biomass) %>% mutate(weighted_biomass = 1*percent_biomass) %>% mutate(weighted_diet= weighted_biomass*value) %>% summarize(sum(weighted_diet))
-  #weighted value of diet composition for mesopelagic prey on mesopelagic prey
-
-avg_pp <- Diet[c(29,33,38, 42, 48, 51, 54, 56, 63, 70,76,85), c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% rename(spp= name) %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(Biomass)) %>% mutate(percent_biomass= Biomass/total_biomass) %>% mutate(weighted_biomass = 1*percent_biomass) %>% mutate(weighted_diet= weighted_biomass*value) %>% summarize(sum(weighted_diet))
- #weighted value of diet composition for mesopelagic predators on mesopelagic predators
+avgsmpmp <- Diet[c(3,6,7, 8:10, 18), c(1,4,7,8, 9:11, 19)] %>% pivot_longer(-DIETS) %>% rename(spp= name) %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(unique(Biomass))) %>% mutate(bio_DC_weight = (Biomass*value)/total_biomass) %>% summarize(sum(bio_DC_weight)) 
+ #weighted value of diet composition for mesopelagic prey on mesopelagic prey  
+  
+avg_pp <- Diet[c(29,33,38, 42, 48, 51, 54, 56, 63, 70,76,85), c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% rename(spp= name) %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(unique(Biomass))) %>% mutate(bio_DC_weight = (Biomass*value)/total_biomass) %>% summarize(sum(bio_DC_weight)) 
+#weighted value of diet composition for mesopelagic predators on mesopelagic predators
 ```
+
+```{r}
+
+                                                                                      
+```
+
 
 #Exploring why euphausiids and forage fish increase
 ```{r}
