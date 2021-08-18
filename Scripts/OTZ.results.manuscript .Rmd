@@ -183,7 +183,6 @@ data_2 %>% filter(spp== "mesopelagics")
 #TO NOTE: Mesopelagics currently are cut out of all of the graphs- need to make sure you have same scale for everything, can include them if want to but don't have to- can just state they were depleted to a certain level
 ```{r}
 #Scenario 1
-#Scenario 2
 change_1_overtime_df <- function(species) {
   x = seq(0,1, length.out = length(species))
   color = viridis(n = length(species), option= "B")
@@ -211,9 +210,9 @@ change_1_1_plot <- change_1_1 %>% ggplot(aes(col = Value)) + geom_point(aes(x=bi
 scale_color_manual(values = c("#FF0000","#0000FF", "#00FF70", "#FF00FF")) + 
  scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P. ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + 
   geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
-  xlim(0.70, 1.30) + 
-xlab("Relative biomass") + ylab("Species with high diet proportion ") + labs(col = "End biomass", title= "A") + standard_theme + 
-ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/dietover.50.jpeg")
+  xlim(0.70, 1.35) + 
+xlab("Relative biomass") + ylab("Species with high diet proportion ") + labs(col = "End biomass", title= "A") + standard_theme + theme(axis.text.y=element_blank()) + theme(legend.position = "none") +
+ggsave(width = 8, height = 7, "~/Documents/OTZ.manuscript/Images/Sub.2/dietover.50.jpeg")
 change_1_1_plot 
 
 #3: Lower dependence on mesopelagics: Diet under 0.05 
@@ -229,10 +228,9 @@ change_1_2$Value <- factor(change_1_2$Value, levels = c("Non-commercial", "Both"
 change_1_2_plot <- change_1_2 %>% ggplot(aes(col= Value)) + geom_point(aes(x= biomass_prop, y=reorder(species, desc(species)))) + 
 scale_color_manual(values = c("#0000FF", "#00FF70")) +
  scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"= "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm."= "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Juv. rock."= "Juv. rockfish", "Other cephal."= "Other cephalopod", "Shortspine thorny."= "Shortspine thornyhead", "Widow rock."= "Widow rockfish", "mesopelagics"= "Mesopelagics", "Sea Lions"= "Sea lions", "Splitnose rock."= "Splitnose rockfish")) + 
- xlim(0.70, 1.30) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
+ xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
 xlab("Relative biomass") + ylab("Species with low diet proportion") + 
-labs(col = "End biomass", title= "B") + standard_theme 
-#+ ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/dietunder.50.jpeg")
+labs(col = "End biomass", title= "B") + standard_theme + theme(legend.position = "none") + ggsave(width = 8, height = 7, "~/Documents/OTZ.manuscript/Images/Sub.2/dietunder.50.jpeg")
 change_1_2_plot
 
 #4: No dependence on mesopelagics
@@ -248,9 +246,9 @@ no_dependence_final <- no_dependence %>% filter(Dependence==0)
 change_1_3_df <- no_dependence_final
 change_1_3 <- change_1_3_df %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing", "Neither", "Increasing"), right = TRUE)) %>% arrange(value) %>% rename(biomass_prop= value) 
 change_1_3_plot <- change_1_3 %>% ggplot() + geom_point(aes(x= biomass_prop, y=reorder(species, desc(species)))) + 
-xlim(0.70, 1.30) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
+xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
 xlab("Relative biomass") + ylab("Species with no diet proportion") + 
-scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amphipods"= "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown pelican", "Cali. gull"= "California gull", "carniv-zoops" = "Carnivorous zooplankton", "copepods"= "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"= "Epibenthic", "euphausiids"= "Euphausiids", "infauna"= "Infauna", "Juv. round."= "Juv. roundfish", "Juv. thorny."= "Juv. thornyhead", "large jellies"= "Large jellies", "micro-zoop"= "Microzooplankton", "Nearshore rock."= "Nearshore rockfish", "Pacific Mackerel"= "Pacific mackerel", "pandalid shp"= "Pandalid shrimp", "phytoplankton"= "Phytoplankton", "Pigeon Guillemot"= "Pigeon guillemot", "Rhino. auk"= "Rhinoceros auklet", "small jellies"= "Small jellies", "surf perch"= "Surf perch", "tanner crb"= "Tanner crab", "Transient Orcas"= "Transient orcas", "Yelloweye rock."= "Yelloweye rockfish")) + labs(col = "End biomass", title= "C") + standard_theme + ggsave(width = 6, height = 8, "~/Documents/OTZ.manuscript/Images/no.diet.50.jpeg")
+scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amphipods"= "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown pelican", "Cali. gull"= "California gull", "carniv-zoops" = "Carnivorous zooplankton", "copepods"= "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"= "Epibenthic", "euphausiids"= "Euphausiids", "infauna"= "Infauna", "Juv. round."= "Juv. roundfish", "Juv. thorny."= "Juv. thornyhead", "large jellies"= "Large jellies", "micro-zoop"= "Microzooplankton", "Nearshore rock."= "Nearshore rockfish", "Pacific Mackerel"= "Pacific mackerel", "pandalid shp"= "Pandalid shrimp", "phytoplankton"= "Phytoplankton", "Pigeon Guillemot"= "Pigeon guillemot", "Rhino. auk"= "Rhinoceros auklet", "small jellies"= "Small jellies", "surf perch"= "Surf perch", "tanner crb"= "Tanner crab", "Transient Orcas"= "Transient orcas", "Yelloweye rock."= "Yelloweye rockfish")) + labs(col = "End biomass", title= "C") + standard_theme + ggsave(width = 8, height = 7, "~/Documents/OTZ.manuscript/Images/Sub.2/nodiet.50.jpeg")
 change_1_3_plot
 
 #Scenario 2
@@ -279,9 +277,9 @@ change_2_1_plot <- change_2_1 %>% ggplot(aes(col = Value)) + geom_point(aes(x=bi
 scale_color_manual(values = c("#FF0000","#0000FF", "#00FF70", "#FF00FF")) + 
  scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P. ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + 
   geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
-  xlim(0.70, 1.30) + 
-xlab("Relative biomass") + ylab("Species with high diet proportion ") + labs(col = "End biomass", title= "A") + standard_theme + 
-ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/dietover.25.jpeg")
+  xlim(0.70, 1.35) + 
+xlab("Relative biomass") + ylab("Species with high diet proportion ") + labs(col = "End biomass", title= "D") + standard_theme + 
+ggsave(width = 8, height = 7, "~/Documents/OTZ.manuscript/Images/Sub.2/dietover.25.jpeg")
 change_2_1_plot 
 
 #3: Lower dependence on mesopelagics: Diet under 0.05 
@@ -296,21 +294,21 @@ change_2_2$Value <- factor(change_2_2$Value, levels = c("Non-commercial", "Both"
 change_2_2_plot <- change_2_2 %>% ggplot(aes(col= Value)) + geom_point(aes(x= biomass_prop, y=reorder(species, desc(species)))) + 
 scale_color_manual(values = c("#0000FF", "#00FF70")) +
  scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"= "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm."= "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Juv. rock."= "Juv. rockfish", "Other cephal."= "Other cephalopod", "Shortspine thorny."= "Shortspine thornyhead", "Widow rock."= "Widow rockfish", "mesopelagics"= "Mesopelagics", "Sea Lions"= "Sea lions", "Splitnose rock."= "Splitnose rockfish")) + 
-  xlim(0.75, 1.25) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
+  xlim(0.75, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
 xlab("Relative biomass") + ylab("Species with low diet proportion") + 
-labs(col = "End biomass", title= "B") + standard_theme 
-#+ ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/dietunder.25.jpeg")
+labs(col = "End biomass", title= "E") + standard_theme + ggsave(width = 8, height = 7, "~/Documents/OTZ.manuscript/Images/Sub.2/dietunder.25.jpeg")
 change_2_2_plot
 
 #4: No dependence on mesopelagics
 change_2_3_df <- no_dependence_final
 change_2_3 <- change_2_3_df %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing", "Neither", "Increasing"), right = TRUE)) %>% arrange(value) %>% rename(biomass_prop= value) 
 change_2_3_plot <- change_2_3 %>% ggplot() + geom_point(aes(x= biomass_prop, y=reorder(species, desc(species)))) + 
-xlim(0.70, 1.30) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
+xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
 xlab("Relative biomass") + ylab("Species with no diet proportion") + 
-scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amphipods"= "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown pelican", "Cali. gull"= "California gull", "carniv-zoops" = "Carnivorous zooplankton", "copepods"= "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"= "Epibenthic", "euphausiids"= "Euphausiids", "infauna"= "Infauna", "Juv. round."= "Juv. roundfish", "Juv. thorny."= "Juv. thornyhead", "large jellies"= "Large jellies", "micro-zoop"= "Microzooplankton", "Nearshore rock."= "Nearshore rockfish", "Pacific Mackerel"= "Pacific mackerel", "pandalid shp"= "Pandalid shrimp", "phytoplankton"= "Phytoplankton", "Pigeon Guillemot"= "Pigeon guillemot", "Rhino. auk"= "Rhinoceros auklet", "small jellies"= "Small jellies", "surf perch"= "Surf perch", "tanner crb"= "Tanner crab", "Transient Orcas"= "Transient orcas", "Yelloweye rock."= "Yelloweye rockfish")) + labs(col = "End biomass", title= "C") + standard_theme + ggsave(width = 6, height = 8, "~/Documents/OTZ.manuscript/Images/no.diet.25.jpeg")
+scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amphipods"= "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown pelican", "Cali. gull"= "California gull", "carniv-zoops" = "Carnivorous zooplankton", "copepods"= "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"= "Epibenthic", "euphausiids"= "Euphausiids", "infauna"= "Infauna", "Juv. round."= "Juv. roundfish", "Juv. thorny."= "Juv. thornyhead", "large jellies"= "Large jellies", "micro-zoop"= "Microzooplankton", "Nearshore rock."= "Nearshore rockfish", "Pacific Mackerel"= "Pacific mackerel", "pandalid shp"= "Pandalid shrimp", "phytoplankton"= "Phytoplankton", "Pigeon Guillemot"= "Pigeon guillemot", "Rhino. auk"= "Rhinoceros auklet", "small jellies"= "Small jellies", "surf perch"= "Surf perch", "tanner crb"= "Tanner crab", "Transient Orcas"= "Transient orcas", "Yelloweye rock."= "Yelloweye rockfish")) + labs(col = "End biomass", title= "F") + standard_theme + ggsave(width = 8, height = 7, "~/Documents/OTZ.manuscript/Images/Sub.2/nodiet.25.jpeg")
 change_2_3_plot
 ```
+
 
 
 
