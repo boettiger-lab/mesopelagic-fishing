@@ -160,8 +160,6 @@ mesopelagics_only <- data_2 %>% filter(spp== "mesopelagics") %>% rename(Mesopela
 ggplot() + geom_line(data=data_2_g3, aes(x=month, y=agg_rel_biomass, col= as.factor(classification))) + geom_line(data=mesopelagics_only, aes(x = month, y = biomass, col= "Mesopelagics")) + labs(col= "Species classification") +
   xlab("Month") + ylab("Relative biomass") + 
 scale_color_discrete(type = "viridis") + standard_theme
-
-
 ```
 
 #Ungrouped graph: In this case the other prey is predators of mesopelagic fish that have >= 5% of their diet depend on prey of mesopelagic fish 
@@ -189,8 +187,7 @@ Diet[,c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) 
 
 #Weighted biomass for diet proportions of mesopelagic predators, mesopelagic fish, and prey of mesopelagic fish (that predators of mesopelagic fish prey on for >= 5% of their diet)
 ```{r}
-#Identify prey of mesopelagics where higher diet proportion predators of mesopelagic fish have at least 0.05 in their diet 
-prey_of_mesopelagic_preds <- Diet[c(3,6:10,18), c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% rename(spp= name) 
+prey_of_mesopelagic_preds <- Diet[c(3,6:10,18), c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% rename(spp= name) #prey of mesopelagics where higher diet proportion predators of mesopelagic fish have at least 
 
 avg_pmp <- prey_of_mesopelagic_preds %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(unique(Biomass))) %>% mutate(bio_DC_weight = (Biomass*value)/total_biomass) %>% summarize(sum(bio_DC_weight))
 #weighted value of diet composition for predators on mesopelagic prey
@@ -199,7 +196,7 @@ avg_pmf <- predators_of_mesopelagic[15,] %>% pivot_longer(-DIETS) %>% filter(val
 #weighted value of diet composition for mesopelagic predators on mesopelagic fish
 
 avg_mfmp <- Diet[c(3,6,7, 8:10, 18), c(1,16)] %>% summarize(sum(mesopelagics))
-#non-weighted value (just sum) of diet composition for mesopelagic fish on mesopelagic prey
+#non-weighted value (just sum) of diet composition for mesopelagic fish on mesopelagic prey because would be dividing Biomass of mesopelagics/total_biomass of mesopelagics which would equal 1 
 
 avg_mpp <- Diet[c(29,33,38, 42, 48, 51, 54, 56, 63, 70,76,85), c(1,4,7,8, 9:11, 19)] %>% pivot_longer(-DIETS) %>% rename(spp= name) %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(unique(Biomass))) %>% mutate(bio_DC_weight = (Biomass*value)/total_biomass) %>% summarize(sum(bio_DC_weight))
 #weighted value of diet composition for mesopelagic prey on mesopelagic predators
