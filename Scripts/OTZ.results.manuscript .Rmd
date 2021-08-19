@@ -180,7 +180,8 @@ data_2 %>% filter(spp== "mesopelagics")
 ```
 
 #Change over time graphs for scenario 1 and 2 
-#TO NOTE: Mesopelagics currently are cut out of all of the graphs- need to make sure you have same scale for everything, can include them if want to but don't have to- can just state they were depleted to a certain level
+
+#TO NOTE: Mesopelagics currently are cut out of all of the graphs- need to make sure you have same scale for everything, can mention their decrease in text and this exception was made for graphs 
 ```{r}
 #Scenario 1
 change_1_overtime_df <- function(species) {
@@ -307,6 +308,51 @@ xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", s
 xlab("Relative biomass") + ylab("Species with no diet proportion") + 
 scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amphipods"= "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown pelican", "Cali. gull"= "California gull", "carniv-zoops" = "Carnivorous zooplankton", "copepods"= "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"= "Epibenthic", "euphausiids"= "Euphausiids", "infauna"= "Infauna", "Juv. round."= "Juv. roundfish", "Juv. thorny."= "Juv. thornyhead", "large jellies"= "Large jellies", "micro-zoop"= "Microzooplankton", "Nearshore rock."= "Nearshore rockfish", "Pacific Mackerel"= "Pacific mackerel", "pandalid shp"= "Pandalid shrimp", "phytoplankton"= "Phytoplankton", "Pigeon Guillemot"= "Pigeon guillemot", "Rhino. auk"= "Rhinoceros auklet", "small jellies"= "Small jellies", "surf perch"= "Surf perch", "tanner crb"= "Tanner crab", "Transient Orcas"= "Transient orcas", "Yelloweye rock."= "Yelloweye rockfish")) + labs(col = "Classification") + standard_theme + ggsave(width = 8, height = 7, "~/Documents/OTZ.manuscript/Images/Sub.2/nodiet.25.jpeg")
 change_2_3_plot
+```
+
+#Time series graphs for 25% and 50% harvest rate 
+```{r}
+#Plot functional group biomass over the 50-year simulation
+#Graph with commercially valuable predators
+plot1_comm <- data_1 %>%
+  filter(spp %in% commercial_predators) %>% mutate(spp = fct_reorder(spp, biomass, tail, n = 1, .desc = TRUE)) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= spp)) + xlab("Month") + ylab("Relative biomass") +
+scale_color_discrete(type = "viridis", labels= c("Greenstriped" = expression(bold("Greenstriped rockfish")), "P. Ocean Perch"= expression(bold("P. ocean perch")), "Albacore" = expression(bold("Albacore")), "Arrowtooth" = expression(bold("Arrowtooth flounder")), "Canary rock."= expression(bold("Canary rock.")), "Lingcod"= expression(bold("Lingcod")), "Longspine thorny."= expression(bold("Longspine thornyhead")), "Other cephalopod"= expression(bold("Other cephal.")), "Sablefish"= expression(bold("Sablefish")), "Salmon"= expression(bold("Salmon")), "Sharks"= expression(bold("Sharks")), "Shelf rock."= expression(bold("Shelf rockfish")), "Shortspine thorny."= expression(bold("Shortspine thornyhead")), "Skates"= expression(bold("Skates")), "Slope rock."= expression(bold("Slope rockfish")), "Splitnose rockfish"= expression(bold("Splitnose rockfish")), "Widow rock."= expression(bold("Widow rockfish")), "Yellowtail rock."= expression(bold("Yellowtail rockfish")))) + labs(colour= "Commercially-harvested predators", title= "A") + standard_theme +
+ggsave(width = 6, height = 6, "~/Documents/OTZ.manuscript/Images/Sub.2/plot.commercial.50.jpeg")
+plot1_comm 
+
+
+
+direct.label(plot1_comm$spp, list("last.points", cex=.7, hjust=1))
+
+
++ geom_dl(aes(label= spp), method= list(dl.trans(x= x - 2.0), "last.points", cex= 0.8))
+
+#Graph with non-commercially valuable predators
+new_noncomm <- noncommerical_predators[- c(9,7,11,4,6,17,1,12,8,10,19,5,16,18,15,14,13,3)] #Remove predators that have commercial value as well 
+plot1_noncomm <- data_1 %>% filter(spp %in% new_noncomm) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+scale_color_discrete(type = "viridis", labels= c("Western Gull" = "Western gull", "Tufted Puffin" = "Tufted puffin", "Sea Lions"= "Sea lions", "Resident Orcas"= "Resident orcas", "Leach's S. Petrel" ="Leach's s. petrel", "Juv. Ele. Seal"="Juv. elephant seal", "Double corm."= "Double cormorant", "Brandt's corm." = "Brandt's cormorant", "Juv. rock." = "Juv. rockfish")) + 
+ labs(colour= "Non-commercial predators", title= "B") + ggsave(width = 6, height = 6, "~/Documents/OTZ.manuscript/Images/plot.noncommercial.50.jpeg")
+plot1_noncomm    
+
+#Graph for marine mammals
+plot1_mammals <- data_1 %>% filter(spp %in% mammals) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+theme_bw() + 
+scale_color_discrete(type = "viridis", labels= c("Adult N. Ele. Seal" = "Adult n. elephant seal", "Juv. Ele. Seal"= "Juv. elephant seal", "Resident Orcas"= "Resident orcas", "Sea Lions"= "Sea lions", "Transient Orcas"= "Transient orcas")) + 
+theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+labs(colour = "Marine mammals", title= "A") +
+ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/plot.mammals.50.jpeg")
+plot1_mammals
+#Seperates legend and saves it as pdf document 
+#legend <- get_legend(plot1_mammals)
+#pdf("/Users/SallyDowd/Documents/OTZ.manuscript/Images/Legends/mammals.legend.pdf")
+#grid.draw(legend)
+#dev.off()
+
+#Graph for species with highest economic value
+plot1_high.price <- data_1 %>% filter(spp %in% high.price) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= factor(spp))) + xlab("Month") + ylab("Relative biomass") + 
+scale_color_discrete(type= "viridis", labels= c("Albacore", "Lingcod", "Sablefish", "Salmon", "Shelf rockfish", "Shortspine thornyhead")) + labs(colour = "Commercial predators", title= "B") + standard_theme
+ggsave(width = 6, height = 5, "~/Documents/OTZ.manuscript/Images/plot.highprice.50.jpeg")
+plot1_high.price
 ```
 
 
