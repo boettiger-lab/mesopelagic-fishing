@@ -141,6 +141,7 @@ names(z_1) <- names_spp
 z_1$month <- 1:600
 data_1 <- gather(z_1, key = spp, value = biomass, -month )
 
+write.csv(data_1, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/data.1.csv")
 ```
 
 ```{r}
@@ -177,11 +178,11 @@ names(z_2) <- names_spp
 z_2$month <- 1:600
 data_2 <- gather(z_2, key = spp, value = biomass, -month )
 data_2 %>% filter(spp== "mesopelagics")
+
+write.csv(data_2, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/data.2.csv")
 ```
 
-#Change over time graphs for scenario 1 and 2 
-
-#TO NOTE: Mesopelagics currently are cut out of all of the graphs- need to make sure you have same scale for everything, can mention their decrease in text and this exception was made for graphs 
+#Don't need to run this code again!!! Saving datasets
 ```{r}
 #Scenario 1
 change_1_overtime_df <- function(species) {
@@ -195,6 +196,31 @@ change_1_overtime_df <- function(species) {
 }
 change_1_total <- change_1_overtime_df(all_species)
 change_1_total <- as.data.frame(change_1_total)
+
+write.csv(change_1_total, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/change_1_total.csv")
+
+#Scenario 2
+change_2_overtime_df <- function(species) {
+  x = seq(0,1, length.out = length(species))
+  color = viridis(n = length(species), option= "B")
+  par(mar = c(6,12,2,4))
+  specieyear2 = run2$annual_Biomass[1, species]
+  specieyearlast = run2$annual_Biomass[length(yearlist), species]
+  value <- (specieyearlast/specieyear2)
+  cbind(species, value)
+}
+change_2_total <- change_2_overtime_df(all_species)
+change_2_total <- as.data.frame(change_2_total)
+
+write.csv(change_2_total, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/change_1_total.csv")
+```
+
+#Change over time graphs for scenario 1 and 2 
+
+#TO NOTE: Mesopelagics currently are cut out of all of the graphs- need to make sure you have same scale for everything, can mention their decrease in text and this exception was made for graphs 
+```{r}
+
+#Scenario 1
 
 #Higher dependence on mesopelagics: Diet over 0.05
 change_1_1_df<- change_1_overtime_df(diet_over_0.05)
@@ -252,19 +278,6 @@ xlab("Relative biomass") + ylab("Species with no diet proportion") +
 scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amphipods"= "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown pelican", "Cali. gull"= "California gull", "carniv-zoops" = "Carnivorous zooplankton", "copepods"= "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"= "Epibenthic", "euphausiids"= "Euphausiids", "infauna"= "Infauna", "Juv. round."= "Juv. roundfish", "Juv. thorny."= "Juv. thornyhead", "large jellies"= "Large jellies", "micro-zoop"= "Microzooplankton", "Nearshore rock."= "Nearshore rockfish", "Pacific Mackerel"= "Pacific mackerel", "pandalid shp"= "Pandalid shrimp", "phytoplankton"= "Phytoplankton", "Pigeon Guillemot"= "Pigeon guillemot", "Rhino. auk"= "Rhinoceros auklet", "small jellies"= "Small jellies", "surf perch"= "Surf perch", "tanner crb"= "Tanner crab", "Transient Orcas"= "Transient orcas", "Yelloweye rock."= "Yelloweye rockfish")) + labs(col = "Classification") + standard_theme + ggsave(width = 8, height = 7, "~/Documents/OTZ.manuscript/Images/Sub.2/nodiet.50.jpeg")
 change_1_3_plot
 
-#Scenario 2
-change_2_overtime_df <- function(species) {
-  x = seq(0,1, length.out = length(species))
-  color = viridis(n = length(species), option= "B")
-  par(mar = c(6,12,2,4))
-  specieyear2 = run2$annual_Biomass[1, species]
-  specieyearlast = run2$annual_Biomass[length(yearlist), species]
-  value <- (specieyearlast/specieyear2)
-  cbind(species, value)
-}
-change_2_total <- change_2_overtime_df(all_species)
-change_2_total <- as.data.frame(change_2_total)
-
 #Higher dependence on mesopelagics: Diet over 0.05
 change_2_1_df <- change_2_overtime_df(diet_over_0.05)
 change_2_1_df <- as.data.frame(change_2_1_df)
@@ -310,8 +323,12 @@ scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amph
 change_2_3_plot
 ```
 
+
 #Time series graphs for 25% and 50% harvest rate 
 ```{r}
+data_1 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/data.1.csv")
+data_2 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/data.2.csv")
+
 #Plot functional group biomass over the 50-year simulation
 #Graph with commercially valuable predators
 Predator_value_ts <- Predator_value %>% rename(spp= "species")

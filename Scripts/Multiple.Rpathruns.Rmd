@@ -77,56 +77,6 @@ Cdiet_list <- list()
 
 ```
 
-#Need to load in some data/functions from OTZ.results.newRpath.Rmd file to make some of the data manipulation easier
-```{r}
-#Original scenario
-Cbase <- "../Data/Groupinfo_CalCur-USE.csv"  
-Cdiet <- "../Data/Diet_CalCur_USE.csv"  
-#Load unbalanced Ecopath model
-CalCur_unbal <- read.rpath.params(Cbase, Cdiet)
-check.rpath.params(CalCur_unbal)
-#Balance original Ecopath model
-Cal_bal <- rpath(CalCur_unbal) 
-Cal_bal
-
-#Base Scenario
-yearlist = 2001:2050
-base_sim_scene <- rsim.scenario(Cal_bal, CalCur_unbal, years = yearlist)
-scene0 <- base_sim_scene
-run0 <- rsim.run(scene0, method='AB', years=yearlist) 
-
-#End bimoass function 
-end_biomass <- function(rsim){return(rsim$out_Biomass[dim(rsim$out_Biomass)[1], 2:(dim(rsim$out_Biomass)[2])])}
-end_biomass
-
-#Mesopelagic harvest level of 25% applied to original model
-target_sp <- "mesopelagics"
-target_F <- 0.25
-names(target_F) <- target_sp 
-scene2 <- copy(base_sim_scene)
-run2 <- rsim.run(scene2, method = 'AB', years=2001)
-for (yr in 2002:2050){
-  # stock assessment based on current biomass * error
-  # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
-assessment <- end_biomass(run2)[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
-assessment
-  # convert target F * assessment to a total catch 
-  catches <- target_F * assessment
-  # apply the catch to mesopelagic fish
-  for (sp in target_sp){
-    scene2 <- adjust.fishing(scene2, "ForcedCatch", sp, yr, value=catches[sp])
-  }
-  #run 1 year
-  run2 <- rsim.step(scene2, run2, method = 'AB', year.end=yr)  
-}  
-
-#Original groups
-noncommerical_predators <- c(Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[33], Cal_bal$Group[37:38], Cal_bal$Group[43:47], Cal_bal$Group[50:56], Cal_bal$Group[58:60], Cal_bal$Group[63], Cal_bal$Group[65:67], Cal_bal$Group[69:70], Cal_bal$Group[72:73], Cal_bal$Group[76:80], Cal_bal$Group[82], Cal_bal$Group[85:88])
-noncommerical_predators
-commercial_predators <- c(Cal_bal$Group[18], Cal_bal$Group[33], Cal_bal$Group[37:38], Cal_bal$Group[42:48], Cal_bal$Group[50:56], Cal_bal$Group[58:59])
-commercial_predators
-```
-
 #Loop through 500 data sets!
 #Reading in data, unbalanced model
 ```{r}
@@ -250,7 +200,7 @@ write.csv(entire_data_6, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/
 #Confidence intervals: Calculate 95% CI for each model at month 600 (last month in model) for commercially and non-commerically valuable species 
 
 ```{r}
-read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/entire.data.6.csv")
+entire_data_6 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/entire.data.6.csv")
 
 #Calculate CI:
 n <- 500
@@ -309,6 +259,8 @@ test <- seven_models_outliers %>% left_join(rest_of_models_outliers) %>% mutate(
 
 #Graphs
 ```{r}
+sum_data_6 <- read.csv("/Users/sallydowd/Documents/OTZ.manuscript/Excel/sum_data_6.csv")
+
 #Filter datasets for commercial and non-commercial predators of mesopelagic fish
 new_noncomm <- noncommerical_predators[- c(9,7,11,4,6,17,1,12,8,10,19,5,16,18,15,14,13,3)] #Define group that has non-commercial predators that only had non-commercial value (not commercial value as well)
 comm_value <- sum_data_6 %>% filter(spp %in% commercial_predators) 
