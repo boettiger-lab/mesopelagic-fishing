@@ -12,32 +12,28 @@ library(tidyr)
 
 ```{r}
 Uncertainty_ranges <- read_excel("~/Documents/OTZ.manuscript/Excel/Uncertainty.ranges.xlsx")
+Uncertainty_ranges[4,1] <- "Fishing costs"
 ```
 
 ```{r}
-Uncert_range <- Uncertainty_ranges %>% ggplot(aes(x= factor(Parameter, level= c('Mortality', 'Biomass', 'Fishing Costs', 'Price'))))  +
+standard_theme <- theme_bw() + theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text.align= 0, legend.title= element_text(size = 10), legend.text = element_text(size= 9), axis.text=element_text(size=9), axis.title=element_text(size=10))
+
+Uncert_range <- Uncertainty_ranges %>% ggplot(aes(x= factor(Parameter, level= c('Mortality', 'Biomass', 'Fishing costs', 'Price')))) +
   geom_errorbar(aes(ymin = Min, ymax = Max), width = 0.15) + 
-theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10, family= "Helvetica
-serif"), axis.title=element_text(size=12)) + 
-xlab("Parameter") + ylab("Critical value range") + 
-theme_bw() + theme(panel.border = element_blank()) +
-theme(axis.line = element_line(colour = "black")) +
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
-ggsave(width = 6, height = 4, "~/Documents/OTZ.Manuscript/Images/uncertainty.ranges.jpeg")
+xlab("Parameter") + ylab("Critical value range") + standard_theme + 
+ggsave(width = 6, height = 4, "~/Documents/OTZ.Manuscript/Images/Sub.2/uncertainty.ranges.jpeg", dpi= 600)
 Uncert_range
 ```
 
 #Density function
 ```{r}
-standard_theme <- theme_bw() + theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) +
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text.align= 0, legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) 
-  
 critical_wtp_values <- read_excel("~/Documents/OTZ.manuscript/Excel/critical.wtp.values.xlsx")
 mean_critical <- critical_wtp_values %>% summarize(mean= mean(Critical.values)) 
 mean_WTP <- critical_wtp_values %>% drop_na() %>% summarize(mean= mean(WTP.values)) 
 
-critical.WTP.density <- critical_wtp_values %>% ggplot() + geom_density(aes(x= Critical.values, fill= "red")) + geom_density(aes(x= WTP.values,fill= "blue")) + xlab("Critical value") + ylab("Density") + labs("Value type") + geom_vline(data=mean_critical, aes(xintercept= mean)) + geom_vline(data=mean_WTP, aes(xintercept= mean), linetype="dashed") + scale_x_continuous(expand = c(0, 0)) + labs(fill= "Value type") + scale_y_continuous(expand = c(0, 0)) +scale_fill_manual(labels = c("WTP value", "Critical value"), values = c("blue", "red")) + standard_theme + theme(legend.position = "none") + ggsave(width = 6, height = 4, "~/Documents/OTZ.manuscript/Images/values.density.jpeg")
-  
+critical.WTP.density <- critical_wtp_values %>% ggplot() + geom_density(aes(x= Critical.values, fill= "red")) + geom_density(aes(x= WTP.values,fill= "blue")) + xlab("Critical value") + ylab("Density") + labs("Value type") + geom_vline(data=mean_critical, aes(xintercept= mean)) + geom_vline(data=mean_WTP, aes(xintercept= mean), linetype="dashed") + scale_x_continuous(expand = c(0, 0)) + labs(fill= "Value type") + scale_y_continuous(expand = c(0, 0)) + scale_fill_manual(labels = c("WTP value", "Critical value"), values = c("blue", "red")) + standard_theme + ggsave(width = 6, height = 4, "~/Documents/OTZ.manuscript/Images/Sub.2/values.density.jpeg", dpi= 600)
+critical.WTP.density
 
 library(grid)
 library(cowplot)
