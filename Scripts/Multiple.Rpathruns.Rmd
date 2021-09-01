@@ -11,6 +11,7 @@ library(Rpath)
 library(data.table)
 library(tidyr)
 library(ggplot2)
+library(ggpubr)
 ```
 
 #Load this each time 
@@ -261,6 +262,10 @@ test <- seven_models_outliers %>% left_join(rest_of_models_outliers) %>% mutate(
 ```{r}
 sum_data_6 <- read.csv("/Users/sallydowd/Documents/OTZ.manuscript/Excel/sum_data_6.csv")
 
+#Set standard GGplot theme
+standard_theme <- theme_bw() + theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text.align= 0, legend.title= element_text(size = 10), legend.text = element_text(size= 9), axis.text=element_text(size=9), axis.title=element_text(size=10))
+
 #Filter datasets for commercial and non-commercial predators of mesopelagic fish
 new_noncomm <- noncommerical_predators[- c(9,7,11,4,6,17,1,12,8,10,19,5,16,18,15,14,13,3)] #Define group that has non-commercial predators that only had non-commercial value (not commercial value as well)
 comm_value <- sum_data_6 %>% filter(spp %in% commercial_predators) 
@@ -270,17 +275,13 @@ write.csv(noncomm_value, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/noncom
 
 #Plot CIs for commercial and non-commercial predators 
 comm_value_500 <- comm_value %>% ggplot(aes(fill = median.value)) + 
-  geom_pointrange(aes(y=spp, x=median_biomass, xmin=quant_2.5, xmax= quant_97.5), size=0.5, shape=22) + 
-  scale_fill_grey() + 
+  geom_pointrange(aes(y=spp, x=median_biomass, xmin=quant_2.5, xmax= quant_97.5), size=0.5, shape=22) + scale_fill_grey() + 
 scale_y_discrete(limits = unique(rev(comm_value$spp)), labels= c("Greenstriped" = expression(bold("Greenstriped rockfish")), "P. Ocean Perch"= expression(bold("P. ocean perch")), "Albacore" = expression(bold("Albacore")), "Arrowtooth" = expression(bold("Arrowtooth flounder")), "Canary rock."= expression(bold("Canary rockfish")), "Lingcod"= expression(bold("Lingcod")), "Longspine thorny."= expression(bold("Longspine thornyhead")), "Other cephal."= expression(bold("Other cephalopod")), "Sablefish"= expression(bold("Sablefish")), "Salmon"= expression(bold("Salmon")), "Sharks"= expression(bold("Sharks")), "Shelf rock."= expression(bold("Shelf rockfish")), "Shortspine thorny."= expression(bold("Shortspine thornyhead")), "Skates"= expression(bold("Skates")), "Slope rock."= expression(bold("Slope rockfish")), "Splitnose rock."= expression(bold("Splitnose rockfish")), "Widow rock."= expression(bold("Widow rockfish")), "Yellowtail rock."= expression(bold("Yellowtail rockfish")))) +
 theme(legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10, family= "Helvetica
 serif"), axis.title=element_text(size=12)) + 
 geom_vline(xintercept = 1, size = 0.5) + 
 xlab("Relative biomass") + ylab("Species") + labs(fill = "Median biomass", title= "A") + 
-theme_bw() + theme(panel.border = element_blank()) +
-theme(axis.line = element_line(colour = "black")) +
-theme(legend.position= "none", panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
-ggsave(width = 6, height = 4, "~/Documents/OTZ.Manuscript/Images/500.commercial.25.jpeg")
+standard_theme
 comm_value_500
 
 noncomm_value_500 <- noncomm_value %>% ggplot(aes(fill = median.value)) + geom_pointrange(aes(y=spp, x=median_biomass, xmin=quant_2.5, xmax= quant_97.5), size=0.5, color="black", shape=22) + 
@@ -289,10 +290,7 @@ scale_y_discrete(limits = unique(rev(noncomm_value$spp)), labels= c("Western Gul
 geom_vline(xintercept = 1, size = 0.5) + 
 xlab("Relative biomass") + ylab("Species") + labs(fill = "Median biomass", title= "B") + 
 theme_bw() + theme(panel.border = element_blank()) +
-theme(axis.line = element_line(colour = "black")) +
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
-theme(legend.position= "none", legend.title= element_text(size = 12), legend.text = element_text(size= 10), axis.text=element_text(size=10), axis.title=element_text(size=12)) + 
-ggsave(width = 6, height = 4, "~/Documents/OTZ.Manuscript/Images/500.noncommercial.25.jpeg")
+theme(axis.line = element_line(colour = "black")) + standard_theme
 noncomm_value_500
 ```
 
@@ -307,8 +305,7 @@ sum_2_1_graph <- sum_2_1 %>% ggplot(aes(col= Value)) +
   scale_color_manual(values = c("#FF0000","#0000FF", "#00FF70", "#FF00FF")) + 
 scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P. ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + 
 geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
-  xlim(0.70, 1.35) + xlab("Relative biomass") + ylab("Species with high diet proportion") + labs(col = "Classification") + standard_theme  +
-ggsave(width = 8, height = 7, "~/Documents/OTZ.Manuscript/Images/Sub.2/500.dietover.25.jpeg")
+  xlim(0.70, 1.35) + xlab("Relative biomass") + ylab("Species with high diet proportion") + labs(col = "Classification") + standard_theme
 sum_2_1_graph
 
 sum_2_2 <- sum_data_6 %>% filter(spp %in% diet_under_0.05) %>% rename(species= "spp") %>% left_join(Predator_value, by= "species")
@@ -320,8 +317,7 @@ sum_2_2_graph <- sum_2_2 %>% ggplot(aes(col= Value)) +
   scale_color_manual(values = c("#0000FF", "#00FF70")) +
  scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"= "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm."= "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Juv. rock."= "Juv. rockfish", "Other cephal."= "Other cephalopod", "Shortspine thorny."= "Shortspine thornyhead", "Widow rock."= "Widow rockfish", "mesopelagics"= "Mesopelagics", "Sea Lions"= "Sea lions", "Splitnose rock."= "Splitnose rockfish")) +
   geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
-  xlim(0.70, 1.35) + xlab("Relative biomass") + ylab("Species with low diet proportion") + labs(col = "Classification") + standard_theme + 
-ggsave(width = 8, height = 7, "~/Documents/OTZ.Manuscript/Images/Sub.2/500.dietunder.25.jpeg")
+  xlim(0.70, 1.35) + xlab("Relative biomass") + ylab("Species with low diet proportion") + labs(col = "Classification") + standard_theme 
 sum_2_2_graph
 
 commercial_predators_df <- as.data.frame(commercial_predators) %>% rename(species= commercial_predators)
@@ -338,34 +334,23 @@ sum_2_3_graph <- sum_2_3 %>% ggplot() +
   geom_pointrange(aes(y=reorder(species, desc(species)), x=median_biomass, xmin=quant_2.5, xmax= quant_97.5), size=0.5, shape=22, fill= "white") + 
 scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amphipods"= "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown pelican", "Cali. gull"= "California gull", "carniv-zoops" = "Carnivorous zooplankton", "copepods"= "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"= "Epibenthic", "euphausiids"= "Euphausiids", "infauna"= "Infauna", "Juv. round."= "Juv. roundfish", "Juv. thorny."= "Juv. thornyhead", "large jellies"= "Large jellies", "micro-zoop"= "Microzooplankton", "Nearshore rock."= "Nearshore rockfish", "Pacific Mackerel"= "Pacific mackerel", "pandalid shp"= "Pandalid shrimp", "phytoplankton"= "Phytoplankton", "Pigeon Guillemot"= "Pigeon guillemot", "Rhino. auk"= "Rhinoceros auklet", "small jellies"= "Small jellies", "surf perch"= "Surf perch", "tanner crb"= "Tanner crab", "Transient Orcas"= "Transient orcas", "Yelloweye rock."= "Yelloweye rockfish")) +
   geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
-  xlim(0.70, 1.35) + xlab("Relative biomass") + ylab("Species with low diet proportion") + labs(col = "Classification") + standard_theme + 
-ggsave(width = 8, height = 7, "~/Documents/OTZ.Manuscript/Images/Sub.2/500.nodiet.25.jpeg")
+  xlim(0.70, 1.35) + xlab("Relative biomass") + ylab("Species with low diet proportion") + labs(col = "Classification") + standard_theme 
 sum_2_3_graph
 
-library(ggpubr)
-
-#Seperates legend and saves it as pdf document 
-#legend <- get_legend(plot1_mammals)
-#pdf("/Users/SallyDowd/Documents/OTZ.manuscript/Images/Legends/mammals.legend.pdf")
-#grid.draw(legend)
-#dev.off()
-
-
-high_diet_plot <- ggarrange(change_2_1_plot + rremove("xlab") + rremove("ylab"), change_1_1_plot + rremove("xlab") + rremove("ylab"), common.legend = TRUE, legend= "right", labels= c("A", "B", "C"), sum_2_1_graph + rremove("xlab") + rremove("ylab"), ncol = 3, nrow = 1)
+high_diet_plot <- ggarrange(change_2_1_plot + rremove("xlab") + rremove("ylab"), change_1_1_plot + rremove("xlab") + rremove("ylab"), common.legend = TRUE, legend= "right", labels= c("a", "b", "c"), sum_2_1_graph + rremove("xlab") + rremove("ylab"), ncol = 3, nrow = 1)
 
 annotate_figure(high_diet_plot, bottom= text_grob("Relative biomass", size=14), left= text_grob("Species with high diet proportion", size=14, rot=90)) + 
-ggsave(width = 12, height = 7, "~/Documents/OTZ.Manuscript/Images/Sub.2/high.diet.combo.jpeg")
+ggsave(width = 8.75, height = 5.25, "~/Documents/OTZ.Manuscript/Images/Sub.2/high.diet.combo.jpeg", dpi=600)
 
-low_diet_plot <- ggarrange(change_2_2_plot + rremove("xlab") + rremove("ylab") + rremove("legend"), change_1_2_plot + rremove("xlab") + rremove("ylab") + rremove("legend"), common.legend = TRUE, legend= "right", labels= c("A", "B", "C"), sum_2_2_graph + rremove("xlab") + rremove("ylab"), ncol = 3, nrow = 1)
+low_diet_plot <- ggarrange(change_2_2_plot + rremove("xlab") + rremove("ylab") + rremove("legend"), change_1_2_plot + rremove("xlab") + rremove("ylab") + rremove("legend"), common.legend = TRUE, legend= "right", labels= c("a", "b", "c"), sum_2_2_graph + rremove("xlab") + rremove("ylab"), ncol = 3, nrow = 1)
 
 annotate_figure(low_diet_plot, bottom= text_grob("Relative biomass", size=14), left= text_grob("Species with low diet proportion", size=14, rot=90)) + 
-ggsave(width = 12, height = 7, "~/Documents/OTZ.Manuscript/Images/Sub.2/low.diet.combo.jpeg")
+ggsave(width = 8.75, height = 5.25, "~/Documents/OTZ.Manuscript/Images/Sub.2/low.diet.combo.jpeg", dpi=600)
 
-no_diet_plot <- ggarrange(change_2_3_plot + rremove("xlab") + rremove("ylab"), change_1_3_plot + rremove("xlab") + rremove("ylab"), sum_2_3_graph + rremove("xlab") + rremove("ylab"), ncol = 3, nrow = 1)
+no_diet_plot <- ggarrange(change_2_3_plot + rremove("xlab") + rremove("ylab"), change_1_3_plot + rremove("xlab") + rremove("ylab"), sum_2_3_graph + rremove("xlab") + rremove("ylab"), ncol = 3, nrow = 1, labels= c("a", "b", "c"))
 
 annotate_figure(no_diet_plot, bottom= text_grob("Relative biomass", size=14), left= text_grob("Species with no diet proportion", size=14, rot=90)) + 
-ggsave(width = 12, height = 7, "~/Documents/OTZ.Manuscript/Images/Sub.2/no.diet.combo.jpeg")
-
+ggsave(width = 8.75, height = 5.25, "~/Documents/OTZ.Manuscript/Images/Sub.2/no.diet.combo.jpeg", dpi=600)
 ```
 
 #Find the average of the input paramters (Biomass, QB, PB, and EE) from the seven outleir models and the 493 remaining models, trying to determine cause of unrealistic biomass estimates in the seven models
