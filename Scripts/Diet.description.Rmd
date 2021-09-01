@@ -110,11 +110,13 @@ scale_color_discrete(type = "viridis") + standard_theme
 combo_g3 <- rbind(prey_of_mesopelagic_preds[!duplicated(prey_of_mesopelagic_preds$spp),], predators_mesopelagic_0.05, pred_mesopelagic_prey_0.05[!duplicated(pred_mesopelagic_prey_0.05$spp),])
 
 data_2_g3 <- data_2 %>% left_join(GroupInfo_edt, by= "spp") %>% left_join(combo_g3, by= "spp") %>% drop_na() %>% group_by(classification, month) %>% mutate(total_biomass= sum(unique(Biomass))) %>% ungroup() %>% mutate(percent_biomass= Biomass/total_biomass) %>% mutate(weighted_biomass= biomass*percent_biomass) %>% group_by(classification,month) %>% summarize(agg_rel_biomass= sum(weighted_biomass))
+preds_other_prey
 
 mesopelagics_only <- data_2 %>% filter(spp== "mesopelagics") %>% rename(Mesopelagics= "spp")
-ggplot() + geom_line(data=data_2_g3, aes(x=month, y=agg_rel_biomass, col= as.factor(classification))) + geom_line(data=mesopelagics_only, aes(x = month, y = biomass, col= "Mesopelagics")) + labs(col= "Species classification") + scale_x_continuous(name= "Year", breaks= c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040", "2050")) +geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) +
+preds_other_prey <- ggplot() + geom_line(data_2_g3c  %>% mutate(spp = fct_reorder(spp, agg_rel_biomass, tail, n = 1, .desc = TRUE)), aes(x=month, y=agg_rel_biomass, col= as.factor(classification))) + geom_line(data=mesopelagics_only, aes(x = month, y = biomass, col= "Mesopelagics")) + labs(col= "Species classification") + scale_x_continuous(name= "Year", breaks= c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040", "2050")) +geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) +
   xlab("Month") + ylab("Relative biomass") + 
 scale_color_discrete(type = "viridis") + standard_theme + ggsave(width = 6, height = 4, "/Users/sallydowd/Documents/OTZ.manuscript/Images/Sub.2/preds.otherprey.25.jpeg", dpi=600)
+preds_other_prey
 ```
 
 #Ungrouped graph: In this case the other prey is predators of mesopelagic fish that have >= 5% of their diet depend on prey of mesopelagic fish 
