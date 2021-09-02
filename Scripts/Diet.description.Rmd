@@ -131,11 +131,9 @@ mesopelagics_edt <- mesopelagics_only %>% rename(spp= "Mesopelagics") %>% mutate
 
 data_2_u1 <- data_2 %>% left_join(combo_u1, by= "spp") %>% drop_na()
 
-data_2_u1 %>% filter(spp == c("Leach's S. Petrel", "copepods", "Dolphins", "Juv. hake", "Grenadiers", "euphausiids", "Other cephal.", "mesopelagics")) %>% ggplot() + geom_line(aes(x=month, y=biomass, col= spp, linetype= classification)) + scale_color_discrete(type= "viridis", labels= c("copepods"= "Copepods", "euphausiids"= "Euphausiids", "Leach's S. Petrel"= "Leach's s. petrel", "mesopelagics"= "Mesopelagics", "Other cephal." = "Other cephalopods")) + scale_x_continuous(name= "Year", breaks= c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040", "2050")) +  geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) + xlab("Month") + ylab("Relative biomass") + labs(col= "Species", linetype= "Species classification") + standard_theme + guides(linetype = guide_legend(order = 2),col = guide_legend(order = 1)) + ggsave(width = 6, height = 4, "/Users/sallydowd/Documents/OTZ.manuscript/Images/Sub.2/mix.species.25.jpeg", dpi=600)
+data_2_u1 %>% mutate(spp = fct_reorder(spp, biomass, tail, n = 1, .desc = TRUE)) %>% filter(spp == c("Leach's S. Petrel", "copepods", "Dolphins", "Juv. hake", "Grenadiers", "euphausiids", "Other cephal.", "mesopelagics")) %>% ggplot() + geom_line(aes(x=month, y=biomass, col= spp, linetype= classification)) + scale_color_discrete(type= "viridis", labels= c("copepods"= "Copepods", "euphausiids"= "Euphausiids", "Leach's S. Petrel"= "Leach's s. petrel", "mesopelagics"= "Mesopelagics", "Other cephal." = "Other cephalopod")) + scale_x_continuous(name= "Year", breaks= c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040", "2050")) +  geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) + xlab("Month") + ylab("Relative biomass") + labs(col= "Species", linetype= "Species classification") + standard_theme + guides(linetype = guide_legend(order = 2),col = guide_legend(order = 1)) + ggsave(width = 6, height = 4, "/Users/sallydowd/Documents/OTZ.manuscript/Images/Sub.2/mix.species.25.jpeg", dpi=600)
 
-
-Diet[,c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% filter(name== "Grenadiers")
-
+Diet[,c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% filter(name== "Juv. hake")
 
 ```
 

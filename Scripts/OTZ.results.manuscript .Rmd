@@ -375,6 +375,29 @@ scale_color_discrete(type = "viridis", labels= c("Greenstriped" = "Greenstriped 
 
 ```
 
+#Simple stats
+```{r}
+biomass_increase_25 <- data_2 %>% filter(month==600, biomass >1) %>% mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
+biomass_increase_25
+
+biomass_decrease_25 <- data_2 %>% filter(month==600, biomass <1) %>% mutate(difference= (1-biomass), percent= (1-biomass)*100)
+biomass_decrease_25
+
+biomass_increase_50 <- data_1 %>% filter(month==600, biomass >1) %>% mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
+biomass_increase_50
+
+biomass_decrease_50 <- data_1 %>% filter(month==600, biomass <1) %>% mutate(difference= (1-biomass), percent = (1-biomass)*100)
+biomass_decrease_50
+
+#Find relative end biomass for commercial and non-commercial predators of mesopelagic fish for 25% and 50% harvest rate 
+predators_end25_comm <- data_2 %>% filter(spp %in% commercial_predators, month== 600) 
+predators_end25_nonc <- data_2 %>% filter(spp %in% noncommerical_predators, month== 600)
+
+predators_end50_comm <- data_1 %>% filter(spp %in% commercial_predators, month== 600)
+
+predators_end50_nonc <- data_1 %>% filter(spp %in% noncommerical_predators, month== 600)
+```
+
 
 
 
