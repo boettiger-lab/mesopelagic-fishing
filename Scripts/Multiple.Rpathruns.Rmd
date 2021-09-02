@@ -260,7 +260,7 @@ test <- seven_models_outliers %>% left_join(rest_of_models_outliers) %>% mutate(
 
 #Graphs
 ```{r}
-sum_data_6 <- read.csv("/Users/sallydowd/Documents/OTZ.manuscript/Excel/sum_data_6.csv")
+sum_data_6 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/sum_data_6.csv")
 
 #Set standard GGplot theme
 standard_theme <- theme_bw() + theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
