@@ -67,7 +67,7 @@ noncommerical_predators
 diet_under_0.05 <- c(Cal_bal$Group[15], Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[37], Cal_bal$Group[43:47], Cal_bal$Group[50], Cal_bal$Group[52:53], Cal_bal$Group[55], Cal_bal$Group[58:59], Cal_bal$Group[60], Cal_bal$Group[65:67], Cal_bal$Group[69],Cal_bal$Group[72:73], Cal_bal$Group[77:80], Cal_bal$Group[82], Cal_bal$Group[86:88])
 
 diet_under_0.05_2 <- c(Cal_bal$Group[15], Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[37], Cal_bal$Group[43:47], Cal_bal$Group[50], Cal_bal$Group[52:53], Cal_bal$Group[55], Cal_bal$Group[58:59], Cal_bal$Group[60], Cal_bal$Group[65:67], Cal_bal$Group[69],Cal_bal$Group[72:73], Cal_bal$Group[77:80], Cal_bal$Group[82], Cal_bal$Group[86:88])
-diet_under_0.05_2
+as.data.frame(diet_under_0.05_2)
 
 #Predators that have a diet proportion of mesopelagic fish > 0.05
 diet_over_0.05 <- c(Cal_bal$Group[29], Cal_bal$Group[33], Cal_bal$Group[38], Cal_bal$Group[42], Cal_bal$Group[48], Cal_bal$Group[51], Cal_bal$Group[54], Cal_bal$Group[56], Cal_bal$Group[63], Cal_bal$Group[70], Cal_bal$Group[76], Cal_bal$Group[85])
@@ -271,6 +271,7 @@ no_dependence[is.na(no_dependence)] <- 0 #Functional groups with no dependence o
 no_dependence <-no_dependence[!duplicated(no_dependence$species),] 
 no_dependence <- no_dependence[-c(15,30),] #Remove mesopelagics and juvenile hake- dependence on mesopelagics but don't have commercial or non-commercial value so will be weird with filtering
 no_dependence_final <- no_dependence %>% filter(Dependence==0)
+no_dependence_final <- no_dependence_final %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing", "Neither", "Increasing"), right = TRUE)) %>% arrange(value)
 
 change_1_3_df <- no_dependence_final
 change_1_3 <- change_1_3_df %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing", "Neither", "Increasing"), right = TRUE)) %>% arrange(value) %>% rename(biomass_prop= value) 
@@ -315,8 +316,15 @@ labs(col = "Classification") + standard_theme
 change_2_2_plot
 
 #4: No dependence on mesopelagics
-change_2_3_df <- no_dependence_final
+no_dependence_2 <- change_2_total %>% left_join(combo, by= "species")
+no_dependence_2[is.na(no_dependence_2)] <- 0 #Functional groups with no dependence on mesopelagics have a 0
+no_dependence_2 <-no_dependence_2[!duplicated(no_dependence_2$species),] 
+no_dependence_2 <- no_dependence_2[-c(15,30),] #Remove mesopelagics and juvenile hake- dependence on mesopelagics but don't have commercial or non-commercial value so will be weird with filtering
+no_dependence_final_2 <- no_dependence_2 %>% filter(Dependence==0)
+change_2_3_df <- no_dependence_final_2
 change_2_3 <- change_2_3_df %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing", "Neither", "Increasing"), right = TRUE)) %>% arrange(value) %>% rename(biomass_prop= value) 
+
+change_2_3 %>% filter(result== "Neither")
 change_2_3_plot <- change_2_3 %>% ggplot() + geom_point(aes(x= biomass_prop, y=reorder(species, desc(species)))) + 
 xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
 xlab("Relative biomass") + ylab("Species with no diet proportion") + 

@@ -123,23 +123,26 @@ preds_other_prey
 #Show non-intuitive predators (ones that increased) + show major prey of mesopelagics
 ```{r}
 #Graph 1: two predators of mesopelagic fish (>= 0.05) that increased and two that decreased the most, mesopelagic fish, the prey of mesopelagic fish that these predators relied most on, the other prey that these predators relied most on 
+mesopelagics_edt <- mesopelagics_only %>% rename(spp= "Mesopelagics") %>% mutate(classification= "Mesopelagics") %>% select(spp, classification)
 pmp_df <- prey_of_mesopelagic_preds[!duplicated(prey_of_mesopelagic_preds$spp),] #prey of mesopelagic fish that make up at least 5% of diet for some predators of mesopelagic fish 
 pmf_df <- predators_mesopelagic_0.05 #High diet proportion predators of mesopelagic fish that consume at least 5% of mesopelagic fish prey
 combo_u1 <- rbind(pmp_df, pmf_df, mesopelagics_edt)
-
-mesopelagics_edt <- mesopelagics_only %>% rename(spp= "Mesopelagics") %>% mutate(classification= "Mesopelagics") %>% select(spp, classification)
 
 data_2_u1 <- data_2 %>% left_join(combo_u1, by= "spp") %>% drop_na()
 
 data_2_u1 %>% mutate(spp = fct_reorder(spp, biomass, tail, n = 1, .desc = TRUE)) %>% filter(spp == c("Leach's S. Petrel", "copepods", "Dolphins", "Juv. hake", "Grenadiers", "euphausiids", "Other cephal.", "mesopelagics")) %>% ggplot() + geom_line(aes(x=month, y=biomass, col= spp, linetype= classification)) + scale_color_discrete(type= "viridis", labels= c("copepods"= "Copepods", "euphausiids"= "Euphausiids", "Leach's S. Petrel"= "Leach's s. petrel", "mesopelagics"= "Mesopelagics", "Other cephal." = "Other cephalopod")) + scale_x_continuous(name= "Year", breaks= c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040", "2050")) +  geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) + xlab("Month") + ylab("Relative biomass") + labs(col= "Species", linetype= "Species classification") + standard_theme + guides(linetype = guide_legend(order = 2),col = guide_legend(order = 1)) + ggsave(width = 6, height = 4, "/Users/sallydowd/Documents/OTZ.manuscript/Images/Sub.2/mix.species.25.jpeg", dpi=600)
 
-Diet[,c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% filter(name== "Juv. hake")
-
+Diet[,c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% filter(name== "Other cephal.")
+data_2 %>% filter(month== 600, biomass >1)
+#Juvenile hake relied most on euphausiids (0.80), copepods (0.08), and mesopelagics (0.06)
+#Grenadiers relied most on other. ceph (0.30), only on mesopelagics by 0.05
+#Dolphins relied most on mesopelagics (0.20), other ceph. (0.21), import (0.20)
+#Leach's S. Petrel: epuhausiids (0.29), mesopelagics (0.29)
 ```
 
 #Weighted biomass for diet proportions of mesopelagic predators, mesopelagic fish, and prey of mesopelagic fish (that predators of mesopelagic fish prey on for >= 5% of their diet)
 ```{r}
-prey_of_mesopelagic_preds <- Diet[c(3,6:10,18), c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% rename(spp= name) #prey of mesopelagics where higher diet proportion predators of mesopelagic fish have at least 
+prey_of_mesopelagic_preds <- Diet[c(3,6:10,18), c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% rename(spp= name) #prey of mesopelagics where higher diet proportion predators of mesopelagic fish have at least 0.05 dependence on 
 
 avg_pmp <- prey_of_mesopelagic_preds %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(unique(Biomass))) %>% mutate(bio_DC_weight = (Biomass*value)/total_biomass) %>% summarize(sum(bio_DC_weight))
 #weighted value of diet composition for predators on mesopelagic prey
