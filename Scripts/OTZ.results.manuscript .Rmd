@@ -1,10 +1,9 @@
 ---
-title: "OTZ.results.manuscript"
+title: "Rpath.main.results"
 output: html_document
 ---
 
-#Code to simulate the ecosystem-wide impacts of harvesting mesopelagic fishes on the California Current system
-#Code was originally created by Kerim Aydin (kerim.aydin@noaa.gov), modified by Laura Koehn, Sally Dowd, and Melissa Chapman 
+#Code to simulate the ecosystem-wide impacts of harvesting mesopelagic fishes at a yearly rate of 25 and 50% in the California Current for the paper titled "The economic tradeoffs and ecological implications associated with a potential mesopelagic fishery in the California Current". Code was originally created by Kerim Aydin (kerim.aydin@noaa.gov), modified by Laura Koehn (laura.koehn216@gmail.com), Sally Dowd (sdowd20@berkeley.edu), and Melissa Chapman (mchapman@berkeley.edu) 
 
 #Load required packages
 ```{r}
@@ -18,20 +17,21 @@ library(tidyverse)
 library(viridis)
 ```
 
-#Import csv files 
+#Import original diet matrix (Diet_CalCur_USE.csv) and an unbalanced version of base parameters (Groupinfo_CalCur-USE.csv) from Koehn et al. (2016). 
 ```{r}
 #Define code source for base and diet parameters
-Cbase <- "../Data/Groupinfo_CalCur-USE.csv"  # Base biomass, production, fishing, etc.
-Cdiet <- "../Data/Diet_CalCur_USE.csv"  # Diet matrix
+Cdiet <- "../Data/Diet_CalCur_USE.csv"  #Diet matrix
+Cbase <- "../Data/Groupinfo_CalCur-USE.csv"  #Base biomass, production, fishing, etc.
 
 #Load unbalanced Ecopath model
 CalCur_unbal <- read.rpath.params(Cbase, Cdiet)
 
-#Read in created parameter files with read.rpath.params function
+#Read in created parameter files
 check.rpath.params(CalCur_unbal)
 ```
 
-#Running Ecopath in R: Balance an unbalanced Ecopath object, convert Ecopath model to Rpath object
+#Run Ecopath in R through Rpath
+#Solve for EE to balance an unbalanced Ecopath object and convert the Ecopath model to an Rpath object 
 ```{r}
 #Balance the scenario using rpath function 
 Cal_bal <- rpath(CalCur_unbal) 
@@ -64,62 +64,56 @@ noncommerical_predators <- c(Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group
 noncommerical_predators
 
 #Predators that have a diet proportion of mesopelagic fish < 0.05
-diet_under_0.05 <- c(Cal_bal$Group[15], Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[37], Cal_bal$Group[43:47], Cal_bal$Group[50], Cal_bal$Group[52:53], Cal_bal$Group[55], Cal_bal$Group[58:59], Cal_bal$Group[60], Cal_bal$Group[65:67], Cal_bal$Group[69],Cal_bal$Group[72:73], Cal_bal$Group[77:80], Cal_bal$Group[82], Cal_bal$Group[86:88])
+diet_under_0.05 <- c(Cal_bal$Group[15], Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[37], Cal_bal$Group[43:47], Cal_bal$Group[50], Cal_bal$Group[52:53], Cal_bal$Group[55], Cal_bal$Group[58:59], Cal_bal$Group[60], Cal_bal$Group[65:67], Cal_bal$Group[69],Cal_bal$Group[72:73], Cal_bal$Group[77:80], Cal_bal$Group[82], Cal_bal$Group[86:88]) #excludes mesopelagic fish group
 
-diet_under_0.05_2 <- c(Cal_bal$Group[15], Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[37], Cal_bal$Group[43:47], Cal_bal$Group[50], Cal_bal$Group[52:53], Cal_bal$Group[55], Cal_bal$Group[58:59], Cal_bal$Group[60], Cal_bal$Group[65:67], Cal_bal$Group[69],Cal_bal$Group[72:73], Cal_bal$Group[77:80], Cal_bal$Group[82], Cal_bal$Group[86:88])
-as.data.frame(diet_under_0.05_2)
+diet_under_0.05_2 <- c(Cal_bal$Group[15], Cal_bal$Group[18], Cal_bal$Group[28], Cal_bal$Group[37], Cal_bal$Group[43:47], Cal_bal$Group[50], Cal_bal$Group[52:53], Cal_bal$Group[55], Cal_bal$Group[58:59], Cal_bal$Group[60], Cal_bal$Group[65:67], Cal_bal$Group[69],Cal_bal$Group[72:73], Cal_bal$Group[77:80], Cal_bal$Group[82], Cal_bal$Group[86:88]) #includes mesopelagic fish group 
 
 #Predators that have a diet proportion of mesopelagic fish > 0.05
 diet_over_0.05 <- c(Cal_bal$Group[29], Cal_bal$Group[33], Cal_bal$Group[38], Cal_bal$Group[42], Cal_bal$Group[48], Cal_bal$Group[51], Cal_bal$Group[54], Cal_bal$Group[56], Cal_bal$Group[63], Cal_bal$Group[70], Cal_bal$Group[76], Cal_bal$Group[85])
 diet_over_0.05
-
-#Predators of mesopelagic fish with annual economic value over $1/lb 
-high.price <- c(Cal_bal$Group[47], Cal_bal$Group[45], Cal_bal$Group[38], Cal_bal$Group[55], Cal_bal$Group[46], Cal_bal$Group[43])
-high.price
 ```
 
 #Initialize a base scenario
 ```{r}
-yearlist = 2001:2050
+yearlist = 2001:2050 #year range for simulations  
 
 base_sim_scene <- rsim.scenario(Cal_bal, CalCur_unbal, years = yearlist)
 scene0 <- base_sim_scene
-run0 <- rsim.run(scene0, method='AB', years=yearlist) 
+run0 <- rsim.run(scene0, method='AB', years=yearlist) #base scenario created
 rsim.plot(run0,all_species)
 ```
 
-#Function to look up the ending biomass of a scenario
+#Function to find the end biomass of a scenario in year 2050 (simulation month 600)
 ```{r}
 end_biomass <- function(rsim){return(rsim$out_Biomass[dim(rsim$out_Biomass)[1], 2:(dim(rsim$out_Biomass)[2])])}
 end_biomass
 ```
 
-#Scenario 7: Mesopelagic harvest level of 50%
-#Run harvest scenario
+#Scenario 7: Apply a yearly 50% mesopelagic fish harvest rate to the base Rsim scenario and project the simulation forward for fifty years
 ```{r}
 target_sp <- "mesopelagics" #Define target species
 target_F <- 0.50 #Define target harvest rate 
 names(target_F) <- target_sp 
 
+#For year 2001 apply a 50% harvest rate to the original mesopelagic fish biomass. After year 1, and for every year through 2050, pause the operating model and assess the end biomass of that year for mesopelagic fish. Calculate the catch by multiplying the end biomass by an error of 0.5 and then force this catch for the next year. 
 scene1 <- copy(base_sim_scene)
 run1 <- rsim.run(scene1, method = 'AB', years=2001)
 for (yr in 2002:2050){
-#Perform a stock assessment based on current biomass*error
-assessment <- end_biomass(run1)[target_sp] * (runif(length(target_sp)) + 0.5)
-assessment
-#Calculate total catch by multiplying target harvest rate by assessment 
+  #Perform a stock assessment based on current biomass*error
+  assessment <- end_biomass(run1)[target_sp] * (runif(length(target_sp)) + 0.5)
+  assessment
+  #Calculate total catch by multiplying target harvest rate by assessment 
   catches <- target_F * assessment
-  
-#Apply catch to the target species
+  #Apply the calculated catch to mesopelagic fish
   for (sp in target_sp){
     scene1 <- adjust.fishing(scene1, "ForcedCatch", sp, yr, value=catches[sp])
   }
-  #Run 1 year
-  run1 <- rsim.step(scene1, run1, method='AB', year.end=yr) 
-}  
+    #Run 1 year
+    run1 <- rsim.step(scene1, run1, method='AB', year.end=yr) 
+    }  
 rsim.plot(run1,all_species) 
 
-#Modify dataset to plot with ggplot2
+#Change dataset from an Rpath object to a dataframe in order to plot with ggplot2 
 rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
   opar <- par(no.readonly = T)
   if(indplot == F){
@@ -133,46 +127,41 @@ rsim.plot.fun <- function(Rsim.output, spname, indplot = F, ...){
   rel.bio
 } 
 
-names_spp <- run1$params$spname[2:94]
-
-#Make run1 a dataframe 
+names_spp <- run1$params$spname[2:94] 
 z_1 <-rsim.plot.fun(run1)
 z_1<-as.data.frame(z_1)
 names(z_1) <- names_spp
 z_1$month <- 1:600
 data_1 <- gather(z_1, key = spp, value = biomass, -month )
 
-write.csv(data_1, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/data.1.csv")
+write.csv(data_1, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario.7.csv") 
 ```
 
+#Scenario 6: Apply a yearly 25% mesopelagic fish harvest rate to the base Rsim scenario and project the simulation forward for fifty years
 ```{r}
-#Scenario 6: Mesopelagic harvest level of 25%
 target_sp <- "mesopelagics"
 target_F <- 0.25
 names(target_F) <- target_sp 
 
-library(data.table)
 scene2 <- copy(base_sim_scene)
 run2 <- rsim.run(scene2, method = 'AB', years=2001)
 for (yr in 2002:2050){
-  # stock assessment based on current biomass * error
-  # use this if including two species: assessment <- end_biomass(run3)[target_sp] * (runif(2) + 0.5)   
-assessment <- end_biomass(run2)[target_sp] * (runif(length(target_sp)) + 0.5) #argument of length 0 means input is of length zero 
-assessment
-  # convert target F * assessment to a total catch 
+  #Perform a stock assessment based on current biomass*error
+  assessment <- end_biomass(run2)[target_sp] * (runif(length(target_sp)) + 0.5)
+  assessment
+  #Calculate total catch by multiplying target harvest rate by assessment 
   catches <- target_F * assessment
-  # apply the catch to mesopelagic fish
+  #Apply the calculated catch to mesopelagic fish
   for (sp in target_sp){
     scene2 <- adjust.fishing(scene2, "ForcedCatch", sp, yr, value=catches[sp])
   }
-  #run 1 year
-  run2 <- rsim.step(scene2, run2, method = 'AB', year.end=yr)  
-}  
+    #Run 1 year
+    run2 <- rsim.step(scene2, run2, method = 'AB', year.end=yr)  
+    }  
 rsim.plot(run2,all_species)  
 
-#Modify data
+#Change dataset from an Rpath object to a dataframe in order to plot with ggplot2 
 names_spp <- run2$params$spname[2:94]
-#Need to make run2 a data frame
 z_2 <-rsim.plot.fun(run2)
 z_2<-as.data.frame(z_2)
 names(z_2) <- names_spp
@@ -180,12 +169,12 @@ z_2$month <- 1:600
 data_2 <- gather(z_2, key = spp, value = biomass, -month )
 data_2 %>% filter(spp== "mesopelagics")
 
-write.csv(data_2, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/data.2.csv")
+write.csv(data_2, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario.6.csv")
 ```
 
-#Don't need to run this code again!!! Saving datasets
+#Save datasets for the yearly 25% and 50% harvest rate on mesopelagic fish to generate change over time graphs ??? Help here !!!!!!
 ```{r}
-#Scenario 1
+#Save 
 change_1_overtime_df <- function(species) {
   x = seq(0,1, length.out = length(species))
   color = viridis(n = length(species), option= "B")
@@ -216,196 +205,347 @@ change_2_total <- as.data.frame(change_2_total)
 write.csv(change_2_total, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/change_1_total.csv")
 ```
 
-#Change over time graphs for scenario 1 and 2 
-
-#TO NOTE: Mesopelagics currently are cut out of all of the graphs- need to make sure you have same scale for everything, can mention their decrease in text and this exception was made for graphs 
+#Change over time graphs for scenario 6 and 7 for all functional groups (with the exception of mesopelagic fish) to create Figure 3a-b in the paper and Appendix S3: Figure S2 in the supplementary material. The relative end biomass on the x axis the biomass at the end of the simulation in 2050 (month 600).  
 ```{r}
 #Define a common ggplot theme
 standard_theme <- theme_bw() + theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
 theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text.align= 0, legend.title= element_text(size = 10), legend.text = element_text(size= 9), axis.text=element_text(size=9), axis.title=element_text(size=10))
 
-#Scenario 1
+#Scenario 7: yearly 50% harvest rate applied to mesopelagic fish 
 
-#Higher dependence on mesopelagics: Diet over 0.05
-change_1_1_df<- change_1_overtime_df(diet_over_0.05)
-change_1_1_df <- as.data.frame(change_1_1_df)
-change_1_1 <- change_1_1_df %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing", "Neither", "Increasing"), right = TRUE)) %>% arrange(value)
+  #Generate graph with functional groups with high diet dependence on mesopelagic fish:    Diet over 0.05 (mesopelagic fish make up at least 5% of their diet)
+    change_1_1_df<- change_1_overtime_df(diet_over_0.05)
+    change_1_1_df <- as.data.frame(change_1_1_df)
+    change_1_1 <- change_1_1_df %>% mutate(value = round(as.numeric(paste(value)), 2),
+    "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing",
+    "Neither", "Increasing"), right = TRUE)) %>% arrange(value)
 
-Predator_value <- read_csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Predator.value.csv")
-change_1_1 <- change_1_1 %>% rename(biomass_prop= value) %>% left_join(Predator_value, by="species")
-change_1_1[9,4] <- "Neither"
-change_1_1$Value <- factor(change_1_1$Value, levels = c("Commercial", "Non-commercial", "Both", "Neither"))
+    Predator_value <- read_csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Da
+    ta/Predator.value.csv") #Load in economic value of functional groups
+    change_1_1 <- change_1_1 %>% rename(biomass_prop= value) %>%    
+    left_join(Predator_value, by="species")
+    change_1_1[9,4] <- "Neither" #Make sure value column for juvenile hake says neither 
+    change_1_1$Value <- factor(change_1_1$Value, levels = c("Commercial", 
+    "Non-commercial", "Both", "Neither"))
 
-change_1_1_plot <- change_1_1 %>% ggplot(aes(col = Value)) + geom_point(aes(x=biomass_prop, y=reorder(species, desc(species)))) + 
-scale_color_manual(values = c("#FF0000","#0000FF", "#00FF70", "#FF00FF")) + 
- scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P. ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + 
-  geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
-  xlim(0.70, 1.35) + 
-xlab("Relative biomass") + ylab("Species with high diet proportion ") + labs(col = "Classification") + standard_theme
-change_1_1_plot 
+    change_1_1_plot <- change_1_1 %>% ggplot(aes(col = Value)) +   
+    geom_point(aes(x=biomass_prop, y=reorder(species, desc(species)))) + 
+    scale_color_manual(values = c("#FF0000","#0000FF", "#00FF70", "#FF00FF")) + 
+    scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P.
+    ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."=
+    "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope
+    rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + 
+    geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
+    xlim(0.70, 1.35) + 
+    xlab("Relative biomass") + ylab("Species with high diet proportion ") + labs(col =
+    "Classification") + standard_theme
+    change_1_1_plot 
 
-#3: Lower dependence on mesopelagics: Diet under 0.05 
+  #Generate graph with functional groups with low diet dependence on mesopelagic fish:     Diet under 0.05 (mesopelagic fish make up less than 5% of their diet)
+    change_1_2_df <- change_1_overtime_df(diet_under_0.05)
+    change_1_2_df <- as.data.frame(change_1_2_df)
+    change_1_2 <- change_1_2_df %>% mutate(value = round(as.numeric(paste(value)), 2),
+    "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing",
+    "Neither", "Increasing"), right = TRUE)) %>% arrange(value)
+    change_1_2 <- change_1_2 %>% rename(biomass_prop= value) %>%
+    left_join(Predator_value, by="species") 
+    change_1_2[1,4] <- "Neither"
+    change_1_2 <- change_1_2[-1,] #Remove mesopelagic fish 
+    change_1_2$Value <- factor(change_1_2$Value, levels = c("Non-commercial", "Both",
+    "Neither"))
 
-change_1_2_df <- change_1_overtime_df(diet_under_0.05)
-change_1_2_df <- as.data.frame(change_1_2_df)
-change_1_2 <- change_1_2_df %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing", "Neither", "Increasing"), right = TRUE)) %>% arrange(value)
-change_1_2 <- change_1_2 %>% rename(biomass_prop= value) %>% left_join(Predator_value, by="species") 
-change_1_2[1,4] <- "Neither"
-change_1_2 <- change_1_2[-1,]
-change_1_2$Value <- factor(change_1_2$Value, levels = c("Non-commercial", "Both", "Neither"))
+    change_1_2_plot <- change_1_2 %>% ggplot(aes(col= Value)) + geom_point(aes(x=
+    biomass_prop, y=reorder(species, desc(species)))) + 
+    scale_color_manual(values = c("#0000FF", "#00FF70")) +
+    scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"=
+    "Resident orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"=
+    "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm."=
+    "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary
+    rockfish", "Juv. rock."= "Juv. rockfish", "Other cephal."= "Other cephalopod",
+    "Shortspine thorny."= "Shortspine thornyhead", "Widow rock."= "Widow rockfish",
+    "mesopelagics"= "Mesopelagics", "Sea Lions"= "Sea lions", "Splitnose rock."=
+    "Splitnose rockfish")) + 
+    xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size=
+    0.75) + xlab("Relative biomass") + ylab("Species with low diet proportion") + 
+    labs(col = "Classification") + standard_theme
+    change_1_2_plot
 
-change_1_2_plot <- change_1_2 %>% ggplot(aes(col= Value)) + geom_point(aes(x= biomass_prop, y=reorder(species, desc(species)))) + 
-scale_color_manual(values = c("#0000FF", "#00FF70")) +
- scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"= "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm."= "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Juv. rock."= "Juv. rockfish", "Other cephal."= "Other cephalopod", "Shortspine thorny."= "Shortspine thornyhead", "Widow rock."= "Widow rockfish", "mesopelagics"= "Mesopelagics", "Sea Lions"= "Sea lions", "Splitnose rock."= "Splitnose rockfish")) + 
- xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
-xlab("Relative biomass") + ylab("Species with low diet proportion") + 
-labs(col = "Classification") + standard_theme
-change_1_2_plot
+  #Generate graph with functional groups with no diet dependence on mesopelagic fish.      This means that these functional groups have 0% of their diet consist of mesopelagic     fish. 
+    commercial_predators_df <- as.data.frame(commercial_predators) %>% rename(species=
+    commercial_predators)
+    noncommercial_predators_df <- as.data.frame(noncommerical_predators) %>%
+    rename(species= noncommerical_predators)
+    combo <- rbind(commercial_predators_df, noncommercial_predators_df, by= "species")       %>% mutate(Dependence= 1)
+    no_dependence <- change_1_total %>% left_join(combo, by= "species")
+    no_dependence[is.na(no_dependence)] <- 0 
+    no_dependence <-no_dependence[!duplicated(no_dependence$species),] 
+    no_dependence <- no_dependence[-c(15,30),] #Need to remove mesopelagic fish and          juvenile hake from dataset as they don't have commercial or non-commercial value so      are included here but they do have diet dependence on mesopelagic fish
+    no_dependence_final <- no_dependence %>% filter(Dependence==0)
+    no_dependence_final <- no_dependence_final %>% mutate(value =
+    round(as.numeric(paste(value)), 2), "result" = cut(value, breaks = c(-Inf, 0.99,
+    1.001, Inf), labels = c("Decreasing", "Neither", "Increasing"), right = TRUE)) %>%
+    arrange(value)
 
-#4: No dependence on mesopelagics
-commercial_predators_df <- as.data.frame(commercial_predators) %>% rename(species= commercial_predators)
-noncommercial_predators_df <- as.data.frame(noncommerical_predators) %>% rename(species= noncommerical_predators)
-combo <- rbind(commercial_predators_df, noncommercial_predators_df, by= "species") %>% mutate(Dependence= 1)
-no_dependence <- change_1_total %>% left_join(combo, by= "species")
-no_dependence[is.na(no_dependence)] <- 0 #Functional groups with no dependence on mesopelagics have a 0
-no_dependence <-no_dependence[!duplicated(no_dependence$species),] 
-no_dependence <- no_dependence[-c(15,30),] #Remove mesopelagics and juvenile hake- dependence on mesopelagics but don't have commercial or non-commercial value so will be weird with filtering
-no_dependence_final <- no_dependence %>% filter(Dependence==0)
-no_dependence_final <- no_dependence_final %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing", "Neither", "Increasing"), right = TRUE)) %>% arrange(value)
+    change_1_3_df <- no_dependence_final
+    change_1_3 <- change_1_3_df %>% mutate(value = round(as.numeric(paste(value)), 2),
+    "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing",
+    "Neither", "Increasing"), right = TRUE)) %>% arrange(value) %>% rename(biomass_prop=
+    value) 
+    change_1_3_plot <- change_1_3 %>% ggplot() + geom_point(aes(x= biomass_prop,
+    y=reorder(species, desc(species)))) + 
+    xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size=
+    0.75) + 
+    xlab("Relative biomass") + ylab("Species with no diet proportion") + 
+    scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal",
+    "amphipods"= "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown
+    pelican", "Cali. gull"= "California gull", "carniv-zoops" = "Carnivorous
+    zooplankton", "copepods"= "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"=
+    "Epibenthic", "euphausiids"= "Euphausiids", "infauna"= "Infauna", "Juv. round."=
+    "Juv. roundfish", "Juv. thorny."= "Juv. thornyhead", "large jellies"= "Large
+    jellies", "micro-zoop"= "Microzooplankton", "Nearshore rock."= "Nearshore rockfish",
+    "Pacific Mackerel"= "Pacific mackerel", "pandalid shp"= "Pandalid shrimp",
+    "phytoplankton"= "Phytoplankton", "Pigeon Guillemot"= "Pigeon guillemot", "Rhino.
+    auk"= "Rhinoceros auklet", "small jellies"= "Small jellies", "surf perch"= "Surf
+    perch", "tanner crb"= "Tanner crab", "Transient Orcas"= "Transient orcas", "Yelloweye
+    rock."= "Yelloweye rockfish")) + labs(col = "Classification") + standard_theme
+    change_1_3_plot
 
-change_1_3_df <- no_dependence_final
-change_1_3 <- change_1_3_df %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing", "Neither", "Increasing"), right = TRUE)) %>% arrange(value) %>% rename(biomass_prop= value) 
-change_1_3_plot <- change_1_3 %>% ggplot() + geom_point(aes(x= biomass_prop, y=reorder(species, desc(species)))) + 
-xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
-xlab("Relative biomass") + ylab("Species with no diet proportion") + 
-scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amphipods"= "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown pelican", "Cali. gull"= "California gull", "carniv-zoops" = "Carnivorous zooplankton", "copepods"= "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"= "Epibenthic", "euphausiids"= "Euphausiids", "infauna"= "Infauna", "Juv. round."= "Juv. roundfish", "Juv. thorny."= "Juv. thornyhead", "large jellies"= "Large jellies", "micro-zoop"= "Microzooplankton", "Nearshore rock."= "Nearshore rockfish", "Pacific Mackerel"= "Pacific mackerel", "pandalid shp"= "Pandalid shrimp", "phytoplankton"= "Phytoplankton", "Pigeon Guillemot"= "Pigeon guillemot", "Rhino. auk"= "Rhinoceros auklet", "small jellies"= "Small jellies", "surf perch"= "Surf perch", "tanner crb"= "Tanner crab", "Transient Orcas"= "Transient orcas", "Yelloweye rock."= "Yelloweye rockfish")) + labs(col = "Classification") + standard_theme
-change_1_3_plot
+#Scenario 6: yearly 25% harveset rate applied to mesopelagics
+    
+ #Generate graph with functional groups with high diet dependence on mesopelagic fish:    Diet over 0.05 (mesopelagic fish make up at least 5% of their diet)
+    change_2_1_df <- change_2_overtime_df(diet_over_0.05)
+    change_2_1_df <- as.data.frame(change_2_1_df)
+    change_2_1 <- change_2_1_df %>% mutate(value = round(as.numeric(paste(value)), 2),
+    "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing",
+    "Neither", "Increasing"), right = TRUE)) %>% arrange(value)
+    
+    change_2_1 <- change_2_1 %>% rename(biomass_prop= value) %>%        
+    left_join(Predator_value, by="species")
+    change_2_1[10,4] <- "Neither"
+    change_2_1$Value <- factor(change_2_1$Value, levels = c("Commercial",
+    "Non-commercial", "Both", "Neither"))
+    change_2_1_plot <- change_2_1 %>% ggplot(aes(col = Value)) +     
+    geom_point(aes(x=biomass_prop, y=reorder(species, desc(species)))) + 
+    scale_color_manual(values = c("#FF0000","#0000FF", "#00FF70", "#FF00FF")) + 
+    scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P.
+    ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."=
+    "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope
+    rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + 
+    geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
+    xlim(0.70, 1.35) + 
+    xlab("Relative biomass") + ylab("Species with high diet proportion ") + labs(col =
+    "Classification") + standard_theme 
+    change_2_1_plot 
 
-#Higher dependence on mesopelagics: Diet over 0.05
-change_2_1_df <- change_2_overtime_df(diet_over_0.05)
-change_2_1_df <- as.data.frame(change_2_1_df)
-change_2_1 <- change_2_1_df %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing", "Neither", "Increasing"), right = TRUE)) %>% arrange(value)
+  #Generate graph with functional groups with low diet dependence on mesopelagic fish:     Diet under 0.05 (mesopelagic fish make up less than 5% of their diet)
+    change_2_2_df <- change_2_overtime_df(diet_under_0.05_2)
+    change_2_2_df <- as.data.frame(change_2_2_df)
+    change_2_2 <- change_2_2_df %>% mutate(value = round(as.numeric(paste(value)), 2),
+    "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing",
+    "Neither", "Increasing"), right = TRUE)) %>% arrange(value)
+    change_2_2 <- change_2_2 %>% rename(biomass_prop= value) %>%
+    left_join(Predator_value, by="species") 
+    change_2_2[1,4] <- "Neither"
+    change_2_2 <- change_2_2[-1,]
+    change_2_2$Value <- factor(change_2_2$Value, levels = c("Non-commercial", "Both",
+    "Neither"))
 
-change_2_1 <- change_2_1 %>% rename(biomass_prop= value) %>% left_join(Predator_value, by="species")
-change_2_1[10,4] <- "Neither"
+    change_2_2_plot <- change_2_2 %>% ggplot(aes(col= Value)) + geom_point(aes(x=
+    biomass_prop, y=reorder(species, desc(species)))) + 
+    scale_color_manual(values = c("#0000FF", "#00FF70")) +
+    scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"=
+    "Resident orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"=
+    "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm."=
+    "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary
+    rockfish", "Juv. rock."= "Juv. rockfish", "Other cephal."= "Other cephalopod",
+    "Shortspine thorny."= "Shortspine thornyhead", "Widow rock."= "Widow rockfish",
+    "mesopelagics"= "Mesopelagics", "Sea Lions"= "Sea lions", "Splitnose rock."=
+    "Splitnose rockfish")) + 
+    xlim(0.75, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black",
+    size= 0.75) + 
+    xlab("Relative biomass") + ylab("Species with low diet proportion") + 
+    labs(col = "Classification") + standard_theme 
+    change_2_2_plot
 
-change_2_1$Value <- factor(change_2_1$Value, levels = c("Commercial", "Non-commercial", "Both", "Neither"))
-change_2_1_plot <- change_2_1 %>% ggplot(aes(col = Value)) + geom_point(aes(x=biomass_prop, y=reorder(species, desc(species)))) + 
-scale_color_manual(values = c("#FF0000","#0000FF", "#00FF70", "#FF00FF")) + 
- scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P. ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + 
-  geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
-  xlim(0.70, 1.35) + 
-xlab("Relative biomass") + ylab("Species with high diet proportion ") + labs(col = "Classification") + standard_theme 
-change_2_1_plot 
+  #Generate graph with functional groups with no diet dependence on mesopelagic fish.      This means that these functional groups have 0% of their diet consist of mesopelagic     fish.
+    no_dependence_2 <- change_2_total %>% left_join(combo, by= "species")
+    no_dependence_2[is.na(no_dependence_2)] <- 0 #Functional groups with no dependence on     mesopelagics have a 0
+    no_dependence_2 <-no_dependence_2[!duplicated(no_dependence_2$species),] 
+    no_dependence_2 <- no_dependence_2[-c(15,30),] #Remove mesopelagics and juvenile         hake- dependence on mesopelagics but don't have commercial or non-commercial value so     will be weird with filtering
+    no_dependence_final_2 <- no_dependence_2 %>% filter(Dependence==0)
+    change_2_3_df <- no_dependence_final_2
+    change_2_3 <- change_2_3_df %>% mutate(value = round(as.numeric(paste(value)), 2),
+    "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing",
+    "Neither", "Increasing"), right = TRUE)) %>% arrange(value) %>% rename(biomass_prop=
+    value) 
 
-#3: Lower dependence on mesopelagics: Diet under 0.05 
-change_2_2_df <- change_2_overtime_df(diet_under_0.05_2)
-change_2_2_df <- as.data.frame(change_2_2_df)
-change_2_2 <- change_2_2_df %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing", "Neither", "Increasing"), right = TRUE)) %>% arrange(value)
-change_2_2 <- change_2_2 %>% rename(biomass_prop= value) %>% left_join(Predator_value, by="species") 
-change_2_2[1,4] <- "Neither"
-change_2_2 <- change_2_2[-1,]
-change_2_2$Value <- factor(change_2_2$Value, levels = c("Non-commercial", "Both", "Neither"))
-
-change_2_2_plot <- change_2_2 %>% ggplot(aes(col= Value)) + geom_point(aes(x= biomass_prop, y=reorder(species, desc(species)))) + 
-scale_color_manual(values = c("#0000FF", "#00FF70")) +
- scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"= "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm."= "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Juv. rock."= "Juv. rockfish", "Other cephal."= "Other cephalopod", "Shortspine thorny."= "Shortspine thornyhead", "Widow rock."= "Widow rockfish", "mesopelagics"= "Mesopelagics", "Sea Lions"= "Sea lions", "Splitnose rock."= "Splitnose rockfish")) + 
-  xlim(0.75, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
-xlab("Relative biomass") + ylab("Species with low diet proportion") + 
-labs(col = "Classification") + standard_theme 
-change_2_2_plot
-
-#4: No dependence on mesopelagics
-no_dependence_2 <- change_2_total %>% left_join(combo, by= "species")
-no_dependence_2[is.na(no_dependence_2)] <- 0 #Functional groups with no dependence on mesopelagics have a 0
-no_dependence_2 <-no_dependence_2[!duplicated(no_dependence_2$species),] 
-no_dependence_2 <- no_dependence_2[-c(15,30),] #Remove mesopelagics and juvenile hake- dependence on mesopelagics but don't have commercial or non-commercial value so will be weird with filtering
-no_dependence_final_2 <- no_dependence_2 %>% filter(Dependence==0)
-change_2_3_df <- no_dependence_final_2
-change_2_3 <- change_2_3_df %>% mutate(value = round(as.numeric(paste(value)), 2), "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing", "Neither", "Increasing"), right = TRUE)) %>% arrange(value) %>% rename(biomass_prop= value) 
-
-change_2_3 %>% filter(result== "Neither")
-change_2_3_plot <- change_2_3 %>% ggplot() + geom_point(aes(x= biomass_prop, y=reorder(species, desc(species)))) + 
-xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) + 
-xlab("Relative biomass") + ylab("Species with no diet proportion") + 
-scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amphipods"= "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown pelican", "Cali. gull"= "California gull", "carniv-zoops" = "Carnivorous zooplankton", "copepods"= "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"= "Epibenthic", "euphausiids"= "Euphausiids", "infauna"= "Infauna", "Juv. round."= "Juv. roundfish", "Juv. thorny."= "Juv. thornyhead", "large jellies"= "Large jellies", "micro-zoop"= "Microzooplankton", "Nearshore rock."= "Nearshore rockfish", "Pacific Mackerel"= "Pacific mackerel", "pandalid shp"= "Pandalid shrimp", "phytoplankton"= "Phytoplankton", "Pigeon Guillemot"= "Pigeon guillemot", "Rhino. auk"= "Rhinoceros auklet", "small jellies"= "Small jellies", "surf perch"= "Surf perch", "tanner crb"= "Tanner crab", "Transient Orcas"= "Transient orcas", "Yelloweye rock."= "Yelloweye rockfish")) + labs(col = "Classification") + standard_theme 
-change_2_3_plot
+    change_2_3 %>% filter(result== "Neither")
+    change_2_3_plot <- change_2_3 %>% ggplot() + geom_point(aes(x= biomass_prop,
+    y=reorder(species, desc(species)))) + 
+    xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size=
+    0.75) + 
+    xlab("Relative biomass") + ylab("Species with no diet proportion") + 
+    scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal",
+    "amphipods"= "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown
+    pelican", "Cali. gull"= "California gull", "carniv-zoops" = "Carnivorous
+    zooplankton", "copepods"= "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"=
+    "Epibenthic", "euphausiids"= "Euphausiids", "infauna"= "Infauna", "Juv. round."=
+    "Juv. roundfish", "Juv. thorny."= "Juv. thornyhead", "large jellies"= "Large
+    jellies", "micro-zoop"= "Microzooplankton", "Nearshore rock."= "Nearshore rockfish",
+    "Pacific Mackerel"= "Pacific mackerel", "pandalid shp"= "Pandalid shrimp",
+    "phytoplankton"= "Phytoplankton", "Pigeon Guillemot"= "Pigeon guillemot", "Rhino.
+    auk"= "Rhinoceros auklet", "small jellies"= "Small jellies", "surf perch"= "Surf
+    perch", "tanner crb"= "Tanner crab", "Transient Orcas"= "Transient orcas", "Yelloweye
+    rock."= "Yelloweye rockfish")) + labs(col = "Classification") + standard_theme 
+    change_2_3_plot
 ```
 
-
-#Time series graphs for 25% and 50% harvest rate 
+#Time series graphs for scenario 6 and 7 for functional groups with high and low diet dependence on mesoopelagic fish. This code created Appendix S3: Figure 1a-d in the supplementary material. The relative biomass on the y axis is the proportion of original biomass throughout the entire 50-year simulation. 
 ```{r}
-data_1 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/data.1.csv")
-data_2 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/data.2.csv")
+scenario_7 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario.7.csv") #Results from 50% harvest rate 
+scenario_6 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario.6..csv") #Results from 25% harvest rate
 
-#Plot functional group biomass over the 50-year simulation
-#Graph with commercially valuable predators
-Predator_value_ts <- Predator_value %>% rename(spp= "species")
-data_1_high <- data_1 %>% select(-X) %>% filter(spp %in% diet_over_0.05) %>% left_join (Predator_value_ts, by= "spp")
-data_1_high$Value <- factor(data_1_high$Value, levels = c("Commercial", "Non-commercial", "Both", "Neither"))
-data_1_high[1:600, 4] <- "Neither"
+#Graph for functional groups with high diet dependence on mesopelagic fish
+  Predator_value_ts <- Predator_value %>% rename(spp= "species")
+  scenario_7_high <- scenario_7 %>% select(-X) %>% filter(spp %in% diet_over_0.05) %>% 
+  left_join(Predator_value_ts, by= "spp")  
+  scenario_7_high$Value <- factor(scenario_7_high$Value, levels = c("Commercial",
+  "Non-commercial", "Both", "Neither"))
+  scenario_7_high[1:600, 4] <- "Neither"
 
-data_2_high <- data_2 %>% select(-X) %>% filter(spp %in% diet_over_0.05) %>% left_join (Predator_value_ts, by= "spp") 
-data_2_high$Value <- factor(data_2_high$Value, levels = c("Commercial", "Non-commercial", "Both", "Neither"))
-data_2_high[1:600, 4] <- "Neither"
+  scenario_6_high <- scenario_6 %>% select(-X) %>% filter(spp %in% diet_over_0.05) %>% 
+  left_join(Predator_value_ts, by= "spp") 
+  scenario_6_high$Value <- factor(scenario_6_high$Value, levels = c("Commercial",
+  "Non-commercial", "Both", "Neither"))
+  scenario_6_high[1:600, 4] <- "Neither"
 
-data_1_low <- data_1 %>% select(-X) %>% filter(spp %in% diet_under_0.05) %>% left_join(Predator_value_ts, by= "spp") %>% filter(spp !="mesopelagics")
-data_1_low$Value <- factor(data_1_low$Value, levels = c("Commercial", "Non-commercial", "Both", "Neither"))
-data_2_low <- data_2 %>% select(-X) %>% filter(spp %in% diet_under_0.05) %>% left_join(Predator_value_ts, by= "spp") %>% filter(spp !="mesopelagics")
-data_2_low$Value <- factor(data_2_low$Value, levels = c("Commercial", "Non-commercial", "Both", "Neither"))
+  plot_scenario_7_high <- scenario_7_high %>% mutate(spp = fct_reorder(spp, biomass,
+  tail, n = 1,
+  .desc = TRUE)) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= spp,
+  linetype= Value)) + 
+  xlab("Month") + ylab("Relative biomass") + scale_x_continuous(name= "Year", breaks=
+  c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040",
+  "2050")) + 
+  scale_color_discrete(type = "viridis", labels= c("Greenstriped" = "Greenstriped
+  rockfish", "P. Ocean Perch"= "P. ocean perch", "Albacore" = "Albacore", "Arrowtooth" =
+  "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Lingcod"= "Lingcod",
+  "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish",
+  "Shortspine thorny."= "Shortspine thornyhead", "Slope rock."= "Slope rockfish", "Widow
+  rock."= "Widow rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + labs(colour=
+  "Species with high diet proportion", title= "c") + standard_theme +           
+  geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) +
+  guides(linetype = guide_legend(order = 2),col = guide_legend(order = 1)) +
+  scale_linetype_manual("Classification",values=c("Commercial"= 1,
+  "Non-commercial"=2,"Both"=3, "Neither"=4)) + 
+  ggsave(width = 8.75, height = 5.25,
+  "~/Documents/OTZ.manuscript/Images/Sub.2/high.diet.50.jpeg", dpi=600)
+  plot_scenario_7_high
 
-plot1_high_diet <- data_1_high %>% mutate(spp = fct_reorder(spp, biomass, tail, n = 1, .desc = TRUE)) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= spp, linetype= Value)) + 
-  xlab("Month") + ylab("Relative biomass") + scale_x_continuous(name= "Year", breaks= c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040", "2050")) + 
-scale_color_discrete(type = "viridis", labels= c("Greenstriped" = "Greenstriped rockfish", "P. Ocean Perch"= "P. ocean perch", "Albacore" = "Albacore", "Arrowtooth" = "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Lingcod"= "Lingcod", "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Shortspine thorny."= "Shortspine thornyhead", "Slope rock."= "Slope rockfish", "Widow rock."= "Widow rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + labs(colour= "Species with high diet proportion", title= "c") + standard_theme +  geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) + guides(linetype = guide_legend(order = 2),col = guide_legend(order = 1)) + scale_linetype_manual("Classification",values=c("Commercial"= 1, "Non-commercial"=2,"Both"=3, "Neither"=4)) + 
-ggsave(width = 8.75, height = 5.25, "~/Documents/OTZ.manuscript/Images/Sub.2/high.diet.50.jpeg", dpi=600)
-plot1_high_diet
+  plot_scenario_6_high <- scenario_6_high %>% filter(spp %in% diet_over_0.05) %>%
+  mutate(spp =
+  fct_reorder(spp, biomass, tail, n = 1, .desc = TRUE)) %>% ggplot(aes(x= month, y =
+  biomass)) + geom_line(aes(colour= spp, linetype= Value)) + 
+  xlab("Month") + ylab("Relative biomass") + scale_x_continuous(name= "Year", breaks=
+  c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040",
+  "2050")) + 
+  scale_color_discrete(type = "viridis", labels= c("Greenstriped" = "Greenstriped
+  rockfish", "P. Ocean Perch"= "P. ocean perch", "Albacore" = "Albacore", "Arrowtooth" =
+  "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Lingcod"= "Lingcod",
+  "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish",
+  "Shortspine thorny."= "Shortspine thornyhead", "Slope rock."= "Slope rockfish", "Widow
+  rock."= "Widow rockfish", "Yellowtail rock."= "Yellowtail rockfish", "Juv. Ele. Seal" =
+  "Juv n. elephant seal")) + labs(colour= "Species with high diet proportion", title=
+  "a") + labs(colour= "Species with high diet proportion") + standard_theme + 
+  geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) +
+  guides(linetype = guide_legend(order = 2),col = guide_legend(order = 1)) +
+  scale_linetype_manual("Classification",values=c("Commercial"= 1,
+  "Non-commercial"=2,"Both"=3, "Neither"=4)) + 
+  ggsave(width = 8.75, height = 5.25, "~/Documents/OTZ.manuscript/Images/Sub.2/high.diet.25.jpeg", dpi=600)
+  plot_scenario_6_high
 
-plot2_high_diet <- data_2_high %>% filter(spp %in% diet_over_0.05) %>% mutate(spp = fct_reorder(spp, biomass, tail, n = 1, .desc = TRUE)) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= spp, linetype= Value)) + 
-xlab("Month") + ylab("Relative biomass") + scale_x_continuous(name= "Year", breaks= c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040", "2050")) + 
-scale_color_discrete(type = "viridis", labels= c("Greenstriped" = "Greenstriped rockfish", "P. Ocean Perch"= "P. ocean perch", "Albacore" = "Albacore", "Arrowtooth" = "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Lingcod"= "Lingcod", "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Shortspine thorny."= "Shortspine thornyhead", "Slope rock."= "Slope rockfish", "Widow rock."= "Widow rockfish", "Yellowtail rock."= "Yellowtail rockfish", "Juv. Ele. Seal" = "Juv n. elephant seal")) + labs(colour= "Species with high diet proportion", title= "a") + labs(colour= "Species with high diet proportion") + standard_theme +  geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) + guides(linetype = guide_legend(order = 2),col = guide_legend(order = 1)) + scale_linetype_manual("Classification",values=c("Commercial"= 1, "Non-commercial"=2,"Both"=3, "Neither"=4)) + 
-ggsave(width = 8.75, height = 5.25, "~/Documents/OTZ.manuscript/Images/Sub.2/high.diet.25.jpeg", dpi=600)
-plot2_high_diet
+#Graph for functional groups with low diet dependence on mesopelagic fish
+  scenario_7_low <- scenario_7 %>% select(-X) %>% filter(spp %in% diet_under_0.05) %>%  
+  left_join(Predator_value_ts, by= "spp") %>% filter(spp !="mesopelagics")
+  scenario_7_low$Value <- factor(scenario_7_low$Value, levels = c("Commercial",
+  "Non-commercial","Both", "Neither"))
+  scenario_6_low <- scenario_6 %>% select(-X) %>% filter(spp %in% diet_under_0.05) %>%     left_join(Predator_value_ts, by= "spp") %>% filter(spp !="mesopelagics")
+  scenario_6_low$Value <- factor(scenario_6_low$Value, levels = c("Commercial",
+  "Non-commercial","Both", "Neither"))
+  
+   plot_scenario_7_low <- scenario_7_low %>% filter(spp %in% diet_under_0.05) %>%
+   mutate(spp =
+  fct_reorder(spp, biomass, tail, n = 1, .desc = TRUE)) %>% ggplot(aes(x= month, y =
+  biomass)) + geom_line(aes(colour= spp, linetype= Value)) + 
+  xlab("Month") + ylab("Relative biomass") + scale_x_continuous(name= "Year", breaks=
+  c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040",
+  "2050")) + 
+  scale_color_discrete(type = "viridis", labels= c("Greenstriped" = "Greenstriped
+  rockfish", "P. Ocean Perch"= "P. ocean perch", "Arrowtooth" = "Arrowtooth flounder",
+  "Canary rock."= "Canary rockfish", "Longspine thorny."= "Longspine thornyhead", "Shelf
+  rock."= "Shelf rockfish", "Shortspine thorny."= "Shortspine thornyhead", "Slope rock."=
+  "Slope rockfish", "Widow rock."= "Widow rockfish", "Yellowtail rock."= "Yellowtail
+  rockfish", "Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Double
+  corm."= "Double cormorant", "Brandt's corm."= "Brandt's cormorant", "Juv. rock."= "Juv.
+  rockfish", "Other cephal."= "Other cephalopod", "Sea Lions"= "Sea lions", "Splitnose
+  rock."= "Splitnose rockfish", "Juv. Ele. Seal"= "Juv. n. elephant seal")) +
+  labs(colour= "Species with low diet proportion", title= "d") + standard_theme + 
+  geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) +
+  guides(linetype = guide_legend(order = 2),col = guide_legend(order = 1)) +
+  scale_linetype_manual("Classification",values=c("Non-commercial"=2,"Both"=3)) + 
+  ggsave(width = 8.75, height = 5.25, "~/Documents/OTZ.manuscript/Images/Sub.2/low.diet.50.jpeg", dpi=600)
+  plot_scenario_7_low
 
-plot1_low_diet <- data_1_edt %>% filter(spp %in% diet_under_0.05) %>% mutate(spp = fct_reorder(spp, biomass, tail, n = 1, .desc = TRUE)) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= spp, linetype= Value)) + 
-  xlab("Month") + ylab("Relative biomass") + scale_x_continuous(name= "Year", breaks= c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040", "2050")) + 
-scale_color_discrete(type = "viridis", labels= c("Greenstriped" = "Greenstriped rockfish", "P. Ocean Perch"= "P. ocean perch", "Arrowtooth" = "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Shortspine thorny."= "Shortspine thornyhead", "Slope rock."= "Slope rockfish", "Widow rock."= "Widow rockfish", "Yellowtail rock."= "Yellowtail rockfish", "Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Double corm."= "Double cormorant", "Brandt's corm."= "Brandt's cormorant", "Juv. rock."= "Juv. rockfish", "Other cephal."= "Other cephalopod", "Sea Lions"= "Sea lions", "Splitnose rock."= "Splitnose rockfish", "Juv. Ele. Seal"= "Juv. n. elephant seal")) + labs(colour= "Species with low diet proportion", title= "d") + standard_theme +  geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) + guides(linetype = guide_legend(order = 2),col = guide_legend(order = 1)) + scale_linetype_manual("Classification",values=c("Non-commercial"=2,"Both"=3)) + 
-ggsave(width = 8.75, height = 5.25, "~/Documents/OTZ.manuscript/Images/Sub.2/low.diet.50.jpeg", dpi=600)
-plot1_low_diet
-
-plot2_low_diet <- data_2_edt %>% filter(spp %in% diet_under_0.05) %>% mutate(spp = fct_reorder(spp, biomass, tail, n = 1, .desc = TRUE)) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= spp, linetype= Value)) + 
-xlab("Month") + ylab("Relative biomass") + scale_x_continuous(name= "Year", breaks= c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040", "2050")) + 
-scale_color_discrete(type = "viridis", labels= c("Greenstriped" = "Greenstriped rockfish", "P. Ocean Perch"= "P. ocean perch", "Arrowtooth" = "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Shortspine thorny."= "Shortspine thornyhead", "Slope rock."= "Slope rockfish", "Widow rock."= "Widow rockfish", "Yellowtail rock."= "Yellowtail rockfish", "Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Double corm."= "Double cormorant", "Brandt's corm."= "Brandt's cormorant", "Juv. rock."= "Juv. rockfish", "Other cephal."= "Other cephalopod", "Sea Lions"= "Sea lions", "Splitnose rock."= "Splitnose rockfish", "Juv. Ele. Seal"= "Juv. n. elephant seal")) + labs(colour= "Species with low diet proportion", title= "b") + standard_theme + geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) + guides(linetype = guide_legend(order = 2),col = guide_legend(order = 1)) + scale_linetype_manual("Classification",values=c("Non-commercial"=2,"Both"=3)) + ggsave(width = 8.75, height = 5.25, "~/Documents/OTZ.manuscript/Images/Sub.2/low.diet.25.jpeg", dpi=600)
-
-#combo_ts_low_diet <- ggarrange(plot1_low_diet + rremove("xlab") + rremove("ylab"), plot2_low_diet + rremove("xlab") + rremove("ylab"), ncol = 2, nrow = 1)
-
-#annotate_figure(combo_ts_low_diet, bottom= text_grob("Year", size=14), left= text_grob("Relative biomass", size=14, rot=90)) + 
-#ggsave(width = 8, height = 6, "~/Documents/OTZ.Manuscript/Images/Sub.2/ts.combo.lowdiet.jpeg")
-
+  plot_scenario_6_low <- scenario_6_low %>% filter(spp %in% diet_under_0.05) %>%
+  mutate(spp =
+  fct_reorder(spp, biomass, tail, n = 1, .desc = TRUE)) %>% ggplot(aes(x= month, y =
+  biomass)) + geom_line(aes(colour= spp, linetype= Value)) + 
+  xlab("Month") + ylab("Relative biomass") + scale_x_continuous(name= "Year", breaks=
+  c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040",
+  "2050")) + 
+  scale_color_discrete(type = "viridis", labels= c("Greenstriped" = "Greenstriped
+  rockfish", "P. Ocean Perch"= "P. ocean perch", "Arrowtooth" = "Arrowtooth flounder",  
+  "Canary rock."= "Canary rockfish", "Longspine thorny."= "Longspine thornyhead", "Shelf
+  rock."= "Shelf rockfish", "Shortspine thorny."= "Shortspine thornyhead", "Slope rock."=
+  "Slope rockfish", "Widow rock."= "Widow rockfish", "Yellowtail rock."= "Yellowtail
+  rockfish", "Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Double
+  corm."= "Double cormorant", "Brandt's corm."= "Brandt's cormorant", "Juv. rock."= "Juv.
+  rockfish", "Other cephal."= "Other cephalopod", "Sea Lions"= "Sea lions", "Splitnose
+  rock."= "Splitnose rockfish", "Juv. Ele. Seal"= "Juv. n. elephant seal")) +
+  labs(colour= "Species with low diet proportion", title= "b") + standard_theme +
+  geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) +
+  guides(linetype = guide_legend(order = 2),col = guide_legend(order = 1)) +
+  scale_linetype_manual("Classification",values=c("Non-commercial"=2,"Both"=3)) +
+  ggsave(width = 8.75, height = 5.25,
+  "~/Documents/OTZ.manuscript/Images/Sub.2/low.diet.25.jpeg", dpi=600)
+  plot_scenario_6_low
 ```
 
-#Simple stats
+#Calculations for paper statistics.
 ```{r}
-biomass_increase_25 <- data_2 %>% filter(month==600, biomass >1) %>% mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
-biomass_increase_25
+#Find which functional groups increased/decreased at the end of the 25% and 50% harvest rate scenarios 
+  biomass_increase_25 <- scenario_6 %>% filter(month==600, biomass >1) %>%
+  mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
+  biomass_increase_25
+  
+  biomass_decrease_25 <- scenario_6 %>% filter(month==600, biomass <1) %>%
+  mutate(difference= (1-biomass), percent= (1-biomass)*100)
+  biomass_decrease_25
+  
+  biomass_increase_50 <- scenario_7 %>% filter(month==600, biomass >1) %>%
+  mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
+  biomass_increase_50
+  
+  biomass_decrease_50 <- scenario_7 %>% filter(month==600, biomass <1) %>%
+  mutate(difference= (1-biomass), percent = (1-biomass)*100)
+  biomass_decrease_50
 
-biomass_decrease_25 <- data_2 %>% filter(month==600, biomass <1) %>% mutate(difference= (1-biomass), percent= (1-biomass)*100)
-biomass_decrease_25
-
-biomass_increase_50 <- data_1 %>% filter(month==600, biomass >1) %>% mutate(difference= abs(1-biomass), percent = abs(1-biomass)*100)
-biomass_increase_50
-
-biomass_decrease_50 <- data_1 %>% filter(month==600, biomass <1) %>% mutate(difference= (1-biomass), percent = (1-biomass)*100)
-biomass_decrease_50
-
-#Find relative end biomass for commercial and non-commercial predators of mesopelagic fish for 25% and 50% harvest rate 
-predators_end25_comm <- data_2 %>% filter(spp %in% commercial_predators, month== 600) 
-predators_end25_nonc <- data_2 %>% filter(spp %in% noncommerical_predators, month== 600)
-
-predators_end50_comm <- data_1 %>% filter(spp %in% commercial_predators, month== 600)
-
-predators_end50_nonc <- data_1 %>% filter(spp %in% noncommerical_predators, month== 600)
+#Find the relative end biomass for commercial and non-commercial predators of mesopelagic fish at the end of the 25% and 50% harvest rate 
+  predators_end25_comm <- scenario_6 %>% filter(spp %in% commercial_predators, month==
+  600) 
+  predators_end25_nonc <- scenario_6 %>% filter(spp %in% noncommerical_predators, month==
+  600)
+  predators_end50_comm <- scenario_7 %>% filter(spp %in% commercial_predators, month==
+  600)
+  predators_end50_nonc <- scenario_7 %>% filter(spp %in% noncommerical_predators, month==
+  600)
 ```
-
-
-
-
