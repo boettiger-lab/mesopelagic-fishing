@@ -172,37 +172,33 @@ data_2 %>% filter(spp== "mesopelagics")
 write.csv(data_2, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario.6.csv")
 ```
 
-#Save datasets for the yearly 25% and 50% harvest rate on mesopelagic fish to generate change over time graphs ??? Help here !!!!!!
+#Use a function to create a change over time dataset for both the yearly 25% and 50% harvest rate on mesopelagic fish. This dataset has the relative end biomass (at the end of year 2050) of a functional group as the proportion of the original biomass of that group. 
 ```{r}
-#Save 
-change_1_overtime_df <- function(species) {
-  x = seq(0,1, length.out = length(species))
-  color = viridis(n = length(species), option= "B")
-  par(mar = c(6,12,2,4))
-  specieyear1 = run1$annual_Biomass[1, species]
-  specieyearlast = run1$annual_Biomass[length(yearlist), species]
-  value <- (specieyearlast/specieyear1)
-  cbind(species, value)
-}
-change_1_total <- change_1_overtime_df(all_species)
-change_1_total <- as.data.frame(change_1_total)
-
-write.csv(change_1_total, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/change_1_total.csv")
-
-#Scenario 2
-change_2_overtime_df <- function(species) {
-  x = seq(0,1, length.out = length(species))
-  color = viridis(n = length(species), option= "B")
-  par(mar = c(6,12,2,4))
-  specieyear2 = run2$annual_Biomass[1, species]
-  specieyearlast = run2$annual_Biomass[length(yearlist), species]
-  value <- (specieyearlast/specieyear2)
-  cbind(species, value)
-}
-change_2_total <- change_2_overtime_df(all_species)
-change_2_total <- as.data.frame(change_2_total)
-
-write.csv(change_2_total, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/change_1_total.csv")
+#50% harvest rate 
+  change_1_overtime_df <- function(species) {
+    x = seq(0,1, length.out = length(species))
+    color = viridis(n = length(species), option= "B")
+    par(mar = c(6,12,2,4))
+    specieyear1 = run1$annual_Biomass[1, species]
+    specieyearlast = run1$annual_Biomass[length(yearlist), species]
+    value <- (specieyearlast/specieyear1)
+    cbind(species, value)
+  }
+  change_1_total <- change_1_overtime_df(all_species)
+  change_1_total <- as.data.frame(change_1_total)
+  
+#25% harvest rate
+  change_2_overtime_df <- function(species) {
+    x = seq(0,1, length.out = length(species))
+    color = viridis(n = length(species), option= "B")
+    par(mar = c(6,12,2,4))
+    specieyear2 = run2$annual_Biomass[1, species]
+    specieyearlast = run2$annual_Biomass[length(yearlist), species]
+    value <- (specieyearlast/specieyear2)
+    cbind(species, value)
+  }
+  change_2_total <- change_2_overtime_df(all_species)
+  change_2_total <- as.data.frame(change_2_total)
 ```
 
 #Change over time graphs for scenario 6 and 7 for all functional groups (with the exception of mesopelagic fish) to create Figure 3a-b in the paper and Appendix S3: Figure S2 in the supplementary material. The relative end biomass on the x axis the biomass at the end of the simulation in 2050 (month 600).  
