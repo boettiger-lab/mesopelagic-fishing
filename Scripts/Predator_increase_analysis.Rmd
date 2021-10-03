@@ -19,8 +19,8 @@ GroupInfo_CalCur_USE <- read_csv("/Users/sallydowd/Documents/GitHub/mesopelagic-
 Diet <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Diet_CalCur_USE.csv")  
 Diet <- Diet %>% rename("Juv. hake" = "Juv..hake", "Yellowtail rock."= "Yellowtail.rock.", "Shelf rock."= "Shelf.rock.", "P. Ocean Perch"= "P..Ocean.Perch", "Longspine thorny."= "Longspine.thorny.", "Tufted Puffin"= "Tufted.Puffin", "Leach's S. Petrel"= "Leach.s.S..Petrel","Fin whale"= "Fin.whale", "Slope rock."= "Slope.rock.", "carniv-zoops"= "carniv.zoops", "small jellies"= "small.jellies", "large jellies"= "large.jellies", "pandalid shp"= "pandalid.shp", "benthic shp"= "benthic.shp", "tanner crab"= "tanner.crb", "Benthic fish"= "Benthic.fish", "surf perch"= "surf.perch", "Other cephal."= "Other.cephal.", "Market squid"= "Market.squid", "Pacific Mackerel"= "Pacific.Mackerel")
 
-scenario_7 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/scenario.7.csv")
-scenario_6 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/scenario.6.csv")
+scenario_7 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_7.csv")
+scenario_6 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_6.csv")
 ```
 
 #Webplot highlighting predator and prey connections to mesopelagic fish 
@@ -60,7 +60,7 @@ dev.off()
   pred_mesopelagic_prey_0.05 <- predators_of_mesopelagic %>% pivot_longer(-DIETS) %>%
   filter(value >= 0.05) %>% select(DIETS) %>% unique() %>% rename(spp = DIETS) %>%
   mutate(classification= "Other prey of predators of mesopelagics")
-  #pred_mesopelagic_prey_0.05 is made up of the predators of mesopelagic fish (as defined   above) that have other prey consisting of at least 5% of their diet    
+  #pred_mesopelagic_prey_0.05 is made up of the predators of mesopelagic fish (as defined above) that have other prey consisting of at least 5% of their diet    
 
   combo <- rbind(prey_of_mesopelagic_preds[!duplicated(prey_of_mesopelagic_preds$spp),],
   predators_mesopelagic_0.05,
@@ -78,7 +78,6 @@ dev.off()
   group_by(classification,month) %>% summarize(agg_rel_biomass=
   sum(weighted_biomass))
   #get aggregated relative biomass for each species classification (functional group       grouping) by summing weighted biomass for each species classification for each month  
-
 #Make weighted aggregated biomass graph 
   mesopelagics_only <- scenario_6 %>% filter(spp== "mesopelagics") %>%
   rename(Mesopelagics=

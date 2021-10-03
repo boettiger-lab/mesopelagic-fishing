@@ -134,7 +134,7 @@ names(z_1) <- names_spp
 z_1$month <- 1:600
 data_1 <- gather(z_1, key = spp, value = biomass, -month )
 
-write.csv(data_1, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario.7.csv") 
+write.csv(data_1, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_7.csv") 
 ```
 
 #Scenario 6: Apply a yearly 25% mesopelagic fish harvest rate to the base Rsim scenario and project the simulation forward for fifty years
@@ -169,7 +169,7 @@ z_2$month <- 1:600
 data_2 <- gather(z_2, key = spp, value = biomass, -month )
 data_2 %>% filter(spp== "mesopelagics")
 
-write.csv(data_2, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario.6.csv")
+write.csv(data_2, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_6.csv")
 ```
 
 #Use a function to create a change over time dataset for both the yearly 25% and 50% harvest rate on mesopelagic fish. This dataset has the relative end biomass (at the end of year 2050) of a functional group as the proportion of the original biomass of that group. 
@@ -217,7 +217,8 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
     "Neither", "Increasing"), right = TRUE)) %>% arrange(value)
 
     Predator_value <- read_csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Da
-    ta/Predator.value.csv") #Load in economic value of functional groups
+    ta/Predator_value.csv") #Load in economic value of functional groups
+    
     change_1_1 <- change_1_1 %>% rename(biomass_prop= value) %>%    
     left_join(Predator_value, by="species")
     change_1_1[9,4] <- "Neither" #Make sure value column for juvenile hake says neither 
@@ -398,8 +399,8 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
 
 #Time series graphs for scenario 6 and 7 for functional groups with high and low diet dependence on mesoopelagic fish. This code created Appendix S3: Figure 1a-d in the supplementary material. The relative biomass on the y axis is the proportion of original biomass throughout the entire 50-year simulation. 
 ```{r}
-scenario_7 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario.7.csv") #Results from 50% harvest rate 
-scenario_6 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario.6..csv") #Results from 25% harvest rate
+scenario_7 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_7.csv") #Results from 50% harvest rate 
+scenario_6 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_6.csv") #Results from 25% harvest rate
 
 #Graph for functional groups with high diet dependence on mesopelagic fish
   Predator_value_ts <- Predator_value %>% rename(spp= "species")

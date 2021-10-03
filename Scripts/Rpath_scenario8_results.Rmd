@@ -190,12 +190,12 @@ entire_data_6 <- bind_rows(data_6.2) %>% filter(X == 67)
 entire_data_6 <- bind_rows(data_6.2) %>% filter(!X %in% c(67, 126, 237, 343, 396, 430, 472)) %>% arrange(spp)
 entire_data_6 <- transform(entire_data_6,ID=as.numeric(factor(spp))) #Add column for ID that correlates to each different species 
 
-write.csv(entire_data_6, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario.8.csv")
+write.csv(entire_data_6, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_8.csv")
 ```
 
 #Confidence intervals: Calculate the 95% CI for the relative end biomass of each functional group at the end of the simulation (month 600). 
 ```{r}
-scenario_8 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario.8.csv")
+scenario_8 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_8.csv")
 
 n <- 500
 t_star <- 1.960
@@ -240,7 +240,7 @@ sum_data_6 <- sum_data_6 %>% mutate("median.value" = cut(median_biomass,
                         labels = c("Decreasing", "Increasing"),
                         right = TRUE), "difference"= quant_97.5-quant_2.5)
   
-write.csv(sum_data_6, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/Scenario.8.quantiles.csv")
+write.csv(sum_data_6, "/Users/sallydowd/Documents/OTZ.manuscript/Excel/Scenario_8_quantiles.csv")
 ```
 
 #Check to see if the seven datasets that produce unrealistic biomass estimates are outliers 
@@ -257,7 +257,7 @@ test <- seven_models_outliers %>% left_join(rest_of_models_outliers) %>% mutate(
 
 #Change over time graphs for scenario 8 for all functional groups (with the exception of mesopelagic fish) to create Figure 3a-b in the paper and Appendix S3: Figure S2 in the supplementary material. The relative end biomass on the x axis the biomass at the end of the simulation in 2050 (month 600). 
 ```{r}
-scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario.8.quantiles.csv")
+scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_8_quantiles.csv")
 
  #Generate graph with functional groups with high diet dependence on mesopelagic fish:    Diet over 0.05 (mesopelagic fish make up at least 5% of their diet)
   sum_2_1 <- scenario_8_quantiles %>% filter(spp %in% diet_over_0.05) %>% rename(species=
