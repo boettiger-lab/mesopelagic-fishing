@@ -118,3 +118,14 @@ avgsmpmp <- Diet[c(3,6,7, 8:10, 18), c(1,4,7,8, 9:11, 19)] %>% pivot_longer(-DIE
 avg_pp <- Diet[c(29,33,38, 42, 48, 51, 54, 56, 63, 70,76,85), c(1,30,34,39, 43, 49, 52, 55, 57, 64, 71,77,86)] %>% pivot_longer(-DIETS) %>% rename(spp= name) %>% left_join(GroupInfo_edt, by= "spp") %>% mutate(total_biomass= sum(unique(Biomass))) %>% mutate(bio_DC_weight = (Biomass*value)/total_biomass) %>% summarize(sum(bio_DC_weight)) 
 #weighted value of diet composition for mesopelagic predators on mesopelagic predators
 ```
+
+#Scatter plot to look at diet dependence of predators of mesopelagic fish vs. end biomass. This code generates Figure ___ in Appendix 2. 
+```{r}
+predators_endbiomass <- change_2_overtime_df(predators_mesopelagic)
+predators_endbiomass <- as.data.frame(predators_endbiomass) %>% rename(endbiomass= value)
+diets_pm <- predators_of_mesopelagic[15,] %>% pivot_longer(-DIETS) %>% rename(species = name)
+predators_endbiomass <- predators_endbiomass %>% left_join(diets_pm, by= "species") %>% select(-DIETS)
+
+#Found issue- need to correct name in diet for species that have diets under 0.05 (didn't do this in original version)
+```
+
