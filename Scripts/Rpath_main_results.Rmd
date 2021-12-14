@@ -205,7 +205,7 @@ write.csv(data_2, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Sc
 ```{r}
 #Define a common ggplot theme
 standard_theme <- theme_bw() + theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text.align= 0, legend.title= element_text(size = 10), legend.text = element_text(size= 9), axis.text=element_text(size=9), axis.title=element_text(size=10))
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text.align= 0, legend.title= element_text(size = 10), legend.text = element_text(size= 9), axis.text=element_text(size=8), axis.title=element_text(size=10))
 
 #Scenario 7: yearly 50% harvest rate applied to mesopelagic fish 
 
@@ -223,12 +223,11 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
     change_1_1[9,4] <- "Neither" #Make sure value column for juvenile hake says neither 
     change_1_1$Value <- factor(change_1_1$Value, levels = c("Commercial", 
     "Non-commercial", "Both", "Neither"))
-   
+ 
     change_1_1_plot <- change_1_1 %>% ggplot(aes(col = Value)) +   
-    geom_point(aes(x= biomass_prop, y= reorder(species, -biomass_prop))) + 
+    geom_point(aes(x= biomass_prop, y= reorder(species, biomass_prop))) + 
     scale_color_manual(values = c("#FF0000","#0000FF", "#00FF70", "#FF00FF")) + 
-    scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P.
-    ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."=
+    scale_y_discrete(breaks= waiver(), labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P.ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."=
     "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope
     rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + 
     geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
@@ -237,7 +236,7 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
     "Classification") + standard_theme
     change_1_1_plot 
 
-  #Generate graph with functional groups with low diet dependence on mesopelagic fish:     Diet under 0.05 (mesopelagic fish make up less than 5% of their diet)
+  #Generate graph with functional groups with low diet dependence on mesopelagic fish: Diet under 0.05 (mesopelagic fish make up less than 5% of their diet)
     change_1_2_df <- change_1_overtime_df(diet_under_0.05)
     change_1_2_df <- as.data.frame(change_1_2_df)
     change_1_2 <- change_1_2_df %>% mutate(value = round(as.numeric(paste(value)), 2),
@@ -250,8 +249,7 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
     change_1_2$Value <- factor(change_1_2$Value, levels = c("Non-commercial", "Both",
     "Neither"))
 
-    change_1_2_plot <- change_1_2 %>% ggplot(aes(col= Value)) + geom_point(aes(x=
-    biomass_prop, y=reorder(species, desc(species)))) + 
+    change_1_2_plot <- change_1_2 %>% ggplot(aes(col= Value)) + geom_point(aes(x= biomass_prop, y= reorder(species, biomass_prop))) + 
     scale_color_manual(values = c("#0000FF", "#00FF70")) +
     scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"=
     "Resident orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"=
@@ -266,7 +264,7 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
     labs(col = "Classification") + standard_theme
     change_1_2_plot
 
-  #Generate graph with functional groups with no diet dependence on mesopelagic fish.      This means that these functional groups have 0% of their diet consist of mesopelagic     fish. 
+  #Generate graph with functional groups with no diet dependence on mesopelagic fish. This means that these functional groups have 0% of their diet consist of mesopelagic fish. 
     commercial_predators_df <- as.data.frame(commercial_predators) %>% rename(species=
     commercial_predators)
     noncommercial_predators_df <- as.data.frame(noncommerical_predators) %>%
@@ -287,23 +285,21 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
     "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing",
     "Neither", "Increasing"), right = TRUE)) %>% arrange(value) %>% rename(biomass_prop=
     value) 
-    change_1_3_plot <- change_1_3 %>% ggplot() + geom_point(aes(x= biomass_prop,
-    y=reorder(species, desc(species)))) + 
+    change_1_3_plot <- change_1_3 %>% ggplot() + geom_point(aes(x= biomass_prop, y= reorder(species, biomass_prop))) + 
     xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size=
     0.75) + 
     xlab("Relative biomass") + ylab("Species with no diet proportion") + 
-    scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal",
-    "amphipods"= "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown
-    pelican", "Cali. gull"= "California gull", "carniv-zoops" = "Carnivorous
-    zooplankton", "copepods"= "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"=
-    "Epibenthic", "euphausiids"= "Euphausiids", "infauna"= "Infauna", "Juv. round."=
-    "Juv. roundfish", "Juv. thorny."= "Juv. thornyhead", "large jellies"= "Large
-    jellies", "micro-zoop"= "Microzooplankton", "Nearshore rock."= "Nearshore rockfish",
-    "Pacific Mackerel"= "Pacific mackerel", "pandalid shp"= "Pandalid shrimp",
-    "phytoplankton"= "Phytoplankton", "Pigeon Guillemot"= "Pigeon guillemot", "Rhino.
-    auk"= "Rhinoceros auklet", "small jellies"= "Small jellies", "surf perch"= "Surf
-    perch", "tanner crb"= "Tanner crab", "Transient Orcas"= "Transient orcas", "Yelloweye
-    rock."= "Yelloweye rockfish")) + labs(col = "Classification") + standard_theme
+    scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amphipods"=
+  "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown pelican", "Cali.
+  gull"= "California gull", "carniv-zoops" = "Carniv. zooplankton", "copepods"=
+  "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"= "Epibenthic", "euphausiids"=
+  "Euphausiids", "infauna"= "Infauna", "Juv. round."= "Juv. roundfish", "Juv. thorny."=
+  "Juv. thornyhead", "large jellies"= "Large jellies", "micro-zoop"= "Microzooplankton",
+"Pacific Mackerel"= "Pacific mackerel",
+  "pandalid shp"= "Pandalid shrimp", "phytoplankton"= "Phytoplankton", "Pigeon
+  Guillemot"= "Pigeon guillemot", "Rhino. auk"= "Rhinoceros auklet", "small jellies"=
+  "Small jellies", "surf perch"= "Surf perch", "tanner crb"= "Tanner crab", "Transient
+  Orcas"= "Transient orcas", "Juv. flatfish"= "Juv. flat.", "Cali. gull" = "California gull")) + labs(col = "Classification") + standard_theme
     change_1_3_plot
 
 #Scenario 6: yearly 25% harveset rate applied to mesopelagics
@@ -346,8 +342,7 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
     change_2_2$Value <- factor(change_2_2$Value, levels = c("Non-commercial", "Both",
     "Neither"))
 
-    change_2_2_plot <- change_2_2 %>% ggplot(aes(col= Value)) + geom_point(aes(x=
-    biomass_prop, y=reorder(species, desc(species)))) + 
+    change_2_2_plot <- change_2_2 %>% ggplot(aes(col= Value)) + geom_point(aes(x= biomass_prop, y= reorder(species, biomass_prop))) + 
     scale_color_manual(values = c("#0000FF", "#00FF70")) +
     scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"=
     "Resident orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"=
@@ -363,11 +358,11 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
     labs(col = "Classification") + standard_theme 
     change_2_2_plot
 
-  #Generate graph with functional groups with no diet dependence on mesopelagic fish.      This means that these functional groups have 0% of their diet consist of mesopelagic     fish.
+  #Generate graph with functional groups with no diet dependence on mesopelagic fish. This means that these functional groups have 0% of their diet consist of mesopelagic fish.
     no_dependence_2 <- change_2_total %>% left_join(combo, by= "species")
     no_dependence_2[is.na(no_dependence_2)] <- 0 #Functional groups with no dependence on     mesopelagics have a 0
     no_dependence_2 <-no_dependence_2[!duplicated(no_dependence_2$species),] 
-    no_dependence_2 <- no_dependence_2[-c(15,30),] #Remove mesopelagics and juvenile         hake- dependence on mesopelagics but don't have commercial or non-commercial value so     will be weird with filtering
+    no_dependence_2 <- no_dependence_2[-c(15,30),] #Remove mesopelagics and juvenile         hake- dependence on mesopelagics but don't have commercial or non-commercial value so will be weird with filtering
     no_dependence_final_2 <- no_dependence_2 %>% filter(Dependence==0)
     change_2_3_df <- no_dependence_final_2
     change_2_3 <- change_2_3_df %>% mutate(value = round(as.numeric(paste(value)), 2),
@@ -376,23 +371,21 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
     value) 
 
     change_2_3 %>% filter(result== "Neither")
-    change_2_3_plot <- change_2_3 %>% ggplot() + geom_point(aes(x= biomass_prop,
-    y=reorder(species, desc(species)))) + 
+    change_2_3_plot <- change_2_3 %>% ggplot() + geom_point(aes(x= biomass_prop, y= reorder(species, biomass_prop))) + 
     xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size=
     0.75) + 
     xlab("Relative biomass") + ylab("Species with no diet proportion") + 
-    scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal",
-    "amphipods"= "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown
-    pelican", "Cali. gull"= "California gull", "carniv-zoops" = "Carnivorous
-    zooplankton", "copepods"= "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"=
-    "Epibenthic", "euphausiids"= "Euphausiids", "infauna"= "Infauna", "Juv. round."=
-    "Juv. roundfish", "Juv. thorny."= "Juv. thornyhead", "large jellies"= "Large
-    jellies", "micro-zoop"= "Microzooplankton", "Nearshore rock."= "Nearshore rockfish",
-    "Pacific Mackerel"= "Pacific mackerel", "pandalid shp"= "Pandalid shrimp",
-    "phytoplankton"= "Phytoplankton", "Pigeon Guillemot"= "Pigeon guillemot", "Rhino.
-    auk"= "Rhinoceros auklet", "small jellies"= "Small jellies", "surf perch"= "Surf
-    perch", "tanner crb"= "Tanner crab", "Transient Orcas"= "Transient orcas", "Yelloweye
-    rock."= "Yelloweye rockfish")) + labs(col = "Classification") + standard_theme 
+     scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amphipods"=
+  "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown pelican", "Cali.
+  gull"= "California gull", "carniv-zoops" = "Carniv. zooplankton", "copepods"=
+  "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"= "Epibenthic", "euphausiids"=
+  "Euphausiids", "infauna"= "Infauna", "Juv. round."= "Juv. roundfish", "Juv. thorny."=
+  "Juv. thornyhead", "large jellies"= "Large jellies", "micro-zoop"= "Microzooplankton",
+"Pacific Mackerel"= "Pacific mackerel",
+  "pandalid shp"= "Pandalid shrimp", "phytoplankton"= "Phytoplankton", "Pigeon
+  Guillemot"= "Pigeon guillemot", "Rhino. auk"= "Rhinoceros auklet", "small jellies"=
+  "Small jellies", "surf perch"= "Surf perch", "tanner crb"= "Tanner crab", "Transient
+  Orcas"= "Transient orcas", "Juv. flatfish"= "Juv. flat.", "Cali. gull" = "California gull")) + standard_theme 
     change_2_3_plot
 ```
 

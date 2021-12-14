@@ -76,7 +76,6 @@ Cdiet_list <- list()
 #}
 
 #z2 <- read_csv(diet_list[1])
-
 ```
 
 #Read in each diet matrix and base list dataest pair to form the 500 unbalanced models. 
@@ -257,16 +256,19 @@ test <- seven_models_outliers %>% left_join(rest_of_models_outliers) %>% mutate(
 
 #Change over time graphs for scenario 8 for all functional groups (with the exception of mesopelagic fish) to create Figure 3a-b in the paper and Appendix S3: Figure S2 in the supplementary material. The relative end biomass on the x axis the biomass at the end of the simulation in 2050 (month 600). 
 ```{r}
+standard_theme <- theme_bw() + theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text.align= 0, legend.title= element_text(size = 10), legend.text = element_text(size= 9), axis.text=element_text(size=8), axis.title=element_text(size=10))
+
 scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_8_quantiles.csv")
 
- #Generate graph with functional groups with high diet dependence on mesopelagic fish:    Diet over 0.05 (mesopelagic fish make up at least 5% of their diet)
+ #Generate graph with functional groups with high diet dependence on mesopelagic fish: Diet over 0.05 (mesopelagic fish make up at least 5% of their diet)
   sum_2_1 <- scenario_8_quantiles %>% filter(spp %in% diet_over_0.05) %>% rename(species=
   "spp") %>% left_join(Predator_value, by= "species")
   sum_2_1[5,13] <- "Neither"
   sum_2_1$Value <- factor(sum_2_1$Value, levels = c("Commercial", "Non-commercial",
   "Both", "Neither"))
   sum_2_1_graph <- sum_2_1 %>% ggplot(aes(col= Value)) + 
-  geom_pointrange(aes(y=reorder(species, desc(species)), x=median_biomass,
+  geom_pointrange(aes(y=reorder(species, median_biomass), x=median_biomass,
   xmin=quant_2.5, xmax= quant_97.5), size=0.5, shape=22, fill= "white") + 
   scale_color_manual(values = c("#FF0000","#0000FF", "#00FF70", "#FF00FF")) + 
   scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P.
@@ -274,18 +276,17 @@ scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-
   thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope rockfish",
   "Yellowtail rock."= "Yellowtail rockfish")) + 
   geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
-  xlim(0.70, 1.35) + xlab("Relative biomass") + ylab("Species with high diet proportion")
-  + labs(col = "Classification") + standard_theme
+  xlim(0.70, 1.35) + xlab("Relative biomass") + ylab("Species with high diet proportion") + labs(col = "Classification") + standard_theme
   sum_2_1_graph
 
-#Generate graph with functional groups with low diet dependence on mesopelagic fish:     Diet under 0.05 (mesopelagic fish make up less than 5% of their diet)
+#Generate graph with functional groups with low diet dependence on mesopelagic fish: Diet under 0.05 (mesopelagic fish make up less than 5% of their diet)
   sum_2_2 <- scenario_8_quantiles %>% filter(spp %in% diet_under_0.05) %>%
   rename(species= "spp") %>% left_join(Predator_value, by= "species")
   #Remove mesopelagics
   sum_2_2 <- sum_2_2[-15,]
   sum_2_2$Value <- factor(sum_2_2$Value, levels = c("Non-commercial", "Both", "Neither"))
   sum_2_2_graph <- sum_2_2 %>% ggplot(aes(col= Value)) + 
-  geom_pointrange(aes(y=reorder(species, desc(species)), x=median_biomass,
+   geom_pointrange(aes(y=reorder(species, median_biomass), x=median_biomass,
   xmin=quant_2.5, xmax= quant_97.5), size=0.5, shape=22, fill= "white") + 
   scale_color_manual(values = c("#0000FF", "#00FF70")) +
   scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident
@@ -296,11 +297,10 @@ scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-
   thornyhead", "Widow rock."= "Widow rockfish", "mesopelagics"= "Mesopelagics", "Sea
   Lions"= "Sea lions", "Splitnose rock."= "Splitnose rockfish")) +
   geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
-  xlim(0.70, 1.35) + xlab("Relative biomass") + ylab("Species with low diet proportion")
-  + labs(col = "Classification") + standard_theme 
+  xlim(0.70, 1.35) + xlab("Relative biomass") + ylab("Species with low diet proportion") + labs(col = "Classification") + standard_theme 
   sum_2_2_graph
 
-#Generate graph with functional groups with no diet dependence on mesopelagic fish.      This means that these functional groups have 0% of their diet consist of mesopelagic     fish. 
+#Generate graph with functional groups with no diet dependence on mesopelagic fish. This means that these functional groups have 0% of their diet consist of mesopelagic fish. 
   commercial_predators_df <- as.data.frame(commercial_predators) %>% rename(species=       commercial_predators)
   noncommercial_predators_df <- as.data.frame(noncommerical_predators) %>% 
   rename(species= noncommerical_predators)
@@ -308,29 +308,27 @@ scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-
   mutate(Dependence= 1)
   sum_no_dependence <- scenario_8_quantiles %>% rename(species= "spp") %>%
   left_join(combo, by= "species")
-  sum_no_dependence[is.na(sum_no_dependence)] <- 0 #Functional groups with no dependence   on mesopelagics have a 0
+  sum_no_dependence[is.na(sum_no_dependence)] <- 0 #Functional groups with no dependence on mesopelagics have a 0
   sum_no_dependence <-sum_no_dependence[!duplicated(sum_no_dependence$species),] 
-  sum_no_dependence <- sum_no_dependence[-c(42,52),] #Remove mesopelagics and juvenile     hake- dependence on mesopelagics but don't have commercial or non-commercial value so    will be weird with filtering
+  sum_no_dependence <- sum_no_dependence[-c(42,52),] #Remove mesopelagics and juvenile     hake- dependence on mesopelagics but don't have commercial or non-commercial value so will be weird with filtering
   sum_no_dependence_final <- sum_no_dependence %>% filter(Dependence==0)
   
   sum_2_3 <- sum_no_dependence_final
   sum_2_3_graph <- sum_2_3 %>% ggplot() + 
-  geom_pointrange(aes(y=reorder(species, desc(species)), x=median_biomass,  
+   geom_pointrange(aes(y=reorder(species, median_biomass), x=median_biomass,
   xmin=quant_2.5, xmax= quant_97.5), size=0.5, shape=22, fill= "white") + 
   scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amphipods"=
   "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown pelican", "Cali.
-  gull"= "California gull", "carniv-zoops" = "Carnivorous zooplankton", "copepods"=
+  gull"= "California gull", "carniv-zoops" = "Carniv. zooplankton", "copepods"=
   "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"= "Epibenthic", "euphausiids"=
   "Euphausiids", "infauna"= "Infauna", "Juv. round."= "Juv. roundfish", "Juv. thorny."=
   "Juv. thornyhead", "large jellies"= "Large jellies", "micro-zoop"= "Microzooplankton",
-  "Nearshore rock."= "Nearshore rockfish", "Pacific Mackerel"= "Pacific mackerel",
+"Pacific Mackerel"= "Pacific mackerel",
   "pandalid shp"= "Pandalid shrimp", "phytoplankton"= "Phytoplankton", "Pigeon
   Guillemot"= "Pigeon guillemot", "Rhino. auk"= "Rhinoceros auklet", "small jellies"=
   "Small jellies", "surf perch"= "Surf perch", "tanner crb"= "Tanner crab", "Transient
-  Orcas"= "Transient orcas", "Yelloweye rock."= "Yelloweye rockfish")) +
-  geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
-  xlim(0.70, 1.35) + xlab("Relative biomass") + ylab("Species with low diet proportion")
-  + labs(col = "Classification") + standard_theme 
+  Orcas"= "Transient orcas", "Juv. flatfish"= "Juv. flat.", "Cali. gull" = "California gull")) + geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
+  xlim(0.70, 1.35) + xlab("Relative biomass") + ylab("Species with low diet proportion") + labs(col = "Classification") + standard_theme 
   sum_2_3_graph
 
 #Combining scenario 6,7 and 8 plots. The code to generate scenario 6 and 7 plots can be found in Rpath.main.results.Rmd.
@@ -342,7 +340,7 @@ scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-
   annotate_figure(high_diet_plot, bottom= text_grob("Relative end biomass", size=14),
   left= text_grob("Species with high diet proportion", size=14, rot=90)) + 
   ggsave(width = 8.75, height = 5.25,
-  "~/Documents/OTZ.Manuscript/Images/Sub.2/high.diet.combo.jpeg", dpi=600)
+  "~/Documents/OTZ.Manuscript/Images/Submission.3/high.diet.combo.jpeg", dpi=600)
   
   low_diet_plot <- ggarrange(change_2_2_plot + rremove("xlab") + rremove("ylab") +
   rremove("legend"), change_1_2_plot + rremove("xlab") + rremove("ylab") +
@@ -352,7 +350,7 @@ scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-
   annotate_figure(low_diet_plot, bottom= text_grob("Relative end biomass", size=14),
   left= text_grob("Species with low diet proportion", size=14, rot=90)) + 
   ggsave(width = 8.75, height = 5.25,
-  "~/Documents/OTZ.Manuscript/Images/Sub.2/low.diet.combo.jpeg", dpi=600)
+  "~/Documents/OTZ.Manuscript/Images/Submission.3/low.diet.combo.jpeg", dpi=600)
   
   no_diet_plot <- ggarrange(change_2_3_plot + rremove("xlab") + rremove("ylab"),
   change_1_3_plot + rremove("xlab") + rremove("ylab"), sum_2_3_graph + rremove("xlab") +
@@ -361,5 +359,5 @@ scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-
   annotate_figure(no_diet_plot, bottom= text_grob("Relative end biomass", size=14), left=
   text_grob("Species with no diet proportion", size=14, rot=90)) + 
   ggsave(width = 8.75, height = 5.25,
-  "~/Documents/OTZ.Manuscript/Images/Sub.2/no.diet.combo.jpeg", dpi=600)
+  "~/Documents/OTZ.Manuscript/Images/Submission.3/no.diet.combo.jpeg", dpi=600)
 ```
