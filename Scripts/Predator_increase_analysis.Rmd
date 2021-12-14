@@ -17,7 +17,7 @@ library(tidyverse)
 ```{r}
 GroupInfo_CalCur_USE <- read_csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/GroupInfo_CalCur-USE.csv")
 Diet <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Diet_CalCur_USE.csv")  
-Diet <- Diet %>% rename("Juv. hake" = "Juv..hake", "Yellowtail rock."= "Yellowtail.rock.", "Shelf rock."= "Shelf.rock.", "P. Ocean Perch"= "P..Ocean.Perch", "Longspine thorny."= "Longspine.thorny.", "Tufted Puffin"= "Tufted.Puffin", "Leach's S. Petrel"= "Leach.s.S..Petrel","Fin whale"= "Fin.whale", "Slope rock."= "Slope.rock.", "carniv-zoops"= "carniv.zoops", "small jellies"= "small.jellies", "large jellies"= "large.jellies", "pandalid shp"= "pandalid.shp", "benthic shp"= "benthic.shp", "tanner crab"= "tanner.crb", "Benthic fish"= "Benthic.fish", "surf perch"= "surf.perch", "Other cephal."= "Other.cephal.", "Market squid"= "Market.squid", "Pacific Mackerel"= "Pacific.Mackerel")
+Diet <- Diet %>% rename("Juv. hake" = "Juv..hake", "Yellowtail rock."= "Yellowtail.rock.", "Shelf rock."= "Shelf.rock.", "P. Ocean Perch"= "P..Ocean.Perch", "Longspine thorny."= "Longspine.thorny.", "Tufted Puffin"= "Tufted.Puffin", "Leach's S. Petrel"= "Leach.s.S..Petrel","Fin whale"= "Fin.whale", "Slope rock."= "Slope.rock.", "carniv-zoops"= "carniv.zoops", "small jellies"= "small.jellies", "large jellies"= "large.jellies", "pandalid shp"= "pandalid.shp", "benthic shp"= "benthic.shp", "tanner crab"= "tanner.crb", "Benthic fish"= "Benthic.fish", "surf perch"= "surf.perch", "Other cephal."= "Other.cephal.", "Market squid"= "Market.squid", "Pacific Mackerel"= "Pacific.Mackerel", "Juv. rock."= "Juv..rock.", "Canary rock."= "Canary.rock.", "Widow rock."= "Widow.rock.", "Splitnose rock."= "Splitnose.rock.", "Shortspine thorny."= "Shortspine.thorny.", "Common murre"= "Common.murre", "Western Gull"= "Western.Gull", "Resident Orcas"= "Resident.Orcas", "Sperm whale"= "Sperm.whale", "Harbor seals"= "Harbor.seals", "Sea Lions"= "Sea.Lions", "Juv. Ele. Seal"= "Juv..Ele..Seal", "Fur seals"= "Fur.seals", "Brandt's corm."= "Brandt.s.corm.", "Double corm."= "Double.corm.", "Pelagic cormorant"= "Pelagic.cormorant")
 
 scenario_7 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_7.csv")
 scenario_6 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_6.csv")
@@ -121,11 +121,51 @@ avg_pp <- Diet[c(29,33,38, 42, 48, 51, 54, 56, 63, 70,76,85), c(1,30,34,39, 43, 
 
 #Scatter plot to look at diet dependence of predators of mesopelagic fish vs. end biomass. This code generates Figure ___ in Appendix 2. 
 ```{r}
+#Need to run first four code sections + change_2_overtime_df function in Rpath_main_results.Rmd for this code to work
 predators_endbiomass <- change_2_overtime_df(predators_mesopelagic)
 predators_endbiomass <- as.data.frame(predators_endbiomass) %>% rename(endbiomass= value)
+predators_endbiomass$endbiomass <- as.numeric(predators_endbiomass$endbiomass)
+predators_endbiomass$endbiomass <- round(predators_endbiomass$endbiomass,digit=2) 
 diets_pm <- predators_of_mesopelagic[15,] %>% pivot_longer(-DIETS) %>% rename(species = name)
-predators_endbiomass <- predators_endbiomass %>% left_join(diets_pm, by= "species") %>% select(-DIETS)
+predators_endbiomass <- predators_endbiomass %>% left_join(diets_pm, by= "species") %>% select(-DIETS) 
+predators_endbiomass <- predators_endbiomass[-1,]
 
-#Found issue- need to correct name in diet for species that have diets under 0.05 (didn't do this in original version)
+predators_endbiomass %>% ggplot(aes(x= value, y= endbiomass)) + geom_point() + xlab("Diet proportion on mesopelagics") + ylab("Relative end biomass") + standard_theme + ggsave(width = 8.75, height = 5.25, "/Users/sallydowd/Documents/OTZ.manuscript/Images/Submission.2/endbiomass.dietvalue.jpeg", dpi=600)
+
+library(broom)
+ mylm <- lm(endbiomass ~ value, data = predators_endbiomass)
+summary(mylm)
+model.diag.metrics <- augment(mylm)
+head(model.diag.metrics)
+par(mfrow = c(2, 2))
+plot(mylm)
+
+model2 <- lm(log(endbiomass) ~ value, data = predators_endbiomass)
+plot(model2, 3)
+
+shapiro.test(predators_endbiomass$endbiomass)
+
+  plot_scenario_7_high <- scenario_7_high %>% mutate(spp = fct_reorder(spp, biomass,
+  tail, n = 1,
+  .desc = TRUE)) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= spp,
+  linetype= Value)) + 
+  xlab("Month") + ylab("Relative biomass") + scale_x_continuous(name= "Year", breaks=
+  c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040",
+  "2050")) + 
+  scale_color_discrete(type = "viridis", labels= c("Greenstriped" = "Greenstriped
+  rockfish", "P. Ocean Perch"= "P. ocean perch", "Albacore" = "Albacore", "Arrowtooth" =
+  "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Lingcod"= "Lingcod",
+  "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish",
+  "Shortspine thorny."= "Shortspine thornyhead", "Slope rock."= "Slope rockfish", "Widow
+  rock."= "Widow rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + labs(colour=
+  "Species with high diet proportion", title= "c") + standard_theme +           
+  geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) +
+  guides(linetype = guide_legend(order = 2),col = guide_legend(order = 1)) +
+  scale_linetype_manual("Classification",values=c("Commercial"= 1,
+  "Non-commercial"=2,"Both"=3, "Neither"=4)) + 
+  ggsave(width = 8.75, height = 5.25,
+  "~/Documents/OTZ.manuscript/Images/Sub.2/high.diet.50.jpeg", dpi=600)
+  plot_scenario_7_high
+
 ```
 
