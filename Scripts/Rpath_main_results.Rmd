@@ -216,17 +216,16 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
     "result" = cut(value, breaks = c(-Inf, 0.99, 1.001, Inf), labels = c("Decreasing",
     "Neither", "Increasing"), right = TRUE)) %>% arrange(value)
 
-    Predator_value <- read_csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Da
-    ta/Predator_value.csv") #Load in economic value of functional groups
+    Predator_value <- read_csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Predator_value.csv") #Load in economic value of functional groups
     
     change_1_1 <- change_1_1 %>% rename(biomass_prop= value) %>%    
     left_join(Predator_value, by="species")
     change_1_1[9,4] <- "Neither" #Make sure value column for juvenile hake says neither 
     change_1_1$Value <- factor(change_1_1$Value, levels = c("Commercial", 
     "Non-commercial", "Both", "Neither"))
-
+   
     change_1_1_plot <- change_1_1 %>% ggplot(aes(col = Value)) +   
-    geom_point(aes(x=biomass_prop, y=reorder(species, desc(species)))) + 
+    geom_point(aes(x= biomass_prop, y= reorder(species, -biomass_prop))) + 
     scale_color_manual(values = c("#FF0000","#0000FF", "#00FF70", "#FF00FF")) + 
     scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P.
     ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."=
