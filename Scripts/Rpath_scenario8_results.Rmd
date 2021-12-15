@@ -257,7 +257,7 @@ test <- seven_models_outliers %>% left_join(rest_of_models_outliers) %>% mutate(
 #Change over time graphs for scenario 8 for all functional groups (with the exception of mesopelagic fish) to create Figure 3a-b in the paper and Appendix S3: Figure S2 in the supplementary material. The relative end biomass on the x axis the biomass at the end of the simulation in 2050 (month 600). 
 ```{r}
 standard_theme <- theme_bw() + theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text.align= 0, legend.title= element_text(size = 10), legend.text = element_text(size= 9), axis.text=element_text(size=8), axis.title=element_text(size=10))
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text.align= 0, legend.title= element_text(size = 10), legend.text = element_text(size= 9), axis.text=element_text(size=8), axis.title=element_text(size=10)) + theme(axis.text.y = element_text(hjust= 0.95))
 
 scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_8_quantiles.csv")
 
@@ -271,10 +271,7 @@ scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-
   geom_pointrange(aes(y=reorder(species, median_biomass), x=median_biomass,
   xmin=quant_2.5, xmax= quant_97.5), size=0.5, shape=22, fill= "white") + 
   scale_color_manual(values = c("#FF0000","#0000FF", "#00FF70", "#FF00FF")) + 
-  scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P.
-  ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."= "Longspine
-  thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope rockfish",
-  "Yellowtail rock."= "Yellowtail rockfish")) + 
+  scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P. ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + 
   geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
   xlim(0.70, 1.35) + xlab("Relative biomass") + ylab("Species with high diet proportion") + labs(col = "Classification") + standard_theme
   sum_2_1_graph
@@ -289,13 +286,7 @@ scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-
    geom_pointrange(aes(y=reorder(species, median_biomass), x=median_biomass,
   xmin=quant_2.5, xmax= quant_97.5), size=0.5, shape=22, fill= "white") + 
   scale_color_manual(values = c("#0000FF", "#00FF70")) +
-  scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident
-  orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"= "Greenstriped
-  rockfish", "Double corm."= "Double cormorant", "Brandt's corm."= "Brandt's cormorant",
-  "Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Juv. rock."=
-  "Juv. rockfish", "Other cephal."= "Other cephalopod", "Shortspine thorny."= "Shortspine
-  thornyhead", "Widow rock."= "Widow rockfish", "mesopelagics"= "Mesopelagics", "Sea
-  Lions"= "Sea lions", "Splitnose rock."= "Splitnose rockfish")) +
+  scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"= "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm."= "Brandt's cormorant","Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Juv. rock."="Juv. rockfish", "Other cephal."= "Other cephalopod", "Shortspine thorny."= "Shortspine thornyhead", "Widow rock."= "Widow rockfish", "mesopelagics"= "Mesopelagics", "Sea Lions"= "Sea lions", "Splitnose rock."= "Splitnose rockfish")) +
   geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
   xlim(0.70, 1.35) + xlab("Relative biomass") + ylab("Species with low diet proportion") + labs(col = "Classification") + standard_theme 
   sum_2_2_graph
@@ -362,14 +353,14 @@ scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-
   "~/Documents/OTZ.Manuscript/Images/Submission.3/no.diet.combo.jpeg", dpi=600)
   
   
-  high_diet_plot <- ggarrange(change_2_1_plot + rremove("xlab") + rremove("ylab"),
+  high_low_diet_plot <- ggarrange(change_2_1_plot + rremove("xlab") + rremove("ylab"),
   change_1_1_plot + rremove("xlab") + rremove("ylab"), labels= c("a", "b", "c", "d", "e", "f"), sum_2_1_graph + rremove("xlab") + rremove("ylab"),change_2_2_plot + rremove("xlab") + rremove("ylab"), change_1_2_plot + rremove("xlab") + rremove("ylab"), sum_2_2_graph + rremove("xlab") + rremove("ylab"), common.legend= TRUE,
-  ncol = 3, nrow = 2)
-  
-  annotate_figure(high_diet_plot, bottom= text_grob("Relative end biomass", size=14),
+  ncol = 3, nrow = 2) 
+
+  annotate_figure(high_low_diet_plot, bottom= text_grob("Relative end biomass", size=14),
   left= text_grob("Species", size=14, rot=90)) + 
   ggsave(width = 8.75, height = 7,
-  "~/Documents/OTZ.Manuscript/Images/Submission.3/high.diet.combo.jpeg", dpi=600)
+  "~/Documents/OTZ.Manuscript/Images/Submission.3/high.low.diet.combo.jpeg", dpi=600)
   
   low_diet_plot <- ggarrange(high_diet_plot <- ggarrange(change_2_1_plot + rremove("xlab") + rremove("ylab"),
   change_1_1_plot + rremove("xlab") + rremove("ylab"), common.legend = TRUE, legend=
@@ -382,7 +373,7 @@ scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-
   "~/Documents/OTZ.Manuscript/Images/Submission.3/high.diet.combo.jpeg", dpi=600)
   
 
-  
+    change_2_2_plot 
 
 ```
 

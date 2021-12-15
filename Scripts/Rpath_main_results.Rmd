@@ -205,7 +205,7 @@ write.csv(data_2, "/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Sc
 ```{r}
 #Define a common ggplot theme
 standard_theme <- theme_bw() + theme(panel.border = element_rect(fill=NA, colour = "black", size=1)) + 
-theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text.align= 0, legend.title= element_text(size = 10), legend.text = element_text(size= 9), axis.text=element_text(size=8), axis.title=element_text(size=10))
+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text.align= 0, legend.title= element_text(size = 10), legend.text = element_text(size= 9), axis.text=element_text(size=8), axis.title=element_text(size=10)) + theme(axis.text.y = element_text(hjust= 0.95))
 
 #Scenario 7: yearly 50% harvest rate applied to mesopelagic fish 
 
@@ -227,9 +227,7 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
     change_1_1_plot <- change_1_1 %>% ggplot(aes(col = Value)) +   
     geom_point(aes(x= biomass_prop, y= reorder(species, biomass_prop))) + 
     scale_color_manual(values = c("#FF0000","#0000FF", "#00FF70", "#FF00FF")) + 
-    scale_y_discrete(breaks= waiver(), labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P.ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."=
-    "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope
-    rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + 
+    scale_y_discrete(breaks= waiver(), labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P.ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + 
     geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
     xlim(0.70, 1.35) + 
     xlab("Relative biomass") + ylab("Species with high diet proportion ") + labs(col =
@@ -251,14 +249,7 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
 
     change_1_2_plot <- change_1_2 %>% ggplot(aes(col= Value)) + geom_point(aes(x= biomass_prop, y= reorder(species, biomass_prop))) + 
     scale_color_manual(values = c("#0000FF", "#00FF70")) +
-    scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"=
-    "Resident orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"=
-    "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm."=
-    "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary
-    rockfish", "Juv. rock."= "Juv. rockfish", "Other cephal."= "Other cephalopod",
-    "Shortspine thorny."= "Shortspine thornyhead", "Widow rock."= "Widow rockfish",
-    "mesopelagics"= "Mesopelagics", "Sea Lions"= "Sea lions", "Splitnose rock."=
-    "Splitnose rockfish")) + 
+    scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"= "Resident orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"= "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm."="Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Juv. rock."= "Juv. rockfish", "Other cephal."= "Other cephalopod","Shortspine thorny."= "Shortspine thornyhead", "Widow rock."= "Widow rockfish", "mesopelagics"= "Mesopelagics", "Sea Lions"= "Sea lions", "Splitnose rock."="Splitnose rockfish")) + 
     xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size=
     0.75) + xlab("Relative biomass") + ylab("Species with low diet proportion") + 
     labs(col = "Classification") + standard_theme
@@ -289,17 +280,16 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
     xlim(0.70, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black", size=
     0.75) + 
     xlab("Relative biomass") + ylab("Species with no diet proportion") + 
-    scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amphipods"=
-  "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown pelican", "Cali.
-  gull"= "California gull", "carniv-zoops" = "Carniv. zooplankton", "copepods"=
-  "Copepods", "Dungeness"= "Dungeness crab", "epibenthic"= "Epibenthic", "euphausiids"=
-  "Euphausiids", "infauna"= "Infauna", "Juv. round."= "Juv. roundfish", "Juv. thorny."=
-  "Juv. thornyhead", "large jellies"= "Large jellies", "micro-zoop"= "Microzooplankton",
+    scale_y_discrete(labels= c("Adult N. Ele. Seal"= "Adult n. elephant seal", "amphipods"= "Amphipods", "benthic shp"= "Benthic shrimp", "Brown Pelican"= "Brown pelican", "Cali.
+gull"= "California gull", "carniv-zoops" = "Carniv. zooplankton", "copepods"=
+"Copepods", "Dungeness"= "Dungeness crab", "epibenthic"= "Epibenthic", "euphausiids"=
+"Euphausiids", "infauna"= "Infauna", "Juv. round."= "Juv. roundfish", "Juv. thorny."=
+"Juv. thornyhead", "large jellies"= "Large jellies", "micro-zoop"= "Microzooplankton",
 "Pacific Mackerel"= "Pacific mackerel",
-  "pandalid shp"= "Pandalid shrimp", "phytoplankton"= "Phytoplankton", "Pigeon
-  Guillemot"= "Pigeon guillemot", "Rhino. auk"= "Rhinoceros auklet", "small jellies"=
-  "Small jellies", "surf perch"= "Surf perch", "tanner crb"= "Tanner crab", "Transient
-  Orcas"= "Transient orcas", "Juv. flatfish"= "Juv. flat.", "Cali. gull" = "California gull")) + labs(col = "Classification") + standard_theme
+"pandalid shp"= "Pandalid shrimp", "phytoplankton"= "Phytoplankton", "Pigeon
+Guillemot"= "Pigeon guillemot", "Rhino. auk"= "Rhinoceros auklet", "small jellies"=
+"Small jellies", "surf perch"= "Surf perch", "tanner crb"= "Tanner crab", "Transient
+Orcas"= "Transient orcas", "Juv. flatfish"= "Juv. flat.", "Cali. gull" = "California gull")) + labs(col = "Classification") + standard_theme
     change_1_3_plot
 
 #Scenario 6: yearly 25% harveset rate applied to mesopelagics
@@ -317,12 +307,9 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
     change_2_1$Value <- factor(change_2_1$Value, levels = c("Commercial",
     "Non-commercial", "Both", "Neither"))
     change_2_1_plot <- change_2_1 %>% ggplot(aes(col = Value)) +     
-    geom_point(aes(x=biomass_prop, y=reorder(species, desc(species)))) + 
+    geom_point(aes(x= biomass_prop, y= reorder(species, biomass_prop))) + 
     scale_color_manual(values = c("#FF0000","#0000FF", "#00FF70", "#FF00FF")) + 
-    scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P.
-    ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."=
-    "Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope
-    rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + 
+    scale_y_discrete(labels= c("Tufted Puffin"= "Tufted puffin", "P. Ocean Perch"= "P. ocean perch", "Leach's S. Petrel"= "Leach's s. petrel", "Longspine thorny."="Longspine thornyhead", "Shelf rock."= "Shelf rockfish", "Slope rock."= "Slope rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + 
     geom_vline(xintercept=1, linetype= "solid", color= "black", size= 0.75) +
     xlim(0.70, 1.35) + 
     xlab("Relative biomass") + ylab("Species with high diet proportion ") + labs(col =
@@ -344,14 +331,8 @@ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
 
     change_2_2_plot <- change_2_2 %>% ggplot(aes(col= Value)) + geom_point(aes(x= biomass_prop, y= reorder(species, biomass_prop))) + 
     scale_color_manual(values = c("#0000FF", "#00FF70")) +
-    scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"=
-    "Resident orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"=
-    "Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm."=
-    "Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary
-    rockfish", "Juv. rock."= "Juv. rockfish", "Other cephal."= "Other cephalopod",
-    "Shortspine thorny."= "Shortspine thornyhead", "Widow rock."= "Widow rockfish",
-    "mesopelagics"= "Mesopelagics", "Sea Lions"= "Sea lions", "Splitnose rock."=
-    "Splitnose rockfish")) + 
+    scale_y_discrete(labels= c("Western Gull"= "Western gull", "Resident Orcas"="Resident orcas", "Juv. Ele. Seal"= "Juv. n. elephant seal", "Greenstriped"="Greenstriped rockfish", "Double corm."= "Double cormorant", "Brandt's corm."="Brandt's cormorant", "Arrowtooth"= "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Juv. rock."= "Juv. rockfish", "Other cephal."= "Other cephalopod","Shortspine thorny."= "Shortspine thornyhead", "Widow rock."= "Widow rockfish","mesopelagics"= "Mesopelagics", "Sea Lions"= "Sea lions", "Splitnose rock."=
+"Splitnose rockfish")) + 
     xlim(0.75, 1.35) + geom_vline(xintercept=1, linetype= "solid", color= "black",
     size= 0.75) + 
     xlab("Relative biomass") + ylab("Species with low diet proportion") + 
