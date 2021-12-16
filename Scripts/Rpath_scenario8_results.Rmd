@@ -338,11 +338,7 @@ scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-
   rremove("legend"), common.legend = TRUE, legend= "right", labels= c("a", "b", "c"),
   sum_2_2_graph + rremove("xlab") + rremove("ylab"), ncol = 3, nrow = 1)
   
-  annotate_figure(low_diet_plot, bottom= text_grob("Relative end biomass", size=14),
-  left= text_grob("Species with low diet proportion", size=14, rot=90)) + 
-  ggsave(width = 8.75, height = 5.25,
-  "~/Documents/OTZ.Manuscript/Images/Submission.3/low.diet.combo.jpeg", dpi=600)
-  
+
   no_diet_plot <- ggarrange(change_2_3_plot + rremove("xlab") + rremove("ylab"),
   change_1_3_plot + rremove("xlab") + rremove("ylab"), sum_2_3_graph + rremove("xlab") +
   rremove("ylab"), ncol = 3, nrow = 1, labels= c("a", "b", "c"))
@@ -352,29 +348,14 @@ scenario_8_quantiles <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-
   ggsave(width = 8.75, height = 5.25,
   "~/Documents/OTZ.Manuscript/Images/Submission.3/no.diet.combo.jpeg", dpi=600)
   
-  
   high_low_diet_plot <- ggarrange(change_2_1_plot + rremove("xlab") + rremove("ylab"),
-  change_1_1_plot + rremove("xlab") + rremove("ylab"), labels= c("a", "b", "c", "d", "e", "f"), sum_2_1_graph + rremove("xlab") + rremove("ylab"),change_2_2_plot + rremove("xlab") + rremove("ylab"), change_1_2_plot + rremove("xlab") + rremove("ylab"), sum_2_2_graph + rremove("xlab") + rremove("ylab"), common.legend= TRUE,
-  ncol = 3, nrow = 2) 
-
-  annotate_figure(high_low_diet_plot, bottom= text_grob("Relative end biomass", size=14),
+  change_1_1_plot + rremove("xlab") + rremove("ylab"), labels= c("a", "b", "c", "d", "e", "f"),   sum_2_1_graph + rremove("xlab") + rremove("ylab"),change_2_2_plot + rremove("xlab") +          rremove("ylab"), change_1_2_plot + rremove("xlab") + rremove("ylab"), sum_2_2_graph +          rremove("xlab") + rremove("ylab"), common.legend= TRUE, ncol = 3, nrow = 2) 
+  
+   annotate_figure(high_low_diet_plot, bottom= text_grob("Relative end biomass", size=14),
   left= text_grob("Species", size=14, rot=90)) + 
   ggsave(width = 8.75, height = 7,
   "~/Documents/OTZ.Manuscript/Images/Submission.3/high.low.diet.combo.jpeg", dpi=600)
   
-  low_diet_plot <- ggarrange(high_diet_plot <- ggarrange(change_2_1_plot + rremove("xlab") + rremove("ylab"),
-  change_1_1_plot + rremove("xlab") + rremove("ylab"), common.legend = TRUE, legend=
-  "right", labels= c("a", "b", "c"), sum_2_1_graph + rremove("xlab") + rremove("ylab"),
-  ncol = 3, nrow = 1)
-  
-  annotate_figure(high_diet_plot, bottom= text_grob("Relative end biomass", size=14),
-  left= text_grob("Species with high diet proportion", size=14, rot=90)) + 
-  ggsave(width = 8.75, height = 5.25,
-  "~/Documents/OTZ.Manuscript/Images/Submission.3/high.diet.combo.jpeg", dpi=600)
-  
-
-    change_2_2_plot 
-
 ```
 
 ```{r}
