@@ -11,6 +11,7 @@ library(dplyr)
 library(readr)
 library(Rpath)
 library(tidyverse)
+library(viridisLite)
 ```
 
 #Import original diet matrix (Diet_CalCur_USE.csv) and an unbalanced version of base parameters (Groupinfo_CalCur-USE.csv) from Koehn et al. (2016) and the Rsim results for the 25% and 50% harvest rate from Rpath.main.results.Rmd
@@ -72,7 +73,7 @@ dev.off()
 #Calculate weighted aggregated biomass for scenario 6 for predators of mesopelagic fish  and other prey of predators of mesopelagic fish.
   weighted_biomass <- scenario_6 %>% left_join(GroupInfo_edt, by= "spp") %>% left_join(combo,
   by= "spp") %>% drop_na() %>% group_by(classification, month) %>% mutate(total_biomass=
-  sum(unique(Biomass)))%>% #sum initial biomass of each unique species groupings by month
+  sum(unique(Biomass))) %>% #sum initial biomass of each unique species groupings by month
   ungroup() %>% mutate(percent_biomass= Biomass/total_biomass) %>% #divide initial         biomass for a species by total biomass for a species group
   mutate(weighted_biomass= biomass*percent_biomass) %>% #get weighted biomass by           multiplying relative biomass by percent biomass 
   group_by(classification,month) %>% summarize(agg_rel_biomass=
@@ -82,6 +83,7 @@ dev.off()
   mesopelagics_only <- scenario_6 %>% filter(spp== "mesopelagics") %>%
   rename(Mesopelagics=
   "spp")
+  
   preds_other_prey <- ggplot() + geom_line(data=weighted_biomass, aes(x=month,
   y=agg_rel_biomass, col= as.factor(classification))) + geom_line(data=mesopelagics_only,
   aes(x = month, y = biomass, col= "Mesopelagics")) + labs(col= "Species classification")
@@ -130,20 +132,7 @@ diets_pm <- predators_of_mesopelagic[15,] %>% pivot_longer(-DIETS) %>% rename(sp
 predators_endbiomass <- predators_endbiomass %>% left_join(diets_pm, by= "species") %>% select(-DIETS) 
 predators_endbiomass <- predators_endbiomass[-1,]
 
-predators_endbiomass %>% ggplot(aes(x= value, y= endbiomass)) + geom_point() + xlab("Diet proportion on mesopelagics") + ylab("Relative end biomass") + standard_theme + ggsave(width = 8.75, height = 5.25, "/Users/sallydowd/Documents/OTZ.manuscript/Images/Submission.2/endbiomass.dietvalue.jpeg", dpi=600)
-
-library(broom)
- mylm <- lm(endbiomass ~ value, data = predators_endbiomass)
-summary(mylm)
-model.diag.metrics <- augment(mylm)
-head(model.diag.metrics)
-par(mfrow = c(2, 2))
-plot(mylm)
-
-model2 <- lm(log(endbiomass) ~ value, data = predators_endbiomass)
-plot(model2, 3)
-
-shapiro.test(predators_endbiomass$endbiomass)
+predators_endbiomass %>% ggplot(aes(x= value, y= endbiomass)) + geom_point() + xlab("Diet proportion on mesopelagics") + ylab("Relative end biomass") + standard_theme + ggsave(width = 6, height = 4, "/Users/sallydowd/Documents/OTZ.manuscript/Images/Submission.3/endbiomass.dietvalue.jpeg", dpi=600)
 
   plot_scenario_7_high <- scenario_7_high %>% mutate(spp = fct_reorder(spp, biomass,
   tail, n = 1,
