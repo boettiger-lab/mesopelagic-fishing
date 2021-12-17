@@ -14,11 +14,11 @@ library(tidyverse)
 library(viridisLite)
 ```
 
-#Import original diet matrix (Diet_CalCur_USE.csv) and an unbalanced version of base parameters (Groupinfo_CalCur-USE.csv) from Koehn et al. (2016) and the Rsim results for the 25% and 50% harvest rate from Rpath.main.results.Rmd
+#Import original diet matrix (Diet_CalCur_USE.csv) and an unbalanced version of base parameters (Groupinfo_CalCur-USE.csv) from Koehn et al. (2016) and the Rsim results for the 25% and 50% harvest rate from Rpath.main.results.Rmd.
 ```{r}
 GroupInfo_CalCur_USE <- read_csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/GroupInfo_CalCur-USE.csv")
 Diet <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Diet_CalCur_USE.csv")  
-Diet <- Diet %>% rename("Juv. hake" = "Juv..hake", "Yellowtail rock."= "Yellowtail.rock.", "Shelf rock."= "Shelf.rock.", "P. Ocean Perch"= "P..Ocean.Perch", "Longspine thorny."= "Longspine.thorny.", "Tufted Puffin"= "Tufted.Puffin", "Leach's S. Petrel"= "Leach.s.S..Petrel","Fin whale"= "Fin.whale", "Slope rock."= "Slope.rock.", "carniv-zoops"= "carniv.zoops", "small jellies"= "small.jellies", "large jellies"= "large.jellies", "pandalid shp"= "pandalid.shp", "benthic shp"= "benthic.shp", "tanner crab"= "tanner.crb", "Benthic fish"= "Benthic.fish", "surf perch"= "surf.perch", "Other cephal."= "Other.cephal.", "Market squid"= "Market.squid", "Pacific Mackerel"= "Pacific.Mackerel", "Juv. rock."= "Juv..rock.", "Canary rock."= "Canary.rock.", "Widow rock."= "Widow.rock.", "Splitnose rock."= "Splitnose.rock.", "Shortspine thorny."= "Shortspine.thorny.", "Common murre"= "Common.murre", "Western Gull"= "Western.Gull", "Resident Orcas"= "Resident.Orcas", "Sperm whale"= "Sperm.whale", "Harbor seals"= "Harbor.seals", "Sea Lions"= "Sea.Lions", "Juv. Ele. Seal"= "Juv..Ele..Seal", "Fur seals"= "Fur.seals", "Brandt's corm."= "Brandt.s.corm.", "Double corm."= "Double.corm.", "Pelagic cormorant"= "Pelagic.cormorant")
+Diet <- Diet %>% rename("Juv. hake" = "Juv..hake", "Yellowtail rock."= "Yellowtail.rock.", "Shelf rock."= "Shelf.rock.", "P. Ocean Perch"= "P..Ocean.Perch", "Longspine thorny."= "Longspine.thorny.", "Tufted Puffin"= "Tufted.Puffin", "Leach's S. Petrel"= "Leach.s.S..Petrel","Fin whale"= "Fin.whale", "Slope rock."= "Slope.rock.", "carniv-zoops"= "carniv.zoops", "small jellies"= "small.jellies", "large jellies"= "large.jellies", "pandalid shp"= "pandalid.shp", "benthic shp"= "benthic.shp", "tanner crab"= "tanner.crb", "Benthic fish"= "Benthic.fish", "surf perch"= "surf.perch", "Other cephal."= "Other.cephal.", "Market squid"= "Market.squid", "Pacific Mackerel"= "Pacific.Mackerel", "Juv. rock."= "Juv..rock.", "Canary rock."= "Canary.rock.", "Widow rock."= "Widow.rock.", "Splitnose rock."= "Splitnose.rock.", "Shortspine thorny."= "Shortspine.thorny.", "Common murre"= "Common.murre", "Western Gull"= "Western.Gull", "Resident Orcas"= "Resident.Orcas", "Sperm whale"= "Sperm.whale", "Harbor seals"= "Harbor.seals", "Sea Lions"= "Sea.Lions", "Juv. Ele. Seal"= "Juv..Ele..Seal", "Fur seals"= "Fur.seals", "Brandt's corm."= "Brandt.s.corm.", "Double corm."= "Double.corm.", "Pelagic cormorant"= "Pelagic.cormorant") #Relabel functional group names for compatibility with Rpath scenario datasets 
 
 scenario_7 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_7.csv")
 scenario_6 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Data/Scenario_6.csv")
@@ -26,13 +26,8 @@ scenario_6 <- read.csv("/Users/sallydowd/Documents/GitHub/mesopelagic-fishing/Da
 
 #Webplot highlighting predator and prey connections to mesopelagic fish 
 ```{r}
-jpeg(file="~/Documents/OTZ.Manuscript/Images/Sub.2/web.plot.jpeg",
-width=300, height=525)
-webplot(Cal_bal, eco.name= attr(Cal_bal, "California Current"), line.col="grey", labels=TRUE, highlight= "mesopelagics", highlight.col= c("blue", "red", "NA"), label.num=TRUE, label.cex=0.7, fleets=FALSE)
-
 tiff("~/Documents/OTZ.Manuscript/Images/Sub.2/web.plot.jpeg", units="in", width=6, height=5, res=600, compression = 'lzw')
 webplot(Cal_bal, eco.name= attr(Cal_bal, "California Current"), line.col="grey", labels=FALSE, highlight= "mesopelagics", highlight.col= c("blue", "red", "NA"), label.num=TRUE, label.cex=0.7, fleets=FALSE) + standard_theme
-dev.off()
 ```
 
 #Graph with weighted aggregate biomass for predators of mesopelagic fish, other prey of predators of mesopelagic fish and mesopelagic fish themselves. This code created Figure 4 in the paper. 
@@ -52,11 +47,11 @@ dev.off()
 
   predators_of_mesopelagic_0.05 <- predators_of_mesopelagic %>% pivot_longer(-DIETS) %>%
   filter(value >= 0.05) %>% rename(spp= DIETS) %>% mutate(classification= "Predators of
-  mesopelagics") %>% select(-value, -name) #Predators of mesopelagic fish that have at     least 5% of their diet consist of mesopelagics
+  mesopelagics") %>% select(-value, -name) #Predators of mesopelagic fish that have at least 5% of their diet consist of mesopelagics
 
   prey_of_mesopelagic_preds <- Diet[c(3,6:10,18), c(1,30,34,39, 43, 49, 52, 55, 57, 64,
   71,77,86)] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% rename(spp= DIETS)%>%
-  mutate(classification= "Prey of mesopelagics") %>% select(-value, -name) #Identify       prey of mesopelagics where higher diet proportion predators of mesopelagic fish have at   least 0.05 in their diet 
+  mutate(classification= "Prey of mesopelagics") %>% select(-value, -name) #Identify prey of mesopelagics where higher diet proportion predators of mesopelagic fish have at least 0.05 in their diet 
 
   pred_mesopelagic_prey_0.05 <- predators_of_mesopelagic %>% pivot_longer(-DIETS) %>%
   filter(value >= 0.05) %>% select(DIETS) %>% unique() %>% rename(spp = DIETS) %>%
@@ -68,17 +63,17 @@ dev.off()
   pred_mesopelagic_prey_0.05[!duplicated(pred_mesopelagic_prey_0.05$spp),])
 
   GroupInfo_edt <- GroupInfo_CalCur_USE %>% select(Group, Biomass) %>% rename(spp= Group)
-  #select original biomass from group info to join with the predators (consumers) in both   groupings of functional groups
+  #select original biomass from group info to join with the predators (consumers) in both groupings of functional groups
 
 #Calculate weighted aggregated biomass for scenario 6 for predators of mesopelagic fish  and other prey of predators of mesopelagic fish.
   weighted_biomass <- scenario_6 %>% left_join(GroupInfo_edt, by= "spp") %>% left_join(combo,
   by= "spp") %>% drop_na() %>% group_by(classification, month) %>% mutate(total_biomass=
   sum(unique(Biomass))) %>% #sum initial biomass of each unique species groupings by month
-  ungroup() %>% mutate(percent_biomass= Biomass/total_biomass) %>% #divide initial         biomass for a species by total biomass for a species group
-  mutate(weighted_biomass= biomass*percent_biomass) %>% #get weighted biomass by           multiplying relative biomass by percent biomass 
+  ungroup() %>% mutate(percent_biomass= Biomass/total_biomass) %>% #divide initial biomass for a species by total biomass for a species group
+  mutate(weighted_biomass= biomass*percent_biomass) %>% #get weighted biomass by multiplying relative biomass by percent biomass 
   group_by(classification,month) %>% summarize(agg_rel_biomass=
   sum(weighted_biomass))
-  #get aggregated relative biomass for each species classification (functional group       grouping) by summing weighted biomass for each species classification for each month  
+  #get aggregated relative biomass for each species classification (functional group grouping) by summing weighted biomass for each species classification for each month  
 #Make weighted aggregated biomass graph 
   mesopelagics_only <- scenario_6 %>% filter(spp== "mesopelagics") %>%
   rename(Mesopelagics=
@@ -90,7 +85,7 @@ dev.off()
   + scale_x_continuous(name= "Year", breaks= c(0, 120, 240, 360, 480, 600), labels=
   c("2001", "2010", "2020", "2030", "2040", "2050")) + geom_hline(yintercept=1, linetype=
   "solid", color= "black", size= 0.75) + xlab("Month") + ylab("Relative biomass") + 
-  scale_color_discrete(type = "viridis") + standard_theme # + ggsave(width = 6, height =   4, "/Users/sallydowd/Documents/OTZ.manuscript/Images/Sub.2/preds.otherprey.25.jpeg",     dpi=600)
+  scale_color_discrete(type = "viridis") + standard_theme
   preds_other_prey                                    
 ```
 
@@ -121,7 +116,7 @@ avg_pp <- Diet[c(29,33,38, 42, 48, 51, 54, 56, 63, 70,76,85), c(1,30,34,39, 43, 
 #weighted value of diet composition for mesopelagic predators on mesopelagic predators
 ```
 
-#Scatter plot to look at diet dependence of predators of mesopelagic fish vs. end biomass. This code generates Figure ___ in Appendix 2. 
+#Scatter plot to look at diet dependence of predators of mesopelagic fish vs. end biomass. This code generates Figure 4 in Appendix 2. 
 ```{r}
 #Need to run first four code sections + change_2_overtime_df function in Rpath_main_results.Rmd for this code to work
 predators_endbiomass <- change_2_overtime_df(predators_mesopelagic)
@@ -129,32 +124,10 @@ predators_endbiomass <- as.data.frame(predators_endbiomass) %>% rename(endbiomas
 predators_endbiomass$endbiomass <- as.numeric(predators_endbiomass$endbiomass)
 predators_endbiomass$endbiomass <- round(predators_endbiomass$endbiomass,digit=2) 
 diets_pm <- predators_of_mesopelagic[15,] %>% pivot_longer(-DIETS) %>% rename(species = name)
-predators_endbiomass <- predators_endbiomass %>% left_join(diets_pm, by= "species") %>% select(-DIETS) 
+predators_endbiomass <- predators_endbiomass %>% left_join(diets_pm, by= "species") %>% select(-DIETS)
 predators_endbiomass <- predators_endbiomass[-1,]
 
-predators_endbiomass %>% ggplot(aes(x= value, y= endbiomass)) + geom_point() + xlab("Diet proportion on mesopelagics") + ylab("Relative end biomass") + standard_theme + ggsave(width = 6, height = 4, "/Users/sallydowd/Documents/OTZ.manuscript/Images/Submission.3/endbiomass.dietvalue.jpeg", dpi=600)
-
-  plot_scenario_7_high <- scenario_7_high %>% mutate(spp = fct_reorder(spp, biomass,
-  tail, n = 1,
-  .desc = TRUE)) %>% ggplot(aes(x= month, y = biomass)) + geom_line(aes(colour= spp,
-  linetype= Value)) + 
-  xlab("Month") + ylab("Relative biomass") + scale_x_continuous(name= "Year", breaks=
-  c(0, 120, 240, 360, 480, 600), labels= c("2001", "2010", "2020", "2030", "2040",
-  "2050")) + 
-  scale_color_discrete(type = "viridis", labels= c("Greenstriped" = "Greenstriped
-  rockfish", "P. Ocean Perch"= "P. ocean perch", "Albacore" = "Albacore", "Arrowtooth" =
-  "Arrowtooth flounder", "Canary rock."= "Canary rockfish", "Lingcod"= "Lingcod",
-  "Longspine thorny."= "Longspine thornyhead", "Shelf rock."= "Shelf rockfish",
-  "Shortspine thorny."= "Shortspine thornyhead", "Slope rock."= "Slope rockfish", "Widow
-  rock."= "Widow rockfish", "Yellowtail rock."= "Yellowtail rockfish")) + labs(colour=
-  "Species with high diet proportion", title= "c") + standard_theme +           
-  geom_hline(yintercept=1, linetype= "solid", color= "black", size= 0.75) +
-  guides(linetype = guide_legend(order = 2),col = guide_legend(order = 1)) +
-  scale_linetype_manual("Classification",values=c("Commercial"= 1,
-  "Non-commercial"=2,"Both"=3, "Neither"=4)) + 
-  ggsave(width = 8.75, height = 5.25,
-  "~/Documents/OTZ.manuscript/Images/Sub.2/high.diet.50.jpeg", dpi=600)
-  plot_scenario_7_high
-
+preds_endbiomass_diet <- predators_endbiomass %>% ggplot(aes(x= value, y= endbiomass)) + geom_point() + xlab("Diet proportion on mesopelagics") + ylab("Relative end biomass") + standard_theme 
+preds_endbiomass_diet
 ```
 
