@@ -57,7 +57,7 @@ webplot(Cal_bal, eco.name= attr(Cal_bal, "California Current"), line.col="grey",
   filter(value >= 0.05) %>% select(DIETS) %>% unique() %>% rename(spp = DIETS) %>%
   mutate(classification= "Other prey of predators of mesopelagics")
   #pred_mesopelagic_prey_0.05 is made up of the predators of mesopelagic fish (as defined above) that have other prey consisting of at least 5% of their diet    
-
+predators_mesopelagic_0.05 <- predators_of_mesopelagic[15,] %>% pivot_longer(-DIETS) %>% filter(value >= 0.05) %>% select(name) %>% mutate(classification= "Predators of mesopelagics") %>% rename(spp= name)
   combo <- rbind(prey_of_mesopelagic_preds[!duplicated(prey_of_mesopelagic_preds$spp),],
   predators_mesopelagic_0.05,
   pred_mesopelagic_prey_0.05[!duplicated(pred_mesopelagic_prey_0.05$spp),])
@@ -81,12 +81,16 @@ webplot(Cal_bal, eco.name= attr(Cal_bal, "California Current"), line.col="grey",
   
   preds_other_prey <- ggplot() + geom_line(data=weighted_biomass, aes(x=month,
   y=agg_rel_biomass, col= as.factor(classification))) + geom_line(data=mesopelagics_only,
-  aes(x = month, y = biomass, col= "Mesopelagics")) + labs(col= "Species classification")
-  + scale_x_continuous(name= "Year", breaks= c(0, 120, 240, 360, 480, 600), labels=
+  aes(x = month, y = biomass, col= "Mesopelagics")) + labs(col= "Species classification") + scale_x_continuous(name= "Year", breaks= c(0, 120, 240, 360, 480, 600), labels=
   c("2001", "2010", "2020", "2030", "2040", "2050")) + geom_hline(yintercept=1, linetype=
   "solid", color= "black", size= 0.75) + xlab("Month") + ylab("Relative biomass") + 
-  scale_color_discrete(type = "viridis") + standard_theme
-  preds_other_prey                                    
+  scale_color_discrete(type = "viridis") + theme_bw()  + theme(legend.position= c(0.57, 0.60)) + theme(panel.border = element_rect(fill=NA, colour ="black", size=1)) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  theme(legend.text.align= 0, legend.title= element_text(size = 7), legend.text =
+  element_text(size= 6.55), axis.text=element_text(size=9),
+  axis.title=element_text(size=10)) + ggsave("/Users/sallydowd/desktop/test.jpeg", width= 3, height= 4)
+  preds_other_prey   
+  
 ```
 
 #Calculations for weighted biomass diet proportions of mesopelagic predators (in this case those with high diet proprotion of mesopelagics), mesopelagic fish, and certain mesopelagic fish prey items. The outputs from these calculations went into Appendix S3: Figure 3b. 
