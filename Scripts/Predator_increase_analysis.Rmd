@@ -88,7 +88,7 @@ predators_mesopelagic_0.05 <- predators_of_mesopelagic[15,] %>% pivot_longer(-DI
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
   theme(legend.text.align= 0, legend.title= element_text(size = 7), legend.text =
   element_text(size= 6.55), axis.text=element_text(size=9),
-  axis.title=element_text(size=10)) + ggsave("/Users/sallydowd/desktop/test.jpeg", width= 3, height= 4)
+  axis.title=element_text(size=10)) + ggsave("/Users/sallydowd/desktop/test.jpeg", width= 3, height= 4, dpi= 600)
   preds_other_prey   
   
 ```
